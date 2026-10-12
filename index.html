@@ -1226,10 +1226,11 @@ footer{margin-top:var(--space-4);font-size:13px;color:var(--muted)}
           <label class="f">Lớp<select id="clsSel"></select></label>
           <div id="clsInfo" class="lead" style="align-self:end"></div>
         </div>
+        <label class="f" style="max-width:420px">Khối của file điểm sắp tải lên<select id="scoreGrade"><option value="10">Khối 10 (chỉ các lớp 10...)</option><option value="11">Khối 11 (chỉ các lớp 11...)</option><option value="12">Khối 12 (chỉ các lớp 12...)</option><option value="">Mọi khối (áp dụng cho tất cả các lớp)</option></select></label>
         <label class="drop" id="dropScore">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m0 0L7 9m5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
           <strong>Chọn hoặc thả file điểm (file tổng hợp nhiều lớp cũng được)</strong>
-          <span class="muted">Mỗi file là một đợt. App tự chia về từng lớp theo danh sách. Cần có cột Họ và tên và Điểm.</span>
+          <span class="muted">Mỗi file là một đợt của một khối: chọn khối ở trên, app chỉ chia điểm về các lớp thuộc khối đó. Cần có cột Họ và tên và Điểm.</span>
           <input type="file" id="fScore" accept=".xlsx,.xls,.csv" multiple>
         </label>
         <div id="fileList" class="files"></div>
@@ -1349,6 +1350,11 @@ let exams=[];try{exams=JSON.parse(lsGet('tkd.exams','[]'))||[]}catch(e){exams=[]
 const saveExams=()=>{if(!lsSet('tkd.exams',JSON.stringify(S.files)))toast('Không lưu được các đợt điểm (bộ nhớ trình duyệt đầy hoặc bị chặn).')};
 const S={classId:lsGet('tkd.sel',''),files:exams,split:null,active:null,sort:{key:'stt',dir:1},filter:'all',q:'',open:new Set(),imp:null};
 const getClass=()=>classes.find(c=>c.id===S.classId)||null;
+/* khối: file điểm gắn với một khối (10, 11, 12) chỉ áp dụng cho các lớp có tên bắt đầu bằng khối đó */
+const gradeOf=n=>{const m=norm(n).match(/^(?:lop\s*)?(1[0-2])(?!\d)/);return m?m[1]:''};
+const applies=(f,c)=>!f.grade||gradeOf(c.name)===f.grade;
+const filesFor=c=>S.files.filter(f=>applies(f,c));
+const gradeTxt=g=>g?'Khối '+g:'Mọi khối';
 
 /* ---------- tabs ---------- */
 function showTab(t){
@@ -1490,18 +1496,20 @@ wireDrop($('#dropScore'),$('#fScore'),async fs=>{
         if(!await ask({title:'Đợt này đã được tải',msg:'File "'+f.name+'" đã có trong danh sách các đợt. Thay bằng bản mới?',ok:'Thay thế',danger:true}))continue;
         S.files.splice(dupI,1);
       }
-      const id=uid();S.files.push({id,label:baseName(f.name).replace(/^[0-9a-f]{8}-/i,''),fileName:f.name,date,rows,upd:Date.now()});
+      const id=uid();S.files.push({id,label:baseName(f.name).replace(/^[0-9a-f]{8}-/i,''),fileName:f.name,date,rows,grade:$('#scoreGrade').value,upd:Date.now()});
       S.files.sort((a,b)=>(a.date||'9').localeCompare(b.date||'9'));
       S.active=id;saveExams();
       const sp=splitSummary(S.files.find(x=>x.id===id));S.split=sp;sp.parts.forEach(p=>touched.add(p.id));
       if(sp.parts.length&&!sp.parts.some(p=>p.id===S.classId)){S.classId=sp.parts[0].id;lsSet('tkd.sel',S.classId)}
-      toast('Đã chia '+sp.matched+'/'+rows.length+' dòng vào '+sp.parts.length+' lớp');
+      toast('Đã chia '+sp.matched+'/'+rows.length+' dòng vào '+sp.parts.length+' lớp ('+gradeTxt($('#scoreGrade').value).toLowerCase()+')');
     }catch(e){toast(f.name+': không đọc được ('+(e.message||e)+')')}
   }
   renderStats();
   if(touched.size)gsAuto();
 });
-$('#clsSel').addEventListener('change',e=>{S.classId=e.target.value;lsSet('tkd.sel',S.classId);renderStats()});
+$('#clsSel').addEventListener('change',e=>{S.classId=e.target.value;lsSet('tkd.sel',S.classId);const g=getClass()&&gradeOf(getClass().name);if(g){$('#scoreGrade').value=g;lsSet('tkd.grade',g)}renderStats()});
+$('#scoreGrade').addEventListener('change',e=>lsSet('tkd.grade',e.target.value));
+(()=>{const g=lsGet('tkd.grade','');const c=classes.find(x=>x.id===S.classId);$('#scoreGrade').value=g!==''?g:(c&&gradeOf(c.name))||'10'})();
 
 const TIERS=[{k:'Tốt',r:'≥ 8',c:'--t1'},{k:'Khá',r:'6,5 – dưới 8',c:'--t2'},{k:'Đạt',r:'5 – dưới 6,5',c:'--t3'},{k:'Chưa đạt',r:'dưới 5',c:'--t4'}];
 const tierOf=s=>s>=8?0:s>=6.5?1:s>=5?2:3;
@@ -1512,8 +1520,8 @@ function compute(file,cls){
   R.forEach((s,i)=>{if(s.acc)idx.acc.set(s.acc.toLowerCase(),i);const k=norm(s.name);(idx.name.get(k)||idx.name.set(k,[]).get(k)).push(i)});
   const ent=R.map((s,i)=>({i,s,score:null,viol:0,status:'',n:0,dur:0,sus:[]}));
   const extra=[];let dup=0;const used=new Set();
-  const hit=new Set(),clsKey=norm(cls.name),known=new Set(classes.map(c=>norm(c.name)));
-  file.rows.forEach(r=>{
+  const hit=new Set(),clsKey=norm(cls.name),known=new Set(classes.filter(c=>applies(file,c)).map(c=>norm(c.name)));
+  (applies(file,cls)?file.rows:[]).forEach(r=>{
     let j=-1;
     if(r.cls&&norm(r.cls)!==clsKey&&known.has(norm(r.cls))){extra.push(r);return}
     if(r.acc&&idx.acc.has(r.acc.toLowerCase()))j=idx.acc.get(r.acc.toLowerCase());
@@ -1582,10 +1590,12 @@ function renderStats(){
     $('#results').innerHTML=`<div class="card empty"><strong>Chưa có lớp để thống kê</strong><span>Tạo lớp từ file Excel danh sách trước, rồi quay lại đây tải file điểm.</span><button class="btn primary" data-go="classes">Tạo lớp</button></div>`;return;
   }
   $('#fileList').innerHTML=S.files.map((f,i)=>`<div class="file" data-fid="${f.id}">
-    <label class="f">Đợt ${i+1} <span>${esc(f.fileName)} · ${f.rows.length} dòng${f.date?' · ngày làm '+f.date.split('-').reverse().join('/'):''}</span><input type="text" data-lbl value="${esc(f.label)}"></label>
+    <label class="f">Đợt ${i+1} <span>${esc(f.fileName)} · ${gradeTxt(f.grade)} · ${f.rows.length} dòng${f.date?' · ngày làm '+f.date.split('-').reverse().join('/'):''}</span><input type="text" data-lbl value="${esc(f.label)}"></label>
+    <label class="f">Khối<select data-grade>${['10','11','12',''].map(g=>`<option value="${g}"${(f.grade||'')===g?' selected':''}>${g?'Khối '+g:'Mọi khối'}</option>`).join('')}</select></label>
     <button class="btn danger-o" data-act="rmf" aria-label="Xóa đợt ${esc(f.label)}">Xóa đợt</button></div>`).join('');
   renderResults();
 }
+$('#fileList').addEventListener('change',e=>{if(e.target.dataset.grade==null)return;const f=S.files.find(x=>x.id===e.target.closest('[data-fid]').dataset.fid);f.grade=e.target.value;f.upd=Date.now();S.split=null;saveExams();renderStats();toast('Đã đổi khối của đợt thành '+gradeTxt(f.grade).toLowerCase())});
 $('#fileList').addEventListener('input',e=>{if(e.target.dataset.lbl==null)return;const f=S.files.find(x=>x.id===e.target.closest('[data-fid]').dataset.fid);f.label=e.target.value||f.fileName;f.upd=Date.now();saveExams();renderResults(true)});
 $('#fileList').addEventListener('click',async e=>{const b=e.target.closest('[data-act=rmf]');if(!b)return;const id=b.closest('[data-fid]').dataset.fid,f=S.files.find(x=>x.id===id);
   if(!await ask({title:'Xóa đợt "'+f.label+'"?',msg:'Điểm của đợt này sẽ bị xóa khỏi tất cả các lớp.',ok:'Xóa đợt',danger:true}))return;
@@ -1594,9 +1604,11 @@ document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g
 
 function renderResults(keepTable){
   const cls=getClass(),box=$('#results');
+  const mine=filesFor(cls);
+  if(S.files.length&&!mine.length){box.innerHTML=`<div class="card empty"><strong>Chưa có file điểm ${esc(gradeOf(cls.name)?'khối '+gradeOf(cls.name):'cho lớp này')}</strong><span>Lớp ${esc(cls.name)} ${gradeOf(cls.name)?'thuộc khối '+gradeOf(cls.name)+'. Chọn "Khối '+gradeOf(cls.name)+'" ở trên rồi tải file điểm của khối này, hoặc đổi khối của đợt đã tải.':'có tên không bắt đầu bằng 10, 11 hoặc 12 nên chỉ nhận file đặt là "Mọi khối".'}</span></div>`;return}
   if(!S.files.length){box.innerHTML=`<div class="card empty"><strong>Chưa có file điểm</strong><span>Tải file Excel điểm ở trên (file tổng hợp nhiều lớp cũng được). App tự chia điểm về từng lớp và chỉ ra ai chưa làm bài. Mỗi lần tải là một đợt, được lưu lại.</span></div>`;return}
-  if(!S.active||(S.active!=='sum'&&!S.files.find(f=>f.id===S.active)))S.active=S.files[S.files.length-1].id;
-  const comps=S.files.map(f=>({f,c:compute(f,cls)}));
+  if(!S.active||(S.active!=='sum'&&!mine.find(f=>f.id===S.active)))S.active=mine[mine.length-1].id;
+  const comps=mine.map(f=>({f,c:compute(f,cls)}));
   S.comps=comps;
   const pills=comps.map(({f})=>`<button class="pill" aria-pressed="${S.active===f.id}" data-pick="${f.id}" title="${esc(f.label)}">${esc(f.label)}</button>`).join('')+(comps.length>1?`<button class="pill" aria-pressed="${S.active==='sum'}" data-pick="sum">Tổng hợp ${comps.length} đợt</button>`:'');
   let body='';
@@ -1635,7 +1647,7 @@ function splitPanel(){
 function overview(){
   if(classes.length<2||!S.files.length)return'';
   const head=classes.map(c=>`<th class="num">${esc(c.name)}</th>`).join('');
-  const body=S.files.map(f=>`<tr><td>${esc(f.label)}</td>${classes.map(c=>{const x=compute(f,c);return`<td class="num">${x.done?x.done+'/'+x.n+' · TB '+fmt(x.avg):'<span class="muted">chưa có</span>'}</td>`}).join('')}</tr>`).join('');
+  const body=S.files.map(f=>`<tr><td>${esc(f.label)} <span class="muted">· ${gradeTxt(f.grade)}</span></td>${classes.map(c=>{if(!applies(f,c))return'<td class="num"><span class="muted">—</span></td>';const x=compute(f,c);return`<td class="num">${x.done?x.done+'/'+x.n+' · TB '+fmt(x.avg):'<span class="muted">chưa có</span>'}</td>`}).join('')}</tr>`).join('');
   return`<details class="card" open><summary>Tổng quan các lớp theo đợt</summary><div class="tbl-wrap"><table><thead><tr><th>Đợt</th>${head}</tr></thead><tbody>${body}</tbody></table></div></details>`;
 }
 function kpi(l,v,s,cls=''){return`<div class="kpi ${cls}"><span class="l">${l}</span><span class="v">${v}</span><span class="s" title="${esc(s)}">${esc(s)}&nbsp;</span></div>`}
@@ -1849,12 +1861,12 @@ $('#msgDlg').addEventListener('input',e=>{
 /* ---------- đồng bộ điểm qua Google Sheet (nhiều máy) ---------- */
 let GS={url:'',tok:'',auto:false,pull:false,last:null};try{Object.assign(GS,JSON.parse(lsGet('tkd.gs','{}'))||{})}catch(e){}
 const saveGs=()=>lsSet('tkd.gs',JSON.stringify(GS));
-const GS_CODE=`// Dán vào Apps Script của file Google Sheet (bản 2: đồng bộ nhiều máy)
+const GS_CODE=`// Dán vào Apps Script của file Google Sheet (bản 3: đồng bộ nhiều máy, có phân khối)
 const TOKEN = '';   // đặt mã bảo vệ nếu muốn, phải giống ô "Mã bảo vệ" trong app
-const V = 2;
+const V = 3;
 const LOP = '_Lop', DIEM = '_Diem';
 const HL = ['Lớp', 'Họ và tên', 'Ngày sinh', 'Tài khoản'];
-const HD = ['Tệp', 'Nhãn', 'Ngày', 'Cập nhật', 'Họ và tên', 'Tài khoản', 'Ngày sinh', 'Lớp', 'Điểm', 'Vi phạm', 'Trạng thái', 'Thời lượng'];
+const HD = ['Tệp', 'Nhãn', 'Ngày', 'Cập nhật', 'Họ và tên', 'Tài khoản', 'Ngày sinh', 'Lớp', 'Điểm', 'Vi phạm', 'Trạng thái', 'Thời lượng', 'Khối'];
 function doPost(e) {
   const lock = LockService.getScriptLock();
   try {
@@ -1898,9 +1910,9 @@ function pull(ss) {
     (classes[r[0]] = classes[r[0]] || []).push({ name: String(r[1]), dob: String(r[2]), acc: String(r[3]) });
   });
   const exams = {}, order = [];
-  rows(store(ss, DIEM, HD), 12).forEach(function (r) {
+  rows(store(ss, DIEM, HD), 13).forEach(function (r) {
     const k = r[0] + '|' + r[2];
-    if (!exams[k]) { exams[k] = { fileName: String(r[0]), label: String(r[1]), date: String(r[2]), upd: Number(r[3]) || 0, rows: [] }; order.push(k); }
+    if (!exams[k]) { exams[k] = { fileName: String(r[0]), label: String(r[1]), date: String(r[2]), grade: String(r[12] || ''), upd: Number(r[3]) || 0, rows: [] }; order.push(k); }
     exams[k].rows.push({ name: String(r[4]), acc: String(r[5]), dob: String(r[6]), cls: String(r[7]), score: r[8] === '' ? null : Number(r[8]), viol: Number(r[9]) || 0, status: String(r[10]), dur: Number(r[11]) || 0 });
   });
   return {
@@ -1919,7 +1931,7 @@ function push(ss, d) {
     put(sh, keep, 4);
   }
   if (d.exams && d.exams.length) {
-    const sh = store(ss, DIEM, HD), cur = rows(sh, 12), have = {};
+    const sh = store(ss, DIEM, HD), cur = rows(sh, 13), have = {};
     cur.forEach(function (r) { const k = r[0] + '|' + r[2]; have[k] = Math.max(have[k] || 0, Number(r[3]) || 0); });
     const redo = {};
     d.exams.forEach(function (x) {
@@ -1931,10 +1943,10 @@ function push(ss, d) {
     Object.keys(redo).forEach(function (k) {
       const x = redo[k];
       x.rows.forEach(function (r) {
-        keep.push([x.fileName, x.label, x.date || '', x.upd || 0, r.name, r.acc || '', r.dob || '', r.cls || '', r.score == null ? '' : r.score, r.viol || 0, r.status || '', r.dur || 0]);
+        keep.push([x.fileName, x.label, x.date || '', x.upd || 0, r.name, r.acc || '', r.dob || '', r.cls || '', r.score == null ? '' : r.score, r.viol || 0, r.status || '', r.dur || 0, x.grade || '']);
       });
     });
-    put(sh, keep, 12);
+    put(sh, keep, 13);
   }
   (d.matrices || []).forEach(function (m) {
     let sh = ss.getSheetByName(m.name) || ss.insertSheet(m.name);
@@ -1954,7 +1966,7 @@ function renderGs(){
 }
 const gsName=n=>String(n).replace(/[\[\]*?:\/\\]/g,'-').slice(0,90)||'Lop';
 function gsMatrix(cls){
-  const comps=S.files.map(f=>({f,c:compute(f,cls)})).filter(x=>x.c.matched>0);
+  const comps=filesFor(cls).map(f=>({f,c:compute(f,cls)})).filter(x=>x.c.matched>0);
   if(!comps.length)return null;
   const rows=[['STT','Họ và tên','Ngày sinh','Tài khoản',...comps.map(x=>x.f.label),'Điểm TB','Số bài chưa làm']];
   cls.students.forEach((s,i)=>{
@@ -1986,8 +1998,8 @@ function gsMerge(r){
   (r.exams||[]).forEach(e=>{
     const rows=e.rows.map(x=>({...x,score:x.score==null||x.score===''?null:Number(x.score)}));
     const l=S.files.find(x=>x.fileName===e.fileName&&(x.date||'')===(e.date||''));
-    if(!l){S.files.push({id:uid(),label:e.label,fileName:e.fileName,date:e.date||'',rows,upd:e.upd||0});n.e++}
-    else if((e.upd||0)>(l.upd||0)){l.rows=rows;l.label=e.label;l.upd=e.upd;n.u++}
+    if(!l){S.files.push({id:uid(),label:e.label,fileName:e.fileName,date:e.date||'',rows,grade:e.grade||'',upd:e.upd||0});n.e++}
+    else if((e.upd||0)>(l.upd||0)){l.rows=rows;l.label=e.label;l.grade=e.grade||'';l.upd=e.upd;n.u++}
   });
   S.files.sort((a,b)=>(a.date||'9').localeCompare(b.date||'9'));
   if(n.c||n.s||n.e||n.u){saveClasses();saveExams();if(!getClass()&&classes.length){S.classId=classes[0].id;lsSet('tkd.sel',S.classId)}S.active=null;S.split=null}
@@ -2008,7 +2020,7 @@ async function gsSync(mode,quiet){
       const r=await gsPost({action:'pull',token:GS.tok||''});
       if(r.unconfirmed)throw new Error('Trình duyệt không đọc được phản hồi từ Google. Kiểm tra quyền truy cập Web App phải là "Bất kỳ ai".');
       if(!r.ok)throw new Error(r.error||'phản hồi lạ');
-      if(!(r.v>=2))throw new Error('Mã Apps Script chưa phải bản mới. Hãy dán mã mới và tạo phiên bản triển khai mới.');
+      if(!(r.v>=3))throw new Error('Mã Apps Script chưa phải bản mới nhất (cần bản 3, có cột Khối). Hãy dán mã mới và tạo phiên bản triển khai mới.');
       remote=r;const n=gsMerge(r);
       if(n.c||n.s||n.e||n.u)parts.push('lấy về '+[n.e&&n.e+' đợt mới',n.u&&n.u+' đợt cập nhật',n.c&&n.c+' lớp mới',n.s&&n.s+' học sinh mới'].filter(Boolean).join(', '));
       else parts.push('không có dữ liệu mới trên Sheet');
@@ -2020,7 +2032,7 @@ async function gsSync(mode,quiet){
       const cl=classes.filter(c=>c.students.length).map(c=>({name:c.name,students:c.students.map(s=>({name:s.name,dob:s.dob||'',acc:s.acc||''}))}));
       const mats=classes.map(gsMatrix).filter(Boolean);
       const r=await gsPost({action:'push',token:GS.tok||'',source:'thong-ke-diem-toan',sentAt:new Date().toISOString(),classes:cl,
-        exams:ex.map(f=>({fileName:f.fileName,label:f.label,date:f.date||'',upd:f.upd,rows:f.rows.map(x=>({name:x.name,acc:x.acc||'',dob:x.dob||'',cls:x.cls||'',score:x.score==null?null:x.score,viol:x.viol||0,status:x.status||'',dur:x.dur||0}))})),matrices:mats});
+        exams:ex.map(f=>({fileName:f.fileName,label:f.label,date:f.date||'',grade:f.grade||'',upd:f.upd,rows:f.rows.map(x=>({name:x.name,acc:x.acc||'',dob:x.dob||'',cls:x.cls||'',score:x.score==null?null:x.score,viol:x.viol||0,status:x.status||'',dur:x.dur||0}))})),matrices:mats});
       if(!r.unconfirmed&&!r.ok)throw new Error(r.error||'phản hồi lạ');
       parts.push(r.unconfirmed?'đã gửi '+ex.length+' đợt, '+cl.length+' lớp (chưa xác nhận được, hãy mở Sheet kiểm tra)':'đẩy lên '+ex.length+' đợt, '+cl.length+' lớp'+(r.skipped?' ('+r.skipped+' đợt trên Sheet mới hơn nên giữ nguyên)':''));
     }
@@ -2040,7 +2052,7 @@ $('#gsTest').addEventListener('click',async()=>{
   try{const j=await gsPost({action:'ping',token:GS.tok||''});
     if(j.unconfirmed)gsStat('Đã gửi, nhưng trình duyệt không đọc được phản hồi. Kiểm tra quyền "Bất kỳ ai" của Web App.','bad');
     else if(!j.ok)gsStat('Lỗi: '+(j.error||'phản hồi lạ'),'bad');
-    else gsStat((j.msg||'Kết nối tốt')+(j.v>=2?'. Mã script là bản mới, dùng được nhiều máy.':'. Mã script là bản cũ, hãy dán mã mới ở bên dưới để dùng nhiều máy.'),j.v>=2?'ok':'bad')}
+    else gsStat((j.msg||'Kết nối tốt')+(j.v>=3?'. Mã script là bản mới nhất.':'. Mã script là bản cũ, hãy dán mã mới ở bên dưới (bản 3, có phân khối).'),j.v>=3?'ok':'bad')}
   catch(e){gsStat('Không kết nối được. Kiểm tra địa chỉ và quyền truy cập "Bất kỳ ai".','bad')}
 });
 $('#gsSync').addEventListener('click',()=>{gsRead();gsSync('both')});
