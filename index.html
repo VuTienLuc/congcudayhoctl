@@ -212,6 +212,18 @@ dialog .stack{gap:var(--space-3)}
 .timer{font-weight:800;font-size:26px;font-variant-numeric:tabular-nums;min-width:72px;text-align:center;padding:2px 12px;border-radius:12px;background:var(--surface-2)}
 .timer.low{background:var(--danger);color:#fff}
 .timer.sol{background:var(--yellow,#eab308);color:#1c1917}
+#bkDlg,#bkImp{max-width:min(860px,96vw);max-height:94vh;overflow:auto}
+#bkDlg .pf,#bkImp .pf{display:grid;gap:4px;margin:4px 0}#bkDlg .pf label,#bkImp .pf label,#bkDlg .pf>span{font-weight:600;font-size:14px}
+#bkDlg input[type=text],#bkImp input[type=text],#bkDlg select,#bkDlg input[type=number],#bkDlg textarea{font:inherit;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:inherit;width:100%}
+#bkDlg input[type=number]{width:76px}
+#bkDlg .three,#bkImp .three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}#bkDlg .ck,#bkImp .ck{display:flex;gap:8px;align-items:flex-start;font-size:14px;margin:4px 0}
+#bkDlg [aria-pressed=true]{background:var(--primary);border-color:var(--primary);color:var(--primary-contrast)}
+.bklist{max-height:42vh;overflow:auto;border:1px solid var(--border);border-radius:10px}
+.bki{display:flex;gap:10px;align-items:flex-start;padding:8px 12px;border-bottom:1px solid var(--border);cursor:pointer}.bki:hover{background:var(--surface-2)}
+.bki input{margin-top:6px;flex:none;width:18px;height:18px}.bki .bkt{display:inline-block;background:var(--primary-soft);padding:0 7px;border-radius:99px;font-size:12px}
+.bki small{display:block;margin-top:2px}
+table.mx{border-collapse:collapse;margin:8px 0;font-size:13px}table.mx th,table.mx td{padding:3px 6px;text-align:center}table.mx th:first-child{text-align:left;white-space:nowrap}table.mx input{width:58px!important;text-align:center}
+@media(max-width:600px){#bkDlg .three,#bkImp .three{grid-template-columns:1fr}}
 #autoDlg{max-width:min(560px,96vw)}
 #autoDlg .pf{display:grid;gap:4px;margin:6px 0}#autoDlg .pf label{font-weight:600;font-size:14px}#autoDlg select{font:inherit;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:inherit;width:100%}#autoDlg .ck{display:flex;gap:8px;align-items:flex-start;font-size:15px;margin:6px 0}#autoDlg .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 #stage{overflow:auto;padding:calc(var(--space-4)*var(--k)) clamp(16px,4vw,64px)}
@@ -403,6 +415,7 @@ dialog .stack{gap:var(--space-3)}
   <button class="btn" id="btnImport">Tải file Excel</button>
   <button class="btn" id="btnExport">Lưu Excel</button>
   <button class="btn" id="btnPdf" title="Xuất đề thi in tiết kiệm giấy, lưu thành PDF">Xuất đề PDF</button>
+  <button class="btn" id="btnBank" title="Ngân hàng câu hỏi lưu trên Google Sheet riêng">🏦 Ngân hàng</button>
   <button class="btn" id="btnAuto" title="Cài đặt thời gian mỗi câu, lời giải và trình chiếu tự động">⚙ Tự động</button>
   <button class="btn primary" id="btnPlay">▶ Trình chiếu</button>
   <input type="file" id="fXlsx" accept=".xlsx,.xls,.csv" hidden>
@@ -452,6 +465,38 @@ dialog .stack{gap:var(--space-3)}
 <label class="ck"><input type="checkbox" id="aNext"> <span>Tự động sang câu tiếp theo sau khi xem lời giải</span></label>
 <p class="muted" style="margin:0;font-size:13px">Khi đang chiếu: phím <b>T</b> hoặc nút Tạm dừng để dừng/tiếp tục đồng hồ. Tắt chế độ này thì đồng hồ chỉ báo "Hết giờ" và thầy tự bấm hiện đáp án.</p>
 <div class="row" style="justify-content:flex-end"><button class="btn" type="button" id="aClose">Xong</button><button class="btn primary" type="button" id="aPlay">▶ Lưu và trình chiếu</button></div></div></dialog>
+<dialog id="bkImp"><div class="stack"><h2>Lưu vào ngân hàng câu hỏi?</h2>
+<p class="lead" style="margin:0" id="bkImpInfo"></p>
+<label class="ck"><input type="checkbox" id="bkImpOn"> <span><b>Lưu các câu này vào ngân hàng</b> (Google Sheet riêng). Câu trùng nội dung sẽ tự bỏ qua.</span></label>
+<div id="bkImpLab" class="stack"><p class="muted" style="margin:0;font-size:13px">Câu nào trong file chưa có cột Lớp, Chương, Bài sẽ được gắn nhãn dưới đây:</p>
+<div class="three"><div class="pf"><label for="bkL">Lớp</label><input type="text" id="bkL" placeholder="10"></div><div class="pf"><label for="bkC">Chương</label><input type="text" id="bkC" placeholder="Chương 3. Dãy số"></div><div class="pf"><label for="bkB">Bài</label><input type="text" id="bkB" placeholder="Bài 5. Cấp số cộng"></div></div></div>
+<p class="muted" id="bkImpWarn" style="margin:0;font-size:13px"></p>
+<div class="row" style="justify-content:flex-end;flex-wrap:wrap"><button class="btn" type="button" id="bkImpCfg">Cài đặt ngân hàng</button><button class="btn" type="button" id="bkImpNo">Không lưu</button><button class="btn primary" type="button" id="bkImpGo">Tiếp tục</button></div></div></dialog>
+<dialog id="bkDlg"><div class="stack"><div class="row between"><h2>Ngân hàng câu hỏi</h2><button class="btn sm" type="button" id="bkClose">Đóng</button></div>
+<div class="row" style="gap:8px"><button class="btn sm" type="button" data-bt="pick" aria-pressed="true">Chọn câu</button><button class="btn sm" type="button" data-bt="cfg" aria-pressed="false">Cài đặt Google Sheet</button></div>
+<div id="bkPick" class="stack">
+<p class="muted" id="bkStat" style="margin:0;font-size:13px"></p>
+<div class="three"><div class="pf"><label for="fLop">Lớp</label><select id="fLop"></select></div><div class="pf"><label for="fChu">Chương</label><select id="fChu"></select></div><div class="pf"><label for="fBai">Bài</label><select id="fBai"></select></div></div>
+<div class="three"><div class="pf"><label for="fTyp">Loại câu</label><select id="fTyp"><option value="0">Tất cả</option><option value="1">Trắc nghiệm</option><option value="2">Đúng – Sai</option><option value="3">Trả lời ngắn</option></select></div><div class="pf"><label for="fLv">Cấp độ</label><select id="fLv"><option value="0">Tất cả</option><option value="1">Nhận biết</option><option value="2">Thông hiểu</option><option value="3">Vận dụng</option><option value="4">Vận dụng cao</option></select></div><div class="pf"><label for="fQ">Từ khóa</label><input type="text" id="fQ" placeholder="Tìm trong câu hỏi, chủ đề"></div></div>
+<label class="ck"><input type="checkbox" id="fFresh"> <span>Chỉ câu <b>chưa chiếu</b> hoặc chiếu cách đây hơn 30 ngày</span></label>
+<div class="row" style="flex-wrap:wrap;gap:8px"><button class="btn sm" type="button" id="bkAll">Chọn tất cả đang lọc</button><button class="btn sm" type="button" id="bkNone">Bỏ chọn</button><span class="muted">Bốc ngẫu nhiên</span><input type="number" id="bkRn" min="1" max="200" value="10" style="width:76px"><button class="btn sm" type="button" id="bkRand">🎲 Bốc</button><button class="btn sm" type="button" id="bkRefresh">↻ Tải lại</button></div>
+<details id="bkMx" style="margin:2px 0"><summary style="cursor:pointer;font-weight:600">Bốc ngẫu nhiên theo ma trận (số câu theo loại × cấp độ)</summary>
+<table class="mx"><thead><tr><th></th><th>Nhận biết</th><th>Thông hiểu</th><th>Vận dụng</th><th>Vận dụng cao</th></tr></thead><tbody>
+<tr><th>Trắc nghiệm</th><td><input type="number" min="0" max="99" value="0" data-mt="1" data-ml="1" aria-label="Trắc nghiệm, cấp độ 1"></td><td><input type="number" min="0" max="99" value="0" data-mt="1" data-ml="2" aria-label="Trắc nghiệm, cấp độ 2"></td><td><input type="number" min="0" max="99" value="0" data-mt="1" data-ml="3" aria-label="Trắc nghiệm, cấp độ 3"></td><td><input type="number" min="0" max="99" value="0" data-mt="1" data-ml="4" aria-label="Trắc nghiệm, cấp độ 4"></td></tr><tr><th>Đúng – Sai</th><td><input type="number" min="0" max="99" value="0" data-mt="2" data-ml="1" aria-label="Đúng – Sai, cấp độ 1"></td><td><input type="number" min="0" max="99" value="0" data-mt="2" data-ml="2" aria-label="Đúng – Sai, cấp độ 2"></td><td><input type="number" min="0" max="99" value="0" data-mt="2" data-ml="3" aria-label="Đúng – Sai, cấp độ 3"></td><td><input type="number" min="0" max="99" value="0" data-mt="2" data-ml="4" aria-label="Đúng – Sai, cấp độ 4"></td></tr><tr><th>Trả lời ngắn</th><td><input type="number" min="0" max="99" value="0" data-mt="3" data-ml="1" aria-label="Trả lời ngắn, cấp độ 1"></td><td><input type="number" min="0" max="99" value="0" data-mt="3" data-ml="2" aria-label="Trả lời ngắn, cấp độ 2"></td><td><input type="number" min="0" max="99" value="0" data-mt="3" data-ml="3" aria-label="Trả lời ngắn, cấp độ 3"></td><td><input type="number" min="0" max="99" value="0" data-mt="3" data-ml="4" aria-label="Trả lời ngắn, cấp độ 4"></td></tr></tbody></table>
+<div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn sm" type="button" id="bkMxGo">🎯 Bốc theo ma trận</button><span class="muted" id="bkMxInfo" style="font-size:13px"></span></div></details>
+<label class="ck"><input type="checkbox" id="bkLeast" checked> <span>Khi bốc, <b>ưu tiên câu chưa chiếu hoặc ít chiếu nhất</b></span></label>
+<div id="bkList" class="bklist" role="list"></div>
+<div class="row" style="justify-content:space-between;flex-wrap:wrap;gap:8px"><span id="bkSel" class="muted"></span>
+<span class="row" style="flex-wrap:wrap;gap:8px"><button class="btn sm danger" type="button" id="bkDel">Xóa khỏi ngân hàng</button><button class="btn" type="button" id="bkPdf" title="Nạp câu đã chọn rồi mở hộp xuất đề PDF, trộn nhiều mã đề">Xuất đề PDF…</button><button class="btn" type="button" id="bkRep">Thay bộ hiện tại</button><button class="btn primary" type="button" id="bkAdd">Thêm vào bài chiếu</button></span></div></div>
+<div id="bkCfg" class="stack" hidden>
+<p class="lead" style="margin:0">Tạo một Google Sheet <b>riêng</b> cho ngân hàng câu hỏi (ví dụ tên "Ngân hàng câu hỏi Toán"). Vào <b>Tiện ích mở rộng → Apps Script</b>, xóa code mẫu, dán đoạn mã bên dưới, bấm <b>Triển khai → Tùy chọn triển khai mới → Ứng dụng web</b> (Người thực thi: Tôi; Ai có quyền truy cập: Bất kỳ ai), rồi dán địa chỉ Web App vào đây.</p>
+<label class="pf"><span>Địa chỉ Web App (Apps Script)</span><input type="text" id="bkUrl" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off"></label>
+<label class="pf"><span>Mã bảo vệ (nếu có đặt TOKEN trong mã)</span><input type="text" id="bkTok" autocomplete="off"></label>
+<label class="ck"><input type="checkbox" id="bkAuto"> <span>Khi tải Excel lên, hỏi lưu vào ngân hàng</span></label>
+<div class="row" style="flex-wrap:wrap;gap:8px"><button class="btn" type="button" id="bkTest">Kiểm tra kết nối</button><button class="btn" type="button" id="bkCopy">Sao chép mã Apps Script</button></div>
+<p id="bkMsg" class="muted" style="margin:0;font-size:13px"></p>
+<textarea id="bkCode" rows="8" readonly style="font:12px/1.4 ui-monospace,monospace"></textarea></div>
+</div></dialog>
 <dialog id="geoDlg"></dialog>
 <dialog id="pdfDlg"><div class="stack" id="pdfBox"><h2>Xuất đề thi PDF · trộn nhiều mã đề</h2>
 <p class="lead" style="margin:0">Tạo đề in chuẩn, trộn thành nhiều mã đề và xuất đáp án Excel theo mẫu. Khi in, chọn <b>Lưu dưới dạng PDF</b> (Save as PDF).</p>
@@ -537,8 +582,8 @@ const saveDeck=()=>{if(!lsSet('ttn.deck',JSON.stringify(Q)))toast('Không lưu �
 const saveSet=()=>lsSet('ttn.set',JSON.stringify(ST));
 const TYPES={1:'Trắc nghiệm',2:'Đúng – Sai',3:'Trả lời ngắn'},TSHORT={1:'TN',2:'ĐS',3:'TLN'},ROMAN={1:'I',2:'II',3:'III'};
 const qType=q=>q&&(q.type===2||q.type===3)?q.type:1;
-const blankQ=(t)=>({type:t||1,title:'',opts:['','','',''],ans:-1,tf:[null,null,null,null],short:'',sol:'',level:1,img:'',svg:''});
-function fixQ(q){q.type=qType(q);if(!Array.isArray(q.tf)||q.tf.length!==4)q.tf=[0,1,2,3].map(i=>(q.tf&&typeof q.tf[i]==='boolean')?q.tf[i]:null);if(typeof q.short!=='string')q.short=q.short==null?'':String(q.short);if(!Array.isArray(q.opts))q.opts=['','','',''];while(q.opts.length<4)q.opts.push('');return q}
+const blankQ=(t)=>({m:{lop:'',chuong:'',bai:'',chude:''},type:t||1,title:'',opts:['','','',''],ans:-1,tf:[null,null,null,null],short:'',sol:'',level:1,img:'',svg:''});
+function fixQ(q){q.type=qType(q);if(!q.m||typeof q.m!=='object')q.m={lop:'',chuong:'',bai:'',chude:''};if(!Array.isArray(q.tf)||q.tf.length!==4)q.tf=[0,1,2,3].map(i=>(q.tf&&typeof q.tf[i]==='boolean')?q.tf[i]:null);if(typeof q.short!=='string')q.short=q.short==null?'':String(q.short);if(!Array.isArray(q.opts))q.opts=['','','',''];while(q.opts.length<4)q.opts.push('');return q}
 const tfStr=q=>(q.tf||[]).map(v=>v===true?'Đ':v===false?'S':'?').join('');
 const ansText=q=>{const t=qType(q);return t===1?(q.ans>=0?'ABCD'[q.ans]:'?'):t===2?tfStr(q):(String(q.short||'').trim()||'?')};
 const warnOf=q=>{const w=[],t=qType(q);if(!String(q.title).trim())w.push('Thiếu nội dung câu hỏi');
@@ -567,8 +612,13 @@ function parseSheet(ws){
     level:find(x=>x.startsWith('cap do')||x==='level'),
     img:find(x=>x.includes('link anh')||x==='hinh anh'||x==='image'),
     opt:['a','b','c','d'].map(l=>find(x=>x==='dap an '+l||x===l)),
-    type:find(x=>/^(loai|dang cau|type)/.test(x))
+    type:find(x=>/^(loai|dang cau|type)/.test(x)),
+    lop:find(x=>x==='lop'||x==='khoi lop'||x==='lop hoc'),
+    chuong:find(x=>x.startsWith('chuong')),
+    bai:find(x=>x==='bai'||x==='bai hoc'||x==='ten bai'),
+    chude:find(x=>x==='chu de'||x==='chuyen de'||x==='dang toan')
   };
+  const cell=(r,c)=>c>=0&&r[c]!=null?String(r[c]).trim():'';
   col.ans=find((x,i)=>!col.opt.includes(i)&&(x.startsWith('dap an')||x.includes('ki hieu')||x==='answer'));
   if(col.opt.some(c=>c<0)){ // định dạng chỉ có 4 cột đáp án liền sau lời giải
     const s=col.sol>=0?col.sol+1:col.title+3;col.opt=[s,s+1,s+2,s+3];
@@ -597,7 +647,7 @@ function parseSheet(ws){
       tf=tf.map((v,i)=>opts[i]===''?null:v);
     }else if(type===3){short=raw;ans=-1}
     if(type!==1)ans=-1;
-    out.push({type,tf,short,title,opts:type===3?['','','','']:opts,ans,sol:col.sol>=0?String(r[col.sol]==null?'':r[col.sol]).trim():'',level:lv>=1&&lv<=4?lv:1,img:/^(https?:|data:image)/.test(link)?link:'',svg:''});
+    out.push({type,tf,short,title,opts:type===3?['','','','']:opts,ans,sol:col.sol>=0?String(r[col.sol]==null?'':r[col.sol]).trim():'',level:lv>=1&&lv<=4?lv:1,img:/^(https?:|data:image)/.test(link)?link:'',svg:'',m:{lop:cell(r,col.lop),chuong:cell(r,col.chuong),bai:cell(r,col.bai),chude:cell(r,col.chude)}});
   }
   if(!out.length)throw new Error('File không có câu hỏi nào.');
   return out;
@@ -609,13 +659,13 @@ async function importFile(f){
     if(Q.length&&!await ask({title:'Thay bộ câu hỏi hiện tại?',msg:'File mới có '+qs.length+' câu. Bộ '+Q.length+' câu đang có sẽ được thay thế.',ok:'Thay thế',danger:true}))return;
     Q=qs.map(fixQ);S.i=0;saveDeck();render();
     const bad=Q.filter(q=>warnOf(q).length).length;
-    const cn=[1,2,3].map(t=>Q.filter(q=>qType(q)===t).length);toast('Đã đọc '+Q.length+' câu ('+cn[0]+' trắc nghiệm, '+cn[1]+' đúng-sai, '+cn[2]+' trả lời ngắn)'+(bad?'. '+bad+' câu cần kiểm tra (đánh dấu !)':''));setTimeout(()=>{try{openAuto()}catch(e){}},400);
+    const cn=[1,2,3].map(t=>Q.filter(q=>qType(q)===t).length);toast('Đã đọc '+Q.length+' câu ('+cn[0]+' trắc nghiệm, '+cn[1]+' đúng-sai, '+cn[2]+' trả lời ngắn)'+(bad?'. '+bad+' câu cần kiểm tra (đánh dấu !)':''));setTimeout(()=>{try{bkAfterImport()}catch(e){try{openAuto()}catch(_){}}},400);
   }catch(e){toast('Không tải được file: '+(e.message||String(e)),9000)}
 }
 function exportXlsx(){
   if(!Q.length)return toast('Chưa có câu hỏi để lưu.');
-  const aoa=[['STT','Câu hỏi','Đáp án (Câu hỏi nhiều đáp án: các đáp án cách nhau bởi ký tự @)','Lời giải','Đáp án A','Đáp án B','Đáp án C','Đáp án D','Cấp độ','Loại câu (1: trắc nghiệm, 2: đúng-sai, 3: trả lời ngắn)'],['idx','title','answer','answerText','1','2','3','4','level','type']];
-  Q.forEach((q,i)=>{const t=qType(q);aoa.push([i+1,q.title,t===1?(q.ans>=0?q.ans+1:''):t===2?[0,1,2,3].filter(k=>q.tf[k]===true).map(k=>k+1).join('@'):String(q.short||''),q.sol,...(t===3?['','','','']:q.opts),q.level,t])});
+  const aoa=[['STT','Câu hỏi','Đáp án (Câu hỏi nhiều đáp án: các đáp án cách nhau bởi ký tự @)','Lời giải','Đáp án A','Đáp án B','Đáp án C','Đáp án D','Cấp độ','Loại câu (1: trắc nghiệm, 2: đúng-sai, 3: trả lời ngắn)','Lớp','Chương','Bài','Chủ đề'],['idx','title','answer','answerText','1','2','3','4','level','type','class','chapter','lesson','topic']];
+  Q.forEach((q,i)=>{const t=qType(q);aoa.push([i+1,q.title,t===1?(q.ans>=0?q.ans+1:''):t===2?[0,1,2,3].filter(k=>q.tf[k]===true).map(k=>k+1).join('@'):String(q.short||''),q.sol,...(t===3?['','','','']:q.opts),q.level,t,(q.m||{}).lop||'',(q.m||{}).chuong||'',(q.m||{}).bai||'',(q.m||{}).chude||''])});
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(aoa),'Sheet1');
   const d=new Date();XLSX.writeFile(wb,'cau-hoi-trac-nghiem-'+d.getFullYear()+p2(d.getMonth()+1)+p2(d.getDate())+'.xlsx');
   toast('Đã lưu file Excel'+(Q.some(q=>q.img||q.svg)?' (hình vẽ và ảnh chỉ giữ trong trình duyệt, không nằm trong file Excel)':''));
@@ -895,7 +945,7 @@ function play(){
   const ok=Q.filter(q=>!warnOf(q).length);
   if(!ok.length)return toast('Chưa có câu hỏi hợp lệ để chiếu. Kiểm tra các câu đánh dấu "!".');
   if(ok.length<Q.length)toast('Bỏ qua '+(Q.length-ok.length)+' câu chưa hợp lệ (đánh dấu !)');
-  P.order=ok.slice();P.i=0;tellParent(true);$('#present').classList.add('on');document.body.style.overflow='hidden';
+  P.order=ok.slice();P.i=0;try{bkMarkPlayed(P.order)}catch(e){}tellParent(true);$('#present').classList.add('on');document.body.style.overflow='hidden';
   fsAsk('on');
   show();
 }
@@ -1428,15 +1478,284 @@ sideUi();
 
 /* ---------- khởi động ---------- */
 function sampleXlsx(){
-  const aoa=[['STT','Câu hỏi','Đáp án (Câu hỏi nhiều đáp án: các đáp án cách nhau bởi ký tự @)','Lời giải','Đáp án A','Đáp án B','Đáp án C','Đáp án D','Cấp độ','Loại câu (1: trắc nghiệm, 2: đúng-sai, 3: trả lời ngắn)'],['idx','title','answer','answerText','1','2','3','4','level','type'],
-   [1,'Cho cấp số cộng $(u_n)$ có $u_1=3$ và công sai $d=4$. Tìm $u_5$.',3,'Ta có $u_5=u_1+4d=3+4\\times 4=19$.','$17$','$18$','$19$','$20$',1,1],
-   [2,'Cho hàm số $y=x^2-4x+3$. Xét tính đúng sai của các mệnh đề sau:','1@3','$y=(x-1)(x-3)$ nên a) đúng.\nĐỉnh $I(2;-1)$ nên b) sai.\nHàm số có hai nghiệm nên c) đúng.','Đồ thị cắt trục hoành tại $x=1$ và $x=3$','Đỉnh của parabol là $I(2;1)$','Hàm số nghịch biến trên $(-\\infty;2)$','Giá trị nhỏ nhất của hàm số bằng $1$',2,2],
-   [3,'Một cấp số nhân có $u_1=2$, công bội $q=3$. Tính $u_4$.','54','$u_4=u_1q^3=2\\cdot 27=54$.','','','','',2,3]];
+  const aoa=[['STT','Câu hỏi','Đáp án (Câu hỏi nhiều đáp án: các đáp án cách nhau bởi ký tự @)','Lời giải','Đáp án A','Đáp án B','Đáp án C','Đáp án D','Cấp độ','Loại câu (1: trắc nghiệm, 2: đúng-sai, 3: trả lời ngắn)','Lớp','Chương','Bài','Chủ đề'],['idx','title','answer','answerText','1','2','3','4','level','type','class','chapter','lesson','topic'],
+   [1,'Cho cấp số cộng $(u_n)$ có $u_1=3$ và công sai $d=4$. Tìm $u_5$.',3,'Ta có $u_5=u_1+4d=3+4\\times 4=19$.','$17$','$18$','$19$','$20$',1,1,'10','Chương 3. Dãy số','Bài 5. Cấp số cộng','Số hạng tổng quát'],
+   [2,'Cho hàm số $y=x^2-4x+3$. Xét tính đúng sai của các mệnh đề sau:','1@3','$y=(x-1)(x-3)$ nên a) đúng.\nĐỉnh $I(2;-1)$ nên b) sai.\nHàm số có hai nghiệm nên c) đúng.','Đồ thị cắt trục hoành tại $x=1$ và $x=3$','Đỉnh của parabol là $I(2;1)$','Hàm số nghịch biến trên $(-\\infty;2)$','Giá trị nhỏ nhất của hàm số bằng $1$',2,2,'10','Chương 6. Hàm số bậc hai','Bài 1. Hàm số bậc hai','Đỉnh, nghiệm'],
+   [3,'Một cấp số nhân có $u_1=2$, công bội $q=3$. Tính $u_4$.','54','$u_4=u_1q^3=2\\cdot 27=54$.','','','','',2,3,'10','Chương 3. Dãy số','Bài 6. Cấp số nhân','Số hạng tổng quát']];
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(aoa),'Sheet1');XLSX.writeFile(wb,'cau-hoi-mau.xlsx');
 }
 $('#btnImport').addEventListener('click',()=>$('#fXlsx').click());
 $('#fXlsx').addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(f)importFile(f)});
 $('#btnExport').addEventListener('click',exportXlsx);
+
+
+/* ---------- ngân hàng câu hỏi trên Google Sheet riêng ---------- */
+const BK_CODE=`// Dán vào Apps Script của file Google Sheet RIÊNG làm Ngân hàng câu hỏi (bản 1)
+const TOKEN = '';   // đặt mã bảo vệ nếu muốn, phải giống ô "Mã bảo vệ" trong app
+const V = 1;
+const NH = 'NganHang', XOA = '_XoaNH';
+const HN = ['Mã', 'Loại', 'Câu hỏi', 'Đáp án A', 'Đáp án B', 'Đáp án C', 'Đáp án D', 'Đáp án', 'Lời giải', 'Cấp độ', 'Lớp', 'Chương', 'Bài', 'Chủ đề', 'Link ảnh', 'Nguồn', 'Ngày nhập', 'Số lần chiếu', 'Chiếu gần nhất', 'Cập nhật'];
+const W = 20, WT = 16;
+const HX = ['Mã', 'Thời điểm'];
+function doPost(e) {
+  const lock = LockService.getScriptLock();
+  try {
+    const d = JSON.parse(e.postData.contents);
+    if (TOKEN && d.token !== TOKEN) return out({ ok: false, error: 'Sai mã bảo vệ' });
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    if (d.action === 'ping') return out({ ok: true, v: V, msg: 'Kết nối tốt với file: ' + ss.getName() });
+    lock.waitLock(25000);
+    if (d.action === 'pull') return out(pull(ss));
+    if (d.action === 'push') return out(push(ss, d));
+    if (d.action === 'mark') return out(mark(ss, d));
+    return out({ ok: false, error: 'Lệnh không hợp lệ' });
+  } catch (err) { return out({ ok: false, error: String(err) }); }
+  finally { try { lock.releaseLock(); } catch (x) {} }
+}
+function out(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
+function store(ss, name, head, hide) {
+  let sh = ss.getSheetByName(name);
+  if (!sh) {
+    sh = ss.insertSheet(name);
+    sh.getRange(1, 1, 1, head.length).setValues([head]).setFontWeight('bold');
+    sh.getRange(2, 1, 2000, Math.min(head.length, WT)).setNumberFormat('@');
+    if (hide) sh.hideSheet(); else sh.setFrozenRows(1);
+  }
+  return sh;
+}
+function rows(sh, w) {
+  const n = sh.getLastRow();
+  return n < 2 ? [] : sh.getRange(2, 1, n - 1, w).getValues();
+}
+function put(sh, data, w, tw) {
+  const n = sh.getLastRow();
+  if (n > 1) sh.getRange(2, 1, n - 1, w).clearContent();
+  if (data.length) {
+    sh.getRange(2, 1, data.length, tw).setNumberFormat('@');
+    sh.getRange(2, 1, data.length, w).setValues(data);
+  }
+}
+function fix(r) {
+  const a = [];
+  for (let i = 0; i < W; i++) a.push(r[i] === undefined || r[i] === null ? '' : r[i]);
+  return a;
+}
+function pull(ss) {
+  const sh = store(ss, NH, HN, false);
+  const cur = rows(sh, W);
+  let changed = false;
+  cur.forEach(function (r) {
+    if (!r[0] && r[2]) { r[0] = 'm' + Math.random().toString(36).slice(2, 10); changed = true; }
+  });
+  if (changed) put(sh, cur, W, WT);
+  const deleted = rows(store(ss, XOA, HX, true), 2).map(function (r) { return { k: String(r[0]), t: Number(r[1]) || 0 }; });
+  return {
+    ok: true, v: V, deleted: deleted,
+    rows: cur.filter(function (r) { return r[0] && r[2]; }).map(function (r) {
+      return [String(r[0]), String(r[1]), String(r[2]), String(r[3]), String(r[4]), String(r[5]), String(r[6]), String(r[7]), String(r[8]), String(r[9]), String(r[10]), String(r[11]), String(r[12]), String(r[13]), String(r[14]), String(r[15]), String(r[16]), Number(r[17]) || 0, Number(r[18]) || 0, Number(r[19]) || 0];
+    })
+  };
+}
+function push(ss, d) {
+  const sh = store(ss, NH, HN, false), xs = store(ss, XOA, HX, true);
+  let cur = rows(sh, W).map(fix);
+  const idx = {};
+  cur.forEach(function (r, i) { if (r[0]) idx[r[0]] = i; });
+  const tomb = {};
+  rows(xs, 2).forEach(function (r) { tomb[r[0]] = Math.max(tomb[r[0]] || 0, Number(r[1]) || 0); });
+  let added = 0, dup = 0, updated = 0, removed = 0, skipped = 0;
+  (d.items || []).forEach(function (it) {
+    const row = fix(it.row), k = row[0];
+    if (!k || !row[2]) return;
+    const upd = Number(row[19]) || 0;
+    if (idx[k] !== undefined) {
+      if (it.mode === 'upd') {
+        if (tomb[k] >= upd) { skipped++; return; }
+        const old = cur[idx[k]];
+        row[16] = old[16]; row[17] = old[17]; row[18] = old[18];
+        cur[idx[k]] = row; updated++;
+      } else dup++;
+    } else {
+      if (it.mode === 'upd' && (tomb[k] || 0) >= upd) { skipped++; return; }
+      delete tomb[k];
+      idx[k] = cur.length; cur.push(row); added++;
+    }
+  });
+  if (d.deletes && d.deletes.length) {
+    const del = {};
+    d.deletes.forEach(function (x) { tomb[x.k] = Math.max(tomb[x.k] || 0, x.t); del[x.k] = 1; });
+    const before = cur.length;
+    cur = cur.filter(function (r) { return !del[r[0]]; });
+    removed = before - cur.length;
+  }
+  put(sh, cur, W, WT);
+  put(xs, Object.keys(tomb).map(function (k) { return [k, tomb[k]]; }), 2, 2);
+  return { ok: true, v: V, added: added, dup: dup, updated: updated, removed: removed, skipped: skipped };
+}
+function mark(ss, d) {
+  const sh = store(ss, NH, HN, false), cur = rows(sh, W).map(fix), set = {};
+  (d.keys || []).forEach(function (k) { set[k] = 1; });
+  let n = 0;
+  cur.forEach(function (r) { if (set[r[0]]) { r[17] = (Number(r[17]) || 0) + 1; r[18] = d.t || 0; n++; } });
+  if (n) put(sh, cur, W, WT);
+  return { ok: true, v: V, marked: n };
+}
+`;
+const BK=Object.assign({url:'',tok:'',ask:true,lop:'',chuong:'',bai:'',del:[],pend:[],items:[],last:null},(()=>{try{return JSON.parse(lsGet('ttn.bk','{}'))}catch(e){return {}}})());
+const saveBk=()=>{const o={...BK};lsSet('ttn.bk',JSON.stringify(o))};
+const bkOk=()=>/^https:\/\/script\.google(usercontent)?\.com\//.test(BK.url||'')||/^http:\/\/127\.0\.0\.1[:\/]/.test(BK.url||'');
+function bkHash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(36)}
+function bkKey(q){const t=qType(q);return 'c'+bkHash(norm(plain(q.title))+'|'+(t===3?'':q.opts.map(o=>norm(plain(o))).join('|'))+'|'+t)+String(plain(q.title).length).slice(-3)}
+const bkHdr=['Câu hỏi','Đáp án','Lời giải','Đáp án A','Đáp án B','Đáp án C','Đáp án D','Cấp độ','Loại câu','Lớp','Chương','Bài','Chủ đề','Link ảnh'];
+function bkAns(q){const t=qType(q);return t===1?(q.ans>=0?String(q.ans+1):''):t===2?[0,1,2,3].filter(k=>q.tf[k]===true).map(k=>k+1).join('@'):String(q.short||'')}
+function bkRow(q,label,src,upd){
+  const m=q.m||{},t=qType(q),d=new Date(),lb=label||{};
+  return [bkKey(q),String(t),q.title,...(t===3?['','','','']:q.opts),bkAns(q),q.sol||'',String(q.level||1),m.lop||lb.lop||'',m.chuong||lb.chuong||'',m.bai||lb.bai||'',m.chude||'',/^https?:/.test(q.img||'')?q.img:'',src||'',d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate()),0,0,upd||Date.now()]}
+function bkFromRows(rows){
+  const aoa=[bkHdr].concat(rows.map(r=>[r[2],r[7],r[8],r[3],r[4],r[5],r[6],r[9],r[1],r[10],r[11],r[12],r[13],r[14]]));
+  let qs;try{qs=parseSheet(XLSX.utils.aoa_to_sheet(aoa))}catch(e){return []}
+  return qs.map(fixQ);
+}
+async function bkPost(body){
+  const opt={method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:BK.tok||'',...body}),redirect:'follow'};
+  const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),45000);
+  try{
+    try{const r=await fetch(BK.url,{...opt,signal:ctl.signal});return await r.json()}
+    catch(e){if(e.name==='AbortError')throw e;await fetch(BK.url,{...opt,mode:'no-cors',signal:ctl.signal});return{ok:true,unconfirmed:true}}
+  }finally{clearTimeout(to)}
+}
+async function bkPull(quiet){
+  if(!bkOk()){if(!quiet)toast('Hãy dán địa chỉ Web App của Google Sheet ngân hàng trong phần Cài đặt.');return false}
+  try{
+    await bkFlush();
+    const r=await bkPost({action:'pull'});
+    if(!r||r.unconfirmed)throw new Error('Không đọc được phản hồi. Kiểm tra quyền "Bất kỳ ai" của Web App.');
+    if(!r.ok)throw new Error(r.error||'Lỗi');
+    const tomb={};(r.deleted||[]).forEach(d=>tomb[d.k]=d.t);
+    const rows=(r.rows||[]).filter(x=>String(x[2]).trim());
+    const qs=bkFromRows(rows);
+    BK.items=rows.map((x,i)=>qs[i]?{k:x[0],q:qs[i],src:x[15],day:x[16],n:x[17]||0,last:x[18]||0,upd:x[19]||0}:null).filter(Boolean);
+    BK.last={t:Date.now(),n:BK.items.length};saveBk();return true;
+  }catch(e){if(!quiet)toast('Không tải được ngân hàng: '+(e.message||e),7000);return false}
+}
+async function bkFlush(){
+  if(!BK.pend.length&&!BK.del.length)return;if(!bkOk())return;
+  try{const r=await bkPost({action:'push',items:BK.pend,deletes:BK.del});if(r&&r.ok&&!r.unconfirmed){BK.pend=[];BK.del=[];saveBk()}}catch(e){}
+}
+async function bkSave(list,label,src){
+  const seen=new Set(),items=[];
+  list.forEach(q=>{if(!String(q.title).trim())return;const row=bkRow(q,label,src);if(seen.has(row[0]))return;seen.add(row[0]);items.push({mode:'new',row})});
+  if(!items.length)return{ok:false,msg:'Không có câu hợp lệ để lưu.'};
+  try{
+    const r=await bkPost({action:'push',items,deletes:BK.del});
+    if(r&&r.ok&&!r.unconfirmed){BK.del=[];saveBk();return{ok:true,msg:'Đã lưu vào ngân hàng: thêm mới '+r.added+', trùng bỏ qua '+r.dup+'.'}}
+    if(r&&r.unconfirmed){return{ok:true,msg:'Đã gửi '+items.length+' câu lên Google Sheet (chưa xác nhận được phản hồi, hãy mở Sheet kiểm tra).'}}
+    throw new Error((r&&r.error)||'Lỗi')
+  }catch(e){BK.pend=BK.pend.concat(items);saveBk();return{ok:false,msg:'Chưa lưu được ('+(e.message||e)+'). Đã giữ tạm trên máy, sẽ gửi lại lần sau.'}}
+}
+/* hộp thoại sau khi tải Excel */
+function bkAfterImport(){
+  const withL=Q.filter(q=>q.m&&(q.m.lop||q.m.chuong||q.m.bai)).length;
+  $('#bkImpInfo').textContent='Đã đọc '+Q.length+' câu. '+(withL?withL+' câu đã có nhãn Lớp / Chương / Bài trong file.':'File chưa có nhãn Lớp / Chương / Bài.');
+  $('#bkImpOn').checked=bkOk()&&BK.ask!==false;$('#bkL').value=BK.lop||'';$('#bkC').value=BK.chuong||'';$('#bkB').value=BK.bai||'';
+  $('#bkImpWarn').textContent=bkOk()?'':'Chưa cài đặt Google Sheet ngân hàng. Bấm "Cài đặt ngân hàng" để kết nối (làm một lần).';
+  $('#bkImpLab').hidden=false;
+  if(!bkOk()&&BK.ask===false){openAuto();return}
+  $('#bkImp').showModal();
+}
+async function bkImpFinish(save){
+  const dlg=$('#bkImp'),lab={lop:$('#bkL').value.trim(),chuong:$('#bkC').value.trim(),bai:$('#bkB').value.trim()};
+  BK.lop=lab.lop;BK.chuong=lab.chuong;BK.bai=lab.bai;saveBk();
+  if(save){
+    if(!bkOk()){toast('Chưa cài đặt Google Sheet ngân hàng.');return}
+    Q.forEach(q=>{q.m=q.m||{};if(!q.m.lop&&lab.lop)q.m.lop=lab.lop;if(!q.m.chuong&&lab.chuong)q.m.chuong=lab.chuong;if(!q.m.bai&&lab.bai)q.m.bai=lab.bai});saveDeck();
+    $('#bkImpGo').disabled=true;$('#bkImpGo').textContent='Đang lưu…';
+    const r=await bkSave(Q,lab,'Excel '+new Date().toLocaleDateString('vi-VN'));
+    $('#bkImpGo').disabled=false;$('#bkImpGo').textContent='Tiếp tục';toast(r.msg,6000);
+  }
+  dlg.close();setTimeout(()=>{try{openAuto()}catch(e){}},300);
+}
+$('#bkImpGo').addEventListener('click',()=>bkImpFinish($('#bkImpOn').checked));
+$('#bkImpNo').addEventListener('click',()=>bkImpFinish(false));
+$('#bkImpCfg').addEventListener('click',()=>{$('#bkImp').close();openBank('cfg')});
+/* hộp thoại ngân hàng */
+const bkSelSet=new Set();let bkView=[];
+function bkTab(t){$('#bkPick').hidden=t!=='pick';$('#bkCfg').hidden=t!=='cfg';$$('#bkDlg [data-bt]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.bt===t)))}
+async function openBank(tab){
+  $('#bkUrl').value=BK.url||'';$('#bkTok').value=BK.tok||'';$('#bkAuto').checked=BK.ask!==false;$('#bkCode').value=BK_CODE;
+  if(!$('#bkDlg').open)$('#bkDlg').showModal();
+  bkTab(tab||(bkOk()?'pick':'cfg'));
+  if(bkOk()&&(tab||'pick')==='pick'){$('#bkStat').textContent='Đang tải ngân hàng…';await bkPull(true);bkFilters();bkRender()}
+  else bkRender();
+}
+function bkOpts(id,vals,all){const cur=$(id).value;$(id).innerHTML='<option value="">'+all+'</option>'+vals.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');if(vals.includes(cur))$(id).value=cur}
+function bkFilters(){
+  const u=k=>[...new Set(BK.items.map(x=>(x.q.m||{})[k]||'').filter(Boolean))].sort((a,b)=>a.localeCompare(b,'vi',{numeric:true}));
+  bkOpts('#fLop',u('lop'),'Tất cả lớp');bkOpts('#fChu',u('chuong'),'Tất cả chương');bkOpts('#fBai',u('bai'),'Tất cả bài');
+}
+const LVN={1:'Nhận biết',2:'Thông hiểu',3:'Vận dụng',4:'Vận dụng cao'};
+function bkFiltered(){
+  const lop=$('#fLop').value,chu=$('#fChu').value,bai=$('#fBai').value,ty=+$('#fTyp').value,lv=+$('#fLv').value,kw=norm($('#fQ').value),fresh=$('#fFresh').checked,lim=Date.now()-30*864e5;
+  return BK.items.filter(x=>{const m=x.q.m||{};
+    if(lop&&m.lop!==lop)return false;if(chu&&m.chuong!==chu)return false;if(bai&&m.bai!==bai)return false;
+    if(ty&&qType(x.q)!==ty)return false;if(lv&&x.q.level!==lv)return false;
+    if(fresh&&x.last&&x.last>lim)return false;
+    if(kw&&!norm(plain(x.q.title)+' '+(m.chude||'')+' '+(m.bai||'')).includes(kw))return false;return true});
+}
+function bkRender(){
+  bkView=bkFiltered();
+  $('#bkStat').textContent=bkOk()?('Ngân hàng có '+BK.items.length+' câu. Đang lọc: '+bkView.length+' câu.'+(BK.pend.length?' Còn '+BK.pend.length+' câu chờ gửi lên.':'')):'Chưa kết nối Google Sheet. Mở "Cài đặt Google Sheet" để dán địa chỉ Web App.';
+  const shown=bkView.slice(0,300);
+  $('#bkList').innerHTML=shown.length?shown.map(x=>{const m=x.q.m||{},lab=[m.lop&&'Lớp '+m.lop,m.chuong,m.bai].filter(Boolean).join(' · ');
+    return `<label class="bki" role="listitem"><input type="checkbox" data-k="${esc(x.k)}"${bkSelSet.has(x.k)?' checked':''}><span><b class="bkt">${TSHORT[qType(x.q)]}</b> <span class="bkq">${rm(String(x.q.title).slice(0,260))}</span><small class="muted">${esc(LVN[x.q.level]||'')}${lab?' · '+esc(lab):''} · ${x.n?'đã chiếu '+x.n+' lần'+(x.last?' (gần nhất '+new Date(x.last).toLocaleDateString('vi-VN')+')':''):'chưa chiếu'}</small></span></label>`}).join('')+(bkView.length>300?`<p class="muted">Hiển thị 300 câu đầu, hãy lọc thêm để thu hẹp.</p>`:''):'<p class="muted" style="padding:12px">Không có câu nào khớp bộ lọc.</p>';
+  bkCount();
+}
+function bkCount(){const n=bkView.filter(x=>bkSelSet.has(x.k)).length;$('#bkSel').textContent='Đã chọn '+bkSelSet.size+' câu'+(bkSelSet.size!==n?' ('+n+' trong bộ lọc)':'');['#bkAdd','#bkRep','#bkDel','#bkPdf'].forEach(i=>$(i).disabled=!bkSelSet.size)}
+function bkPicked(){return BK.items.filter(x=>bkSelSet.has(x.k)).map(x=>{const q=JSON.parse(JSON.stringify(x.q));return fixQ(q)})}
+$('#btnBank').addEventListener('click',()=>openBank());
+$('#bkClose').addEventListener('click',()=>$('#bkDlg').close());
+$('#bkDlg').addEventListener('click',e=>{const t=e.target.closest('[data-bt]');if(t){bkTab(t.dataset.bt);if(t.dataset.bt==='pick'){bkRender()}}});
+['#fLop','#fChu','#fBai','#fTyp','#fLv','#fFresh'].forEach(i=>$(i).addEventListener('change',bkRender));
+$('#fQ').addEventListener('input',bkRender);
+$('#bkList').addEventListener('change',e=>{const c=e.target.closest('input[data-k]');if(!c)return;c.checked?bkSelSet.add(c.dataset.k):bkSelSet.delete(c.dataset.k);bkCount()});
+$('#bkAll').addEventListener('click',()=>{bkView.forEach(x=>bkSelSet.add(x.k));bkRender()});
+$('#bkNone').addEventListener('click',()=>{bkSelSet.clear();bkRender()});
+$('#bkRand').addEventListener('click',()=>{const n=Math.max(1,Math.min(200,+$('#bkRn').value||10));bkSelSet.clear();bkTake(bkView,n).forEach(x=>bkSelSet.add(x.k));bkRender();toast('Đã bốc ngẫu nhiên '+Math.min(n,bkView.length)+' câu')});
+$('#bkRefresh').addEventListener('click',async()=>{$('#bkStat').textContent='Đang tải…';await bkPull(false);bkFilters();bkRender()});
+$('#bkAdd').addEventListener('click',()=>{const p=bkPicked();if(!p.length)return;Q=Q.concat(p);saveDeck();render();$('#bkDlg').close();toast('Đã thêm '+p.length+' câu từ ngân hàng (tổng '+Q.length+' câu)')});
+$('#bkRep').addEventListener('click',async()=>{const p=bkPicked();if(!p.length)return;if(Q.length&&!await ask({title:'Thay bộ câu hỏi hiện tại?',msg:'Bộ '+Q.length+' câu đang có sẽ được thay bằng '+p.length+' câu đã chọn.',ok:'Thay thế',danger:true}))return;Q=p;S.i=0;saveDeck();render();$('#bkDlg').close();toast('Đã nạp '+p.length+' câu từ ngân hàng')});
+$('#bkDel').addEventListener('click',async()=>{
+  const ks=[...bkSelSet];if(!ks.length)return;
+  if(!await ask({title:'Xóa khỏi ngân hàng?',msg:'Xóa '+ks.length+' câu đã chọn khỏi Google Sheet. Không thể hoàn tác.',ok:'Xóa',danger:true}))return;
+  const t=Date.now();ks.forEach(k=>BK.del=BK.del.filter(d=>d.k!==k).concat([{k,t}]));
+  BK.items=BK.items.filter(x=>!bkSelSet.has(x.k));bkSelSet.clear();saveBk();bkFilters();bkRender();
+  await bkFlush();toast('Đã xóa '+ks.length+' câu khỏi ngân hàng');
+});
+function bkCfgRead(){BK.url=$('#bkUrl').value.trim();BK.tok=$('#bkTok').value.trim();BK.ask=$('#bkAuto').checked;saveBk()}
+$('#bkCfg').addEventListener('change',bkCfgRead);
+$('#bkTest').addEventListener('click',async()=>{bkCfgRead();const m=$('#bkMsg');if(!bkOk()){m.textContent='Hãy dán địa chỉ Web App (bắt đầu bằng https://script.google.com/).';return}
+  m.textContent='Đang kiểm tra…';try{const r=await bkPost({action:'ping'});m.textContent=r&&r.ok&&!r.unconfirmed?'✔ '+(r.msg||'Kết nối tốt')+' (bản '+r.v+')':(r&&r.unconfirmed?'Đã gửi nhưng không đọc được phản hồi. Hãy kiểm tra Web App đã đặt quyền "Bất kỳ ai" chưa.':'✘ '+((r&&r.error)||'Lỗi'))}catch(e){m.textContent='✘ Không kết nối được: '+(e.message||e)}});
+$('#bkCopy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(BK_CODE);toast('Đã sao chép mã Apps Script')}catch(e){$('#bkCode').select();document.execCommand('copy');toast('Đã chọn mã, nhấn Ctrl+C để sao chép')}});
+
+function bkTake(pool,n){let a=shuf(pool);if($('#bkLeast')&&$('#bkLeast').checked)a=a.sort((x,y)=>(x.n||0)-(y.n||0)||(x.last||0)-(y.last||0));return a.slice(0,n)}
+$('#bkMxGo').addEventListener('click',()=>{
+  const got=new Set(),miss=[];let want=0;
+  $$('#bkMx input[data-mt]').forEach(i=>{const c=Math.max(0,+i.value||0);if(!c)return;want+=c;
+    const t=+i.dataset.mt,l=+i.dataset.ml,pool=bkView.filter(x=>qType(x.q)===t&&x.q.level===l&&!got.has(x.k)),pick=bkTake(pool,c);
+    pick.forEach(x=>got.add(x.k));if(pick.length<c)miss.push(TSHORT[t]+' '+(LVN[l]||l)+': thiếu '+(c-pick.length))});
+  if(!want){$('#bkMxInfo').textContent='Hãy nhập số câu vào bảng.';return}
+  bkSelSet.clear();got.forEach(k=>bkSelSet.add(k));bkRender();
+  $('#bkMxInfo').textContent='Đã chọn '+got.size+'/'+want+' câu.'+(miss.length?' Thiếu: '+miss.join('; ')+'.':'');
+});
+$('#bkPdf').addEventListener('click',async()=>{const p=bkPicked();if(!p.length)return;
+  if(Q.length&&!await ask({title:'Dùng '+p.length+' câu đã chọn để xuất đề?',msg:'Bộ '+Q.length+' câu đang có trong bài chiếu sẽ được thay bằng '+p.length+' câu này.',ok:'Tiếp tục',danger:true}))return;
+  Q=p;S.i=0;saveDeck();render();$('#bkDlg').close();setTimeout(()=>openPdf(),200)});
+/* đánh dấu câu đã chiếu */
+function bkMarkPlayed(list){
+  if(!bkOk())return;const ks=[...new Set(list.map(bkKey))].filter(k=>!BK.items.length||BK.items.some(x=>x.k===k));if(!ks.length)return;
+  const t=Date.now();BK.items.forEach(x=>{if(ks.includes(x.k)){x.n=(x.n||0)+1;x.last=t}});saveBk();
+  bkPost({action:'mark',keys:ks,t}).catch(()=>{});
+}
 
 /* ---------- cài đặt trình chiếu tự động ---------- */
 function openAuto(){
@@ -1591,7 +1910,7 @@ $('#pfTpl').addEventListener('change',()=>{const t=TPL[$('#pfTpl').value];$('#pf
 $('#pdfDlg').addEventListener('change',e=>{if(e.target.closest('#pfVer,#pfCode0,#pfShufQ,#pfShufO,#pfKeepD,#pfKeepFirst')){getSet(false);pfInfo()}});
 function render(){renderMain()}
 applySettings();render();
-window.__ttn={examHtml,keyHtml,keyAoa,makeSet,PDF,rm,parseWorkbook,get Q(){return Q},suggestions,GEO,warnOf};
+window.__ttn={BK,bkKey,bkRow,bkFromRows,bkSave,bkPull,bkAfterImport,bkMarkPlayed,openBank,examHtml,keyHtml,keyAoa,makeSet,PDF,rm,parseWorkbook,get Q(){return Q},suggestions,GEO,warnOf};
 })();
 </scr@@ipt>
 </body>
