@@ -224,6 +224,10 @@ dialog .stack{gap:var(--space-3)}
 .bki small{display:block;margin-top:2px}
 #qlist .fl,.bki .fl{color:#d99a00;font-weight:700}.fl.bad{color:#c0392b}.bki .tag{display:inline-block;font-style:normal;font-size:11px;background:var(--surface-2);border:1px solid var(--border);border-radius:99px;padding:0 7px;margin-right:2px}
 .bkth{display:block;margin-top:6px}.bkth img,.bkth svg{max-height:84px;max-width:240px;width:auto;height:auto;border:1px solid var(--border);border-radius:6px;background:#fff}
+#pgDlg{max-width:min(860px,96vw);max-height:94vh;overflow:auto}#pgDlg .pf{display:grid;gap:4px;margin:4px 0}#pgDlg .pf>label,#pgDlg .pf>span{font-weight:600;font-size:14px}
+#pgDlg input[type=text],#pgDlg select,#pgDlg textarea{font:inherit;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:inherit;width:100%}
+#pgDlg .three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}#pgDlg .ck{display:flex;gap:8px;align-items:flex-start;font-size:14px;margin:2px 0;font-weight:400}
+@media(max-width:600px){#pgDlg .three{grid-template-columns:1fr}}
 table.mx{border-collapse:collapse;margin:8px 0;font-size:13px}table.mx th,table.mx td{padding:3px 6px;text-align:center}table.mx th:first-child{text-align:left;white-space:nowrap}table.mx input{width:58px!important;text-align:center}
 @media(max-width:600px){#bkDlg .three,#bkImp .three{grid-template-columns:1fr}}
 #autoDlg{max-width:min(560px,96vw)}
@@ -419,6 +423,7 @@ table.mx{border-collapse:collapse;margin:8px 0;font-size:13px}table.mx th,table.
   <button class="btn" id="btnClearAll" title="Xóa toàn bộ câu hỏi cũ để bắt đầu bộ mới">🗑 Xóa tất cả câu</button>
   <button class="btn" id="btnExport">Lưu Excel</button>
   <button class="btn" id="btnPdf" title="Xuất đề thi in tiết kiệm giấy, lưu thành PDF">Xuất đề PDF</button>
+  <button class="btn" id="btnPg" title="Sinh prompt cho AI tạo câu hỏi theo Lớp, Chương, Bài (SGK Kết nối tri thức) rồi nhập JSON về">🤖 Sinh prompt AI</button>
   <button class="btn" id="btnBank" title="Ngân hàng câu hỏi lưu trên Google Sheet riêng">🏦 Ngân hàng</button>
   <button class="btn" id="btnAuto" title="Cài đặt thời gian mỗi câu, lời giải và trình chiếu tự động">⚙ Tự động</button>
   <button class="btn primary" id="btnPlay">▶ Trình chiếu</button>
@@ -485,7 +490,7 @@ table.mx{border-collapse:collapse;margin:8px 0;font-size:13px}table.mx th,table.
 <div class="three"><div class="pf"><label for="fLop">Lớp</label><select id="fLop"></select></div><div class="pf"><label for="fChu">Chương</label><select id="fChu"></select></div><div class="pf"><label for="fBai">Bài</label><select id="fBai"></select></div></div>
 <div class="three"><div class="pf"><label for="fTyp">Loại câu</label><select id="fTyp"><option value="0">Tất cả</option><option value="1">Trắc nghiệm</option><option value="2">Đúng – Sai</option><option value="3">Trả lời ngắn</option></select></div><div class="pf"><label for="fLv">Cấp độ</label><select id="fLv"><option value="0">Tất cả</option><option value="1">Nhận biết</option><option value="2">Thông hiểu</option><option value="3">Vận dụng</option><option value="4">Vận dụng cao</option></select></div><div class="pf"><label for="fQ">Từ khóa</label><input type="text" id="fQ" placeholder="Tìm trong câu hỏi, chủ đề"></div></div>
 <label class="ck"><input type="checkbox" id="fFresh"> <span>Chỉ câu <b>chưa chiếu</b> hoặc chiếu cách đây hơn 30 ngày</span></label>
-<div class="row" style="flex-wrap:wrap;gap:8px"><button class="btn sm" type="button" id="bkAll">Chọn tất cả đang lọc</button><button class="btn sm" type="button" id="bkNone">Bỏ chọn</button><span class="muted">Bốc ngẫu nhiên</span><input type="number" id="bkRn" min="1" max="200" value="10" style="width:76px"><button class="btn sm" type="button" id="bkRand">🎲 Bốc</button><button class="btn sm" type="button" id="bkUp" title="Đưa cả bộ đang chiếu (kể cả hình vẽ, ảnh) lên ngân hàng; câu trùng sẽ được bổ sung hình">⬆ Lưu bộ đang chiếu lên ngân hàng</button><button class="btn sm" type="button" id="bkRefresh">↻ Tải lại</button></div>
+<div class="row" style="flex-wrap:wrap;gap:8px"><button class="btn sm" type="button" id="bkAll">Chọn tất cả đang lọc</button><button class="btn sm" type="button" id="bkNone">Bỏ chọn</button><span class="muted">Bốc ngẫu nhiên</span><input type="number" id="bkRn" min="1" max="200" value="10" style="width:76px"><button class="btn sm" type="button" id="bkRand">🎲 Bốc</button><button class="btn sm" type="button" id="bkPg">🤖 Sinh prompt AI…</button><button class="btn sm" type="button" id="bkUp" title="Đưa cả bộ đang chiếu (kể cả hình vẽ, ảnh) lên ngân hàng; câu trùng sẽ được bổ sung hình">⬆ Lưu bộ đang chiếu lên ngân hàng</button><button class="btn sm" type="button" id="bkRefresh">↻ Tải lại</button></div>
 <details id="bkMx" style="margin:2px 0"><summary style="cursor:pointer;font-weight:600">Bốc ngẫu nhiên theo ma trận (số câu theo loại × cấp độ)</summary>
 <table class="mx"><thead><tr><th></th><th>Nhận biết</th><th>Thông hiểu</th><th>Vận dụng</th><th>Vận dụng cao</th></tr></thead><tbody>
 <tr><th>Trắc nghiệm</th><td><input type="number" min="0" max="99" value="0" data-mt="1" data-ml="1" aria-label="Trắc nghiệm, cấp độ 1"></td><td><input type="number" min="0" max="99" value="0" data-mt="1" data-ml="2" aria-label="Trắc nghiệm, cấp độ 2"></td><td><input type="number" min="0" max="99" value="0" data-mt="1" data-ml="3" aria-label="Trắc nghiệm, cấp độ 3"></td><td><input type="number" min="0" max="99" value="0" data-mt="1" data-ml="4" aria-label="Trắc nghiệm, cấp độ 4"></td></tr><tr><th>Đúng – Sai</th><td><input type="number" min="0" max="99" value="0" data-mt="2" data-ml="1" aria-label="Đúng – Sai, cấp độ 1"></td><td><input type="number" min="0" max="99" value="0" data-mt="2" data-ml="2" aria-label="Đúng – Sai, cấp độ 2"></td><td><input type="number" min="0" max="99" value="0" data-mt="2" data-ml="3" aria-label="Đúng – Sai, cấp độ 3"></td><td><input type="number" min="0" max="99" value="0" data-mt="2" data-ml="4" aria-label="Đúng – Sai, cấp độ 4"></td></tr><tr><th>Trả lời ngắn</th><td><input type="number" min="0" max="99" value="0" data-mt="3" data-ml="1" aria-label="Trả lời ngắn, cấp độ 1"></td><td><input type="number" min="0" max="99" value="0" data-mt="3" data-ml="2" aria-label="Trả lời ngắn, cấp độ 2"></td><td><input type="number" min="0" max="99" value="0" data-mt="3" data-ml="3" aria-label="Trả lời ngắn, cấp độ 3"></td><td><input type="number" min="0" max="99" value="0" data-mt="3" data-ml="4" aria-label="Trả lời ngắn, cấp độ 4"></td></tr></tbody></table>
@@ -505,6 +510,29 @@ table.mx{border-collapse:collapse;margin:8px 0;font-size:13px}table.mx th,table.
 <div class="row" style="flex-wrap:wrap;gap:8px"><button class="btn" type="button" id="bkTest">Kiểm tra kết nối</button><button class="btn" type="button" id="bkCopy">Sao chép mã Apps Script</button></div>
 <p id="bkMsg" class="muted" style="margin:0;font-size:13px"></p>
 <textarea id="bkCode" rows="8" readonly style="font:12px/1.4 ui-monospace,monospace"></textarea></div>
+</div></dialog>
+<dialog id="pgDlg"><div class="stack"><div class="row between"><h2>Sinh prompt tạo câu hỏi cho ngân hàng</h2><button class="btn sm" type="button" id="pgClose">Đóng</button></div>
+<p class="lead" style="margin:0">Chọn Lớp, Chương, Bài theo mục lục SGK Toán Kết nối tri thức và số câu cần sinh. Công cụ tạo sẵn prompt cho "giáo viên Toán xuất sắc chuyên luyện thi"; thầy dán prompt vào ChatGPT, Claude hay Gemini, rồi dán JSON AI trả về xuống phần dưới để nhập vào bài chiếu và ngân hàng.</p>
+<div class="three"><div class="pf"><label for="pgL">Lớp</label><select id="pgL"><option>10</option><option>11</option><option>12</option></select></div><div class="pf"><label for="pgC">Chương</label><select id="pgC"></select></div><div class="pf"><label for="pgB">Bài</label><select id="pgB"></select></div></div>
+<label class="pf"><span>Chủ đề riêng (tuỳ chọn, ví dụ "bài toán thực tế về parabol")</span><input type="text" id="pgT" placeholder="Để trống nếu bám đúng bài"></label>
+<div class="pf"><label>Số câu theo cấp độ</label><table class="mx"><thead><tr><th></th><th>Nhận biết</th><th>Thông hiểu</th><th>Vận dụng thấp</th><th>Vận dụng cao</th></tr></thead><tbody>
+<tr><th>Trắc nghiệm 1 đáp án</th><td><input type="number" min="0" max="50" value="0" data-pm="1" data-pl="1" aria-label="Một đáp án, cấp độ 1"></td><td><input type="number" min="0" max="50" value="0" data-pm="1" data-pl="2" aria-label="Một đáp án, cấp độ 2"></td><td><input type="number" min="0" max="50" value="0" data-pm="1" data-pl="3" aria-label="Một đáp án, cấp độ 3"></td><td><input type="number" min="0" max="50" value="0" data-pm="1" data-pl="4" aria-label="Một đáp án, cấp độ 4"></td></tr>
+<tr><th>Nhiều đáp án đúng (@)</th><td><input type="number" min="0" max="50" value="0" data-pm="2" data-pl="1" aria-label="Nhiều đáp án, cấp độ 1"></td><td><input type="number" min="0" max="50" value="0" data-pm="2" data-pl="2" aria-label="Nhiều đáp án, cấp độ 2"></td><td><input type="number" min="0" max="50" value="0" data-pm="2" data-pl="3" aria-label="Nhiều đáp án, cấp độ 3"></td><td><input type="number" min="0" max="50" value="0" data-pm="2" data-pl="4" aria-label="Nhiều đáp án, cấp độ 4"></td></tr></tbody></table><span class="muted" id="pgTot" style="font-size:13px"></span></div>
+<div class="three"><div class="pf"><label for="pgA">Đối tượng học sinh</label><select id="pgA"><option>Đại trà (cơ bản + vận dụng)</option><option>Yếu, mất gốc (lấy lại nền tảng)</option><option>Khá, giỏi (vận dụng cao, 8-10 điểm)</option><option>Luyện thi nước rút (kỹ năng phòng thi)</option></select></div></div>
+<div class="pf"><label>Nguồn tài liệu AI cần tổng hợp</label>
+<label class="ck"><input type="checkbox" data-ps="Sách giáo khoa Toán Kết nối tri thức với cuộc sống (đúng mục lục bài, ví dụ, luyện tập, vận dụng, bài tập cuối bài)" checked> <span>SGK Kết nối tri thức</span></label>
+<label class="ck"><input type="checkbox" data-ps="Sách bài tập Toán Kết nối tri thức" checked> <span>Sách bài tập</span></label>
+<label class="ck"><input type="checkbox" data-ps="Chuyên đề học tập Toán (nếu liên quan)"> <span>Chuyên đề học tập</span></label>
+<label class="ck"><input type="checkbox" data-ps="Đề minh họa và đề thi tốt nghiệp THPT môn Toán của Bộ GD&ĐT (cấu trúc, mức độ, văn phong)" checked> <span>Đề minh họa, đề thi tốt nghiệp THPT</span></label>
+<label class="ck"><input type="checkbox" data-ps="Đề kiểm tra, đề thi thử của các Sở GD&ĐT và trường THPT có uy tín"> <span>Đề thi thử các Sở, các trường</span></label>
+<label class="ck"><input type="checkbox" data-ps="Tình huống thực tế gắn với đời sống, khoa học, kinh tế phù hợp học sinh Việt Nam"> <span>Tình huống thực tế</span></label></div>
+<label class="pf"><span>Yêu cầu riêng (tuỳ chọn)</span><textarea id="pgX" rows="2" placeholder="Ví dụ: tránh câu quá dài, ưu tiên bẫy dấu, có 2 câu ứng dụng thực tế…"></textarea></label>
+<div class="row" style="flex-wrap:wrap;gap:8px"><button class="btn primary" type="button" id="pgCopy">📋 Sao chép prompt</button><button class="btn" type="button" id="pgDown">Tải prompt (.txt)</button></div>
+<textarea id="pgOut" rows="9" readonly style="font:12px/1.45 ui-monospace,monospace"></textarea>
+<hr style="border:0;border-top:1px solid var(--border);width:100%">
+<h3 style="margin:0">Nhập JSON AI trả về</h3>
+<textarea id="pgJ" rows="6" placeholder="Dán toàn bộ JSON (có thể kèm dấu ```json). Công cụ tự bỏ dòng mẫu idx/title, đổi $$…$$ thành công thức dòng, và gắn nhãn Lớp, Chương, Bài." style="font:12px/1.45 ui-monospace,monospace"></textarea>
+<div class="row" style="flex-wrap:wrap;gap:8px;justify-content:flex-end"><span class="muted" id="pgMsg" style="margin-right:auto;font-size:13px"></span><button class="btn" type="button" id="pgRep">Thay bộ hiện tại</button><button class="btn primary" type="button" id="pgAdd">Thêm vào bài chiếu</button></div>
 </div></dialog>
 <dialog id="geoDlg"></dialog>
 <dialog id="pdfDlg"><div class="stack" id="pdfBox"><h2>Xuất đề thi PDF · trộn nhiều mã đề</h2>
@@ -1859,6 +1887,88 @@ function bkMarkPlayed(list){
   const t=Date.now();BK.items.forEach(x=>{if(ks.includes(x.k)){x.n=(x.n||0)+1;x.last=t}});saveBk();
   bkPost({action:'mark',keys:ks,t}).catch(()=>{});
 }
+
+
+/* ---------- sinh prompt AI theo mục lục SGK Toán KNTT ---------- */
+const MLK={
+10:[['Chương I. Mệnh đề và tập hợp',['Bài 1. Mệnh đề','Bài 2. Tập hợp và các phép toán trên tập hợp']],['Chương II. Bất phương trình và hệ bất phương trình bậc nhất hai ẩn',['Bài 3. Bất phương trình bậc nhất hai ẩn','Bài 4. Hệ bất phương trình bậc nhất hai ẩn']],['Chương III. Hệ thức lượng trong tam giác',['Bài 5. Giá trị lượng giác của một góc từ 0° đến 180°','Bài 6. Hệ thức lượng trong tam giác']],['Chương IV. Vectơ',['Bài 7. Các khái niệm mở đầu','Bài 8. Tổng và hiệu của hai vectơ','Bài 9. Tích của một vectơ với một số','Bài 10. Vectơ trong mặt phẳng tọa độ','Bài 11. Tích vô hướng của hai vectơ']],['Chương V. Các số đặc trưng của mẫu số liệu không ghép nhóm',['Bài 12. Số gần đúng và sai số','Bài 13. Các số đặc trưng đo xu thế trung tâm','Bài 14. Các số đặc trưng đo độ phân tán']],['Chương VI. Hàm số, đồ thị và ứng dụng',['Bài 15. Hàm số','Bài 16. Hàm số bậc hai','Bài 17. Dấu của tam thức bậc hai','Bài 18. Phương trình quy về phương trình bậc hai']],['Chương VII. Phương pháp tọa độ trong mặt phẳng',['Bài 19. Phương trình đường thẳng','Bài 20. Vị trí tương đối giữa hai đường thẳng. Góc và khoảng cách','Bài 21. Đường tròn trong mặt phẳng tọa độ','Bài 22. Ba đường conic']],['Chương VIII. Đại số tổ hợp',['Bài 23. Quy tắc đếm','Bài 24. Hoán vị, chỉnh hợp và tổ hợp','Bài 25. Nhị thức Newton']],['Chương IX. Tính xác suất theo định nghĩa cổ điển',['Bài 26. Biến cố và định nghĩa cổ điển của xác suất','Bài 27. Thực hành tính xác suất theo định nghĩa cổ điển']]],
+11:[['Chương I. Hàm số lượng giác và phương trình lượng giác',['Bài 1. Giá trị lượng giác của góc lượng giác','Bài 2. Công thức lượng giác','Bài 3. Hàm số lượng giác','Bài 4. Phương trình lượng giác cơ bản']],['Chương II. Dãy số. Cấp số cộng và cấp số nhân',['Bài 5. Dãy số','Bài 6. Cấp số cộng','Bài 7. Cấp số nhân']],['Chương III. Các số đặc trưng đo xu thế trung tâm của mẫu số liệu ghép nhóm',['Bài 8. Mẫu số liệu ghép nhóm','Bài 9. Các số đặc trưng đo xu thế trung tâm']],['Chương IV. Quan hệ song song trong không gian',['Bài 10. Đường thẳng và mặt phẳng trong không gian','Bài 11. Hai đường thẳng song song','Bài 12. Đường thẳng song song với mặt phẳng','Bài 13. Hai mặt phẳng song song','Bài 14. Phép chiếu song song']],['Chương V. Giới hạn. Hàm số liên tục',['Bài 15. Giới hạn của dãy số','Bài 16. Giới hạn của hàm số','Bài 17. Hàm số liên tục']],['Chương VI. Hàm số mũ và hàm số lôgarit',['Bài 18. Lũy thừa với số mũ thực','Bài 19. Lôgarit','Bài 20. Hàm số mũ và hàm số lôgarit','Bài 21. Phương trình, bất phương trình mũ và lôgarit']],['Chương VII. Quan hệ vuông góc trong không gian',['Bài 22. Hai đường thẳng vuông góc','Bài 23. Đường thẳng vuông góc với mặt phẳng','Bài 24. Phép chiếu vuông góc','Bài 25. Hai mặt phẳng vuông góc','Bài 26. Khoảng cách','Bài 27. Thể tích']],['Chương VIII. Các quy tắc tính xác suất',['Bài 28. Biến cố hợp, biến cố giao, biến cố độc lập','Bài 29. Công thức cộng xác suất','Bài 30. Công thức nhân xác suất cho hai biến cố độc lập']],['Chương IX. Đạo hàm',['Bài 31. Định nghĩa và ý nghĩa của đạo hàm','Bài 32. Các quy tắc tính đạo hàm','Bài 33. Đạo hàm cấp hai']]],
+12:[['Chương I. Ứng dụng đạo hàm để khảo sát và vẽ đồ thị hàm số',['Bài 1. Tính đơn điệu và cực trị của hàm số','Bài 2. Giá trị lớn nhất và giá trị nhỏ nhất của hàm số','Bài 3. Đường tiệm cận của đồ thị hàm số','Bài 4. Khảo sát sự biến thiên và vẽ đồ thị của hàm số','Bài 5. Ứng dụng đạo hàm để giải quyết một số vấn đề liên quan đến thực tiễn']],['Chương II. Vectơ và hệ trục tọa độ trong không gian',['Bài 6. Vectơ trong không gian','Bài 7. Hệ trục tọa độ trong không gian','Bài 8. Biểu thức tọa độ của các phép toán vectơ']],['Chương III. Các số đặc trưng đo độ phân tán của mẫu số liệu ghép nhóm',['Bài 9. Khoảng biến thiên và khoảng tứ phân vị','Bài 10. Phương sai và độ lệch chuẩn']],['Chương IV. Nguyên hàm và tích phân',['Bài 11. Nguyên hàm','Bài 12. Tích phân','Bài 13. Ứng dụng hình học của tích phân']],['Chương V. Phương pháp tọa độ trong không gian',['Bài 14. Phương trình mặt phẳng','Bài 15. Phương trình đường thẳng trong không gian','Bài 16. Công thức tính góc trong không gian','Bài 17. Phương trình mặt cầu']],['Chương VI. Xác suất có điều kiện',['Bài 18. Xác suất có điều kiện','Bài 19. Công thức xác suất toàn phần và công thức Bayes']]]
+};
+const PG=Object.assign({l:'10',c:0,b:0},(()=>{try{return JSON.parse(lsGet('ttn.pg','{}'))}catch(e){return {}}})());
+function pgFill(){
+  const L=$('#pgL').value,chs=MLK[L];PG.c=Math.min(+PG.c||0,chs.length-1);
+  $('#pgC').innerHTML=chs.map((c,i)=>`<option value="${i}"${i===PG.c?' selected':''}>${esc(c[0])}</option>`).join('');
+  const bs=chs[PG.c][1];PG.b=Math.min(+PG.b||0,bs.length);
+  $('#pgB').innerHTML='<option value="0">Cả chương (chia đều các bài)</option>'+bs.map((b,i)=>`<option value="${i+1}"${i+1===PG.b?' selected':''}>${esc(b)}</option>`).join('');
+}
+function pgSel(){const L=$('#pgL').value,ch=MLK[L][+$('#pgC').value||0],bi=+$('#pgB').value||0;return{lop:L,chuong:ch[0],bai:bi?ch[1][bi-1]:'',bais:ch[1]}}
+function pgCounts(){const m={};$$('#pgDlg input[data-pm]').forEach(i=>{const v=Math.max(0,Math.min(50,parseInt(i.value)||0));m[i.dataset.pm+'-'+i.dataset.pl]=v});return m}
+const LVT=['','Nhận biết','Thông hiểu','Vận dụng thấp','Vận dụng cao'];
+function pgBuild(){
+  const sl=pgSel(),cn=pgCounts(),topic=$('#pgT').value.trim(),extra=$('#pgX').value.trim(),aud=$('#pgA').value;
+  const src=$$('#pgDlg input[data-ps]:checked').map(c=>'- '+c.dataset.ps);
+  const sum=k=>[1,2,3,4].reduce((a,l)=>a+(cn[k+'-'+l]||0),0),n1=sum(1),n2=sum(2),tot=n1+n2;
+  $('#pgTot').textContent='Tổng: '+tot+' câu ('+n1+' một đáp án, '+n2+' nhiều đáp án)';
+  const P=[];
+  P.push('Hãy đóng vai một giáo viên Toán THPT xuất sắc với 20 năm kinh nghiệm thực chiến trong giảng dạy, biên soạn đề và luyện thi tốt nghiệp THPT (theo định hướng đề thi 2025 của Bộ GD&ĐT). Bạn am hiểu sâu Chương trình GDPT 2018 và bộ sách Toán "Kết nối tri thức với cuộc sống".');
+  P.push('Nhiệm vụ của bạn là biên soạn NGÂN HÀNG CÂU HỎI TRẮC NGHIỆM chất lượng cao cho:');
+  P.push('- Lớp: '+sl.lop+'\n- Chương: '+sl.chuong+'\n- Bài: '+(sl.bai||'Toàn bộ các bài của chương, chia đều số câu cho các bài sau:\n  '+sl.bais.join('\n  '))+(topic?'\n- Chủ đề trọng tâm: '+topic:''));
+  P.push('\n### 1. ĐỐI TƯỢNG HỌC SINH MỤC TIÊU\n'+aud);
+  P.push('\n### 2. NGUỒN TÀI LIỆU CẦN TỔNG HỢP\nHãy tổng hợp, chọn lọc dạng toán và mức độ từ các nguồn sau:\n'+(src.join('\n')||'- Sách giáo khoa Toán Kết nối tri thức với cuộc sống')+'\nQuy tắc: bám sát nội dung, thuật ngữ, ký hiệu và thứ tự kiến thức đúng mục lục bài nêu trên; học từ cách ra đề của các nguồn nhưng TỰ BIÊN SOẠN câu mới, không sao chép nguyên văn, không bịa câu "trích từ đề thi X"; không ra câu ngoài phạm vi bài học.');
+  const rows=[];for(const [k,nm] of [[1,'trắc nghiệm 1 đáp án đúng'],[2,'trắc nghiệm nhiều đáp án đúng (từ 2 đáp án trở lên)']]){const p=[1,2,3,4].filter(l=>cn[k+'-'+l]).map(l=>cn[k+'-'+l]+' câu mức '+LVT[l]+' (Cấp độ '+l+')');if(p.length)rows.push('- '+sum(k)+' câu '+nm+': '+p.join('; ')+'.')}
+  P.push('\n### 3. SỐ LƯỢNG VÀ CẤU TRÚC\nHãy sinh ra CHÍNH XÁC '+tot+' câu hỏi, gồm:\n'+(rows.join('\n')||'- (chưa chọn số câu)')+'\nSắp xếp từ dễ đến khó, trộn đều vị trí đáp án đúng giữa A, B, C, D.');
+  P.push('\n### 4. YÊU CẦU CHẤT LƯỢNG\n- Mỗi câu chỉ có một đáp án đúng rõ ràng (hoặc đúng các đáp án đã ghi với câu nhiều đáp án); các phương án nhiễu xây dựng từ lỗi sai thường gặp của học sinh (sai dấu, nhầm công thức, thiếu điều kiện, nhầm khái niệm).\n- Đề bài rõ ràng, đủ dữ kiện, số liệu đẹp, không mơ hồ; câu vận dụng gắn tình huống thực tế hợp lý.\n- Lời giải trình bày từng bước ngắn gọn; ngăn cách các ý bằng ký hiệu " // " để có thể xuống dòng khi trình chiếu.\n- Tự kiểm tra lại toàn bộ phép tính và đáp án trước khi xuất; loại bỏ câu có đáp án gây tranh cãi; không trùng lặp ý giữa các câu.\n- Mức độ: 1 Nhận biết, 2 Thông hiểu, 3 Vận dụng thấp, 4 Vận dụng cao, phân bổ đúng số lượng nêu ở mục 3.'+(extra?'\n\n### YÊU CẦU ĐẶC BIỆT TỪ GIÁO VIÊN\n'+extra:''));
+  P.push('\n### 5. CẤU TRÚC ĐẦU RA BẮT BUỘC (JSON NGÂN HÀNG CÂU HỎI TRẮC NGHIỆM)');
+  P.push('Thay vì trình bày văn bản thông thường, hãy tạo hệ thống câu hỏi trắc nghiệm và BẮT BUỘC xuất ra duy nhất một môi trường code JSON theo đúng quy định định dạng sau:\n');
+  P.push('**Hướng dẫn:**\n- Cấp độ Loại câu hỏi:\n  1 Nhận biết\n  2 Thông hiểu\n  3 Vận dụng thấp\n  4 Vận dụng cao\n- Nhập câu hỏi có ký tự đặc biệt: Câu hỏi/phương án trả lời có chứa các công thức toán học: phải nhập mã latex, các công thức chứa mã latex được đặt giữa 2 dấu `$$` ở đầu và cuối công thức.\n- Trong JSON, mỗi dấu gạch chéo ngược của LaTeX phải viết thành hai dấu (ví dụ \\\\dfrac{a}{b}, \\\\sqrt{x}) để JSON hợp lệ.\n- Cột Đáp án: câu một đáp án ghi số 1 đến 4 (tương ứng A đến D); câu nhiều đáp án ghi các số cách nhau bởi ký tự @ (ví dụ 1@3).\n- Lưu ý: KHÔNG ĐƯỢC PHÉP thay đổi hai dòng tiêu đề đầu tiên (tức là Object đầu tiên với các key STT: "idx", Câu hỏi: "title"...) của định dạng mẫu.\n');
+  P.push('**Đầu ra bắt buộc môi trường code json sau:**');
+  P.push(PG_TPL);
+  return P.join('\n');
+}
+const PG_TPL="```json\n[\n  {\n    \"STT\": \"idx\",\n    \"Câu hỏi\": \"title\",\n    \"Đáp án (Câu hỏi nhiều đáp án: các đáp án cách nhau bởi ký tự @)\": \"answer\",\n    \"Lời giải\": \"answerText\",\n    \"Đáp án A\": 1,\n    \"Đáp án B\": 2,\n    \"Đáp án C\": 3,\n    \"Đáp án D\": 4,\n    \"Cấp độ\": \"level\",\n    \"__EMPTY\": \"\"\n  },\n  {\n    \"STT\": 1,\n    \"Câu hỏi\": \"2+2=?\",\n    \"Đáp án (Câu hỏi nhiều đáp án: các đáp án cách nhau bởi ký tự @)\": 1,\n    \"Lời giải\": \"2+2=4\",\n    \"Đáp án A\": \"$$4{{R}^{2}}$$\",\n    \"Đáp án B\": 2,\n    \"Đáp án C\": 3,\n    \"Đáp án D\": 5,\n    \"Cấp độ\": 1,\n    \"__EMPTY\": \"\"\n  },\n  {\n    \"STT\": 2,\n    \"Câu hỏi\": \"1 + 1 = ?\",\n    \"Đáp án (Câu hỏi nhiều đáp án: các đáp án cách nhau bởi ký tự @)\": \"1@2\",\n    \"Lời giải\": \"2, Hai\",\n    \"Đáp án A\": 2,\n    \"Đáp án B\": \"Hai\",\n    \"Đáp án C\": 3,\n    \"Đáp án D\": 4,\n    \"Cấp độ\": 1,\n    \"__EMPTY\": \"\"\n  }\n]\n```";
+function pgRefresh(){PG.l=$('#pgL').value;PG.c=+$('#pgC').value||0;PG.b=+$('#pgB').value||0;lsSet('ttn.pg',JSON.stringify({...PG,n:pgCounts()}));$('#pgOut').value=pgBuild()}
+function openPg(){
+  $('#pgL').value=PG.l||'10';pgFill();
+  const n=PG.n||{1:0};try{const sv=JSON.parse(lsGet('ttn.pg','{}')).n;if(sv)$$('#pgDlg input[data-pm]').forEach(i=>{const v=sv[i.dataset.pm+'-'+i.dataset.pl];if(v!=null)i.value=v})}catch(e){}
+  if(![...$$('#pgDlg input[data-pm]')].some(i=>+i.value))$$('#pgDlg input[data-pm="1"]').forEach((i,k)=>i.value=[4,4,2,1][k]);
+  $('#pgMsg').textContent='';if(!$('#pgDlg').open)$('#pgDlg').showModal();pgRefresh();
+}
+function pgParse(text){
+  let t=String(text||'').trim().replace(/^```(?:json)?/i,'').replace(/```\s*$/,'').trim();
+  const a=t.indexOf('['),b=t.lastIndexOf(']');if(a<0||b<a)throw new Error('Không thấy mảng JSON [ ... ]');t=t.slice(a,b+1);
+  let arr;try{arr=JSON.parse(t)}catch(e){
+    const fixed=t.replace(/\\\\/g,'\u0001').replace(/\\"/g,'\u0002').replace(/\\/g,'\\\\').replace(/\u0001/g,'\\\\').replace(/\u0002/g,'\\"');
+    try{arr=JSON.parse(fixed)}catch(e2){throw new Error('JSON chưa hợp lệ: '+e.message)}}
+  if(!Array.isArray(arr))throw new Error('JSON phải là một mảng');
+  const rows=arr.filter(o=>o&&typeof o==='object'&&!(String(o.STT)==='idx'||String(o['Câu hỏi'])==='title'));
+  if(!rows.length)throw new Error('Không có câu hỏi nào sau dòng mẫu');
+  const keys=[...new Set(arr.flatMap(o=>o&&typeof o==='object'?Object.keys(o):[]))].filter(k=>k!=='__EMPTY');
+  const cv=v=>v==null?'':(typeof v==='string'?v.replace(/\$\$/g,'$'):v);
+  const sh=XLSX.utils.aoa_to_sheet([keys].concat(rows.map(o=>keys.map(k=>cv(o[k])))));
+  return parseSheet(sh).map(fixQ);
+}
+async function pgLoad(replace){
+  let qs;try{qs=pgParse($('#pgJ').value)}catch(e){$('#pgMsg').textContent='✘ '+(e.message||e);return}
+  const sl=pgSel();
+  qs.forEach(q=>{q.m=q.m||mkM();if(!q.m.lop)q.m.lop=sl.lop;if(!q.m.chuong)q.m.chuong=sl.chuong;if(!q.m.bai&&sl.bai)q.m.bai=sl.bai;tagQ(q)});
+  if(replace&&Q.length&&!await ask({title:'Thay bộ câu hỏi hiện tại?',msg:'Bộ '+Q.length+' câu đang có sẽ được thay bằng '+qs.length+' câu từ AI.',ok:'Thay thế',danger:true}))return;
+  Q=replace?qs:Q.concat(qs);S.i=replace?0:Math.max(0,Q.length-qs.length);saveDeck();render();
+  BK.lop=sl.lop;BK.chuong=sl.chuong;BK.bai=sl.bai;saveBk();
+  $('#pgDlg').close();$('#pgJ').value='';
+  const bad=qs.filter(q=>warnOf(q).length).length;toast('Đã nhập '+qs.length+' câu từ AI'+(bad?'. '+bad+' câu cần kiểm tra (đánh dấu !)':''),5000);
+  if(bkOk()&&await ask({title:'Lưu '+qs.length+' câu vào ngân hàng?',msg:'Nhãn: Lớp '+sl.lop+' · '+sl.chuong+(sl.bai?' · '+sl.bai:'')+'. Câu trùng nội dung sẽ tự bỏ qua.',ok:'Lưu vào ngân hàng'})){const r=await bkSave(qs,{lop:sl.lop,chuong:sl.chuong,bai:sl.bai},'AI '+new Date().toLocaleDateString('vi-VN'));toast(r.msg,6000)}
+}
+$('#btnPg').addEventListener('click',openPg);$('#bkPg').addEventListener('click',()=>{$('#bkDlg').close();openPg()});
+$('#pgClose').addEventListener('click',()=>$('#pgDlg').close());
+$('#pgL').addEventListener('change',()=>{PG.c=0;PG.b=0;pgFill();pgRefresh()});
+$('#pgC').addEventListener('change',()=>{PG.c=+$('#pgC').value;PG.b=0;pgFill();pgRefresh()});
+['#pgB','#pgA','#pgT','#pgX'].forEach(i=>$(i).addEventListener('input',pgRefresh));
+$('#pgDlg').addEventListener('input',e=>{if(e.target.matches('input[data-pm],input[data-ps]'))pgRefresh()});
+$('#pgDlg').addEventListener('change',e=>{if(e.target.matches('input[data-ps]'))pgRefresh()});
+$('#pgCopy').addEventListener('click',async()=>{pgRefresh();try{await navigator.clipboard.writeText($('#pgOut').value);toast('Đã sao chép prompt. Hãy dán vào ChatGPT, Claude hoặc Gemini.',3500)}catch(e){$('#pgOut').select();document.execCommand('copy');toast('Đã chọn prompt, nhấn Ctrl+C để sao chép')}});
+$('#pgDown').addEventListener('click',()=>{pgRefresh();const sl=pgSel(),a=document.createElement('a');a.href=URL.createObjectURL(new Blob([$('#pgOut').value],{type:'text/plain;charset=utf-8'}));a.download='prompt-lop'+sl.lop+'-'+norm(sl.chuong.split('.')[0]).replace(/\s+/g,'')+'.txt';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)});
+$('#pgAdd').addEventListener('click',()=>pgLoad(false));$('#pgRep').addEventListener('click',()=>pgLoad(true));
 
 /* ---------- cài đặt trình chiếu tự động ---------- */
 function openAuto(){
