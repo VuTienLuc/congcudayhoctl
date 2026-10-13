@@ -279,7 +279,7 @@ dialog .stack{gap:var(--space-3)}
 #pdfDlg .pf{display:grid;gap:4px;margin:6px 0}#pdfDlg .pf label{font-weight:600;font-size:14px}
 #pdfDlg input[type=text],#pdfDlg select{font:inherit;padding:8px 10px;border:1px solid var(--border,#c9ced6);border-radius:8px;background:var(--surface,#fff);color:inherit;width:100%}
 #pdfDlg .ck{display:flex;gap:8px;align-items:flex-start;font-size:14px;margin:4px 0}
-#pdfDlg .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#pdfDlg .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}#pdfDlg .three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}#pdfDlg .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}#pdfDlg{max-width:min(760px,96vw);max-height:94vh;overflow:auto}#pdfDlg summary{cursor:pointer;font-weight:600;font-size:14px;margin:6px 0}#pdfDlg input[type=number]{font:inherit;padding:8px 10px;border:1px solid var(--border,#c9ced6);border-radius:8px;background:var(--surface,#fff);color:inherit}@media(max-width:560px){#pdfDlg .two,#pdfDlg .three,#pdfDlg .grid2{grid-template-columns:1fr}}
 @media print{
   @page{size:A4;margin:7mm 8mm}
   html,body{background:#fff!important}
@@ -318,6 +318,24 @@ dialog .stack{gap:var(--space-3)}
   .ps-key h3{margin:0 0 2mm;font-size:1.1em}
   .ps-key .kl{display:flex;flex-wrap:wrap;gap:.6mm 4mm;margin-bottom:2mm;font-weight:700}
   .ps-key .sl{margin:0 0 1mm;break-inside:avoid}
+  .ps-end{text-align:center;font-weight:700;font-size:.9em;margin:1.6mm 0 0}
+  .ver.vbrk{break-before:page;page-break-before:always}
+  .ver{counter-reset:page 1}
+  /* mẫu Đề thi chuẩn */
+  .t-std{font-family:"Times New Roman",Times,serif}
+  .hd-std{margin-bottom:2mm}
+  .hd-std .hs-top{display:grid;grid-template-columns:1fr 1.5fr auto;gap:3mm;align-items:start;text-align:center;line-height:1.28}
+  .hd-std .hs-l{font-size:.92em}.hd-std .hs-c{font-size:.98em}
+  .hd-std .hs-r{border:.4mm solid #000;padding:.8mm 3.2mm;display:grid;gap:0;text-align:center;line-height:1.1}.hd-std .hs-r span{font-size:.8em}.hd-std .hs-r b{font-size:1.5em;letter-spacing:.06em}
+  .hd-std .hs-bot{display:flex;gap:4mm;margin-top:1.8mm;padding-top:1.4mm;border-top:.3mm solid #000}.hd-std .hs-bot span{white-space:nowrap}.hd-std .hs-bot .n{flex:2.4;overflow:hidden}
+  .t-std .pp{border-bottom:0;font-size:.95em;margin-top:.4mm}
+  .t-std .pq .st b{font-weight:700}
+  .ps-key2 h3{margin:0 0 2mm;font-size:1.1em}
+  .ps-key2 .kv{border:.25mm solid #000;padding:1.2mm 2mm;margin-bottom:2mm;break-inside:avoid;page-break-inside:avoid}
+  .ps-key2 .kv.kbrk{break-before:page;page-break-before:page}.ps-key2 .kv.kbrk:first-of-type{break-before:auto}
+  .ps-key2 h4{margin:0 0 .8mm;font-size:1em}
+  .ps-key2 .kl{display:flex;flex-wrap:wrap;gap:.5mm 3.5mm;margin-bottom:1mm;font-weight:700}.ps-key2 .kc{margin-right:1mm}
+  .ps-key2 .sl{margin:0 0 .8mm;break-inside:avoid}
   .wl{height:var(--lh,5.6mm);border-bottom:.25mm dotted #555;margin:0}
   .wls{margin-top:.4mm}
   /* mẫu Cổ điển */
@@ -399,18 +417,28 @@ dialog .stack{gap:var(--space-3)}
 
 <dialog id="dlg"><form method="dialog" class="stack"><h2 id="dlgT"></h2><p id="dlgM" class="lead"></p><div class="row" style="justify-content:flex-end"><button class="btn" value="no">Hủy</button><button class="btn primary" value="yes" id="dlgOk">OK</button></div></form></dialog>
 <dialog id="geoDlg"></dialog>
-<dialog id="pdfDlg"><form method="dialog" class="stack"><h2>Xuất đề thi PDF</h2>
-<p class="lead" style="margin:0">Tạo bản in tiết kiệm giấy từ các câu hỏi đang có. Trong hộp thoại in, chọn <b>Lưu dưới dạng PDF</b> (Save as PDF).</p>
-<div class="pf"><label for="pfLesson">Tên bài học</label><input type="text" id="pfLesson" placeholder="Ví dụ: Bài 7. Phương trình lượng giác cơ bản"></div>
-<div class="two"><div class="pf"><label for="pfTpl">Mẫu trình bày</label><select id="pfTpl"><option value="eco">Tiết kiệm giấy (đen trắng)</option><option value="classic">Cổ điển – khung viền trang trọng</option><option value="modern">Hiện đại – tiêu đề màu xanh</option><option value="sheet">Phiếu làm bài – ô riêng từng câu</option></select></div>
-<div class="pf"><label for="pfLines">Dòng kẻ làm bài dưới mỗi câu</label><select id="pfLines"><option value="0">Không có</option><option value="1">1 dòng</option><option value="2">2 dòng</option></select></div></div>
-<div class="two"><div class="pf"><label for="pfCols">Số cột</label><select id="pfCols"><option value="1">1 cột</option><option value="2" selected>2 cột (tiết kiệm)</option><option value="3">3 cột (siêu tiết kiệm)</option></select></div>
-<div class="pf"><label for="pfFs">Cỡ chữ</label><select id="pfFs"><option value="8.5">Rất nhỏ (8,5pt)</option><option value="9.5" selected>Nhỏ (9,5pt)</option><option value="10.5">Vừa (10,5pt)</option><option value="12">Lớn (12pt)</option></select></div></div>
-<label class="ck"><input type="checkbox" id="pfSheet" checked> <span>Có phiếu trả lời tô đáp án A B C D ở cuối đề</span></label>
-<label class="ck"><input type="checkbox" id="pfKey"> <span>Thêm trang đáp án cho giáo viên (trang riêng)</span></label>
-<label class="ck"><input type="checkbox" id="pfSol"> <span>Kèm lời giải trong trang đáp án</span></label>
+<dialog id="pdfDlg"><div class="stack" id="pdfBox"><h2>Xuất đề thi PDF · trộn nhiều mã đề</h2>
+<p class="lead" style="margin:0">Tạo đề in chuẩn, trộn thành nhiều mã đề và xuất đáp án Excel theo mẫu. Khi in, chọn <b>Lưu dưới dạng PDF</b> (Save as PDF).</p>
+<div class="two"><div class="pf"><label for="pfTpl">Mẫu trình bày</label><select id="pfTpl"><option value="std">Đề thi chuẩn (đầu đề, mã đề, chân trang)</option><option value="eco">Tiết kiệm giấy (đen trắng)</option><option value="classic">Cổ điển – khung viền trang trọng</option><option value="modern">Hiện đại – tiêu đề màu xanh</option><option value="sheet">Phiếu làm bài – ô riêng từng câu</option></select></div>
+<div class="pf"><label for="pfLesson">Tên bài học / tên đề</label><input type="text" id="pfLesson" placeholder="Ví dụ: Bài 7. Phương trình lượng giác cơ bản"></div></div>
+<details id="pfStd"><summary>Thông tin đầu đề (dùng cho mẫu Đề thi chuẩn)</summary>
+<div class="two"><div class="pf"><label for="pfSchool">Trường</label><input type="text" id="pfSchool"></div><div class="pf"><label for="pfDept">Tổ / Sở</label><input type="text" id="pfDept"></div></div>
+<div class="two"><div class="pf"><label for="pfKind">Loại bài</label><select id="pfKind"><option>Kiểm tra thường xuyên</option><option>Kiểm tra giữa kì I</option><option>Kiểm tra cuối kì I</option><option>Kiểm tra giữa kì II</option><option>Kiểm tra cuối kì II</option><option>Đề ôn tập</option><option>Đề luyện tập</option></select></div><div class="pf"><label for="pfSubject">Môn</label><input type="text" id="pfSubject"></div></div>
+<div class="three"><div class="pf"><label for="pfGrade">Khối</label><input type="text" id="pfGrade"></div><div class="pf"><label for="pfYear">Năm học</label><input type="text" id="pfYear"></div><div class="pf"><label for="pfTime">Thời gian (phút)</label><input type="text" id="pfTime"></div></div></details>
+<div class="two"><div class="pf"><label for="pfCols">Số cột</label><select id="pfCols"><option value="1">1 cột</option><option value="2">2 cột (tiết kiệm)</option><option value="3">3 cột (siêu tiết kiệm)</option></select></div>
+<div class="pf"><label for="pfFs">Cỡ chữ</label><select id="pfFs"><option value="8.5">Rất nhỏ (8,5pt)</option><option value="9.5">Nhỏ (9,5pt)</option><option value="10">Vừa (10pt)</option><option value="11">Lớn (11pt)</option><option value="12">Rất lớn (12pt)</option></select></div></div>
+<div class="two"><div class="pf"><label for="pfLines">Dòng kẻ làm bài dưới mỗi câu</label><select id="pfLines"><option value="0">Không có</option><option value="1">1 dòng</option><option value="2">2 dòng</option></select></div>
+<div class="pf"><label for="pfVer">Số mã đề</label><div class="row" style="gap:8px"><input type="number" id="pfVer" min="1" max="12" style="width:84px"><span class="muted">bắt đầu từ mã</span><input type="text" id="pfCode0" style="width:84px" maxlength="4"></div></div></div>
+<div class="grid2">
+<label class="ck"><input type="checkbox" id="pfShufQ"> <span>Trộn thứ tự câu trong từng phần</span></label>
+<label class="ck"><input type="checkbox" id="pfShufO"> <span>Trộn phương án A–D và ý a, b, c</span></label>
+<label class="ck"><input type="checkbox" id="pfKeepD"> <span>Giữ nguyên vị trí ý d (câu đúng-sai)</span></label>
+<label class="ck"><input type="checkbox" id="pfKeepFirst"> <span>Mã đề đầu giữ thứ tự gốc</span></label>
+<label class="ck"><input type="checkbox" id="pfFoot"> <span>Chân trang: mã đề và số trang</span></label>
+<label class="ck"><input type="checkbox" id="pfSheet"> <span>Phiếu tô đáp án ở cuối mỗi đề</span></label>
+<label class="ck"><input type="checkbox" id="pfSol"> <span>Kèm lời giải trong file đáp án PDF</span></label></div>
 <p class="muted" id="pfInfo" style="margin:4px 0;font-size:13px"></p>
-<div class="row" style="justify-content:flex-end"><button class="btn" value="no">Hủy</button><button class="btn primary" value="ok" id="pfGo">In / Lưu PDF</button></div></form></dialog>
+<div class="row" style="justify-content:flex-end;flex-wrap:wrap"><button class="btn" type="button" id="pfCancel">Đóng</button><button class="btn" type="button" id="pfShuf">🔀 Trộn lại</button><button class="btn" type="button" id="pfXlsx">Tải Excel đáp án</button><button class="btn" type="button" id="pfKeyPdf">In đáp án (PDF)</button><button class="btn" type="button" id="pfExam">In đề (PDF)</button><button class="btn primary" type="button" id="pfAll">📦 Xuất trọn bộ</button></div></div></dialog>
 <div id="printSheet" aria-hidden="true"></div>
 <div id="toast" role="status" aria-live="polite"></div>
 
@@ -1205,30 +1233,58 @@ $('#fXlsx').addEventListener('change',e=>{const f=e.target.files[0];e.target.val
 $('#btnExport').addEventListener('click',exportXlsx);
 $('#btnPlay').addEventListener('click',()=>{if(!Q.length)return toast('Hãy tải file Excel câu hỏi trước.');play()});
 
-/* ---------- xuất đề PDF ---------- */
-const TPL={eco:{lines:0,cols:2},classic:{lines:1,cols:2},modern:{lines:1,cols:2},sheet:{lines:2,cols:1}};
-const PDF=Object.assign({lesson:'',tpl:'eco',lines:0,cols:2,fs:9.5,sheet:true,key:false,sol:false},(()=>{try{return JSON.parse(lsGet('ttn.pdf','{}'))}catch(e){return {}}})());
-function buildSheet(o){
-  const all=Q.filter(q=>String(q.title).trim());
-  const parts=[1,2,3].map(t=>all.filter(q=>qType(q)===t));
-  const PT={1:'PHẦN I. Trắc nghiệm nhiều phương án lựa chọn – mỗi câu chỉ chọn một phương án.',2:'PHẦN II. Trắc nghiệm đúng – sai – ở mỗi ý a), b), c), d) chọn Đúng hoặc Sai.',3:'PHẦN III. Trắc nghiệm trả lời ngắn – ghi đáp số vào ô.'};
-  const fig=q=>q.svg?`<div class="fg">${q.svg}</div>`:(q.img?`<div class="fg"><img src="${esc(q.img)}" alt=""></div>`:'');
+/* ---------- xuất đề PDF, trộn nhiều mã đề, đáp án Excel ---------- */
+const TPL={std:{lines:0,cols:2},eco:{lines:0,cols:2},classic:{lines:1,cols:2},modern:{lines:1,cols:2},sheet:{lines:2,cols:1}};
+const PDF=Object.assign({lesson:'',tpl:'std',lines:0,cols:2,fs:10,sheet:false,key:false,sol:false,school:'TRƯỜNG THPT NGUYỄN HỮU CẢNH',dept:'TỔ TOÁN',kind:'Kiểm tra thường xuyên',subject:'Toán',grade:'10',year:'2026 – 2027',time:'45',ver:1,code0:'001',shufQ:true,shufO:true,keepD:true,keepFirst:true,foot:true},(()=>{try{return JSON.parse(lsGet('ttn.pdf','{}'))}catch(e){return {}}})());
+const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const nonEmp=q=>[0,1,2,3].filter(i=>String(q.opts[i]).trim()!=='');
+function mkItem(q,perm){
+  const t=qType(q),it={q,type:t,title:q.title,sol:q.sol,fig:q.svg?{svg:q.svg}:(q.img?{img:q.img}:null)};
+  if(t===1){const ix=perm||nonEmp(q);it.opts=ix.map(i=>q.opts[i]);it.ans=q.ans>=0?ix.indexOf(q.ans):-1}
+  else if(t===2){const ix=perm||nonEmp(q);it.opts=ix.map(i=>q.opts[i]);it.tf=ix.map(i=>q.tf[i])}
+  else it.short=String(q.short||'').trim();
+  return it;
+}
+function makeSet(o){
+  const base=[1,2,3].map(t=>Q.filter(q=>String(q.title).trim()&&qType(q)===t));
+  const n=Math.max(1,Math.min(12,parseInt(o.ver,10)||1)),c0=parseInt(o.code0,10),w=Math.max(3,String(o.code0||'').length),out=[];
+  for(let v=0;v<n;v++){
+    const raw=v===0&&o.keepFirst,code=isFinite(c0)?String(c0+v).padStart(w,'0'):String(v+1).padStart(3,'0');
+    const parts=base.map(p=>{
+      const qs=(o.shufQ&&!raw)?shuf(p):p.slice();
+      return qs.map(q=>{let perm=null;const t=qType(q);
+        if(!raw&&o.shufO&&t===1)perm=shuf(nonEmp(q));
+        else if(!raw&&o.shufO&&t===2){const ix=nonEmp(q);perm=(o.keepD&&ix.length===4)?shuf(ix.slice(0,3)).concat(ix[3]):shuf(ix)}
+        return mkItem(q,perm)});
+    });
+    out.push({code,parts});
+  }
+  return out;
+}
+const itAns=it=>it.type===1?(it.ans>=0?'ABCD'[it.ans]:'?'):it.type===2?it.tf.map(v=>v===true?'Đ':v===false?'S':'?').join(''):(it.short||'?');
+const itCell=it=>it.type===1?(it.ans>=0?'ABCD'[it.ans]:''):it.type===2?(it.tf.some(v=>v!==true&&v!==false)?'':it.tf.map(v=>v?'Đ':'S').join('')):it.short.replace(',','.');
+const PT=(i,n)=>[`PHẦN I. Câu trắc nghiệm nhiều phương án lựa chọn. Thí sinh trả lời từ câu 1 đến câu ${n}. Mỗi câu hỏi thí sinh chỉ chọn một phương án.`,`PHẦN II. Câu trắc nghiệm đúng sai. Thí sinh trả lời từ câu 1 đến câu ${n}. Trong mỗi ý a), b), c), d) ở mỗi câu, thí sinh chọn đúng hoặc sai.`,`PHẦN III. Câu trắc nghiệm trả lời ngắn. Thí sinh trả lời từ câu 1 đến câu ${n}.`][i];
+function examHtml(ver,o,first,multi){
+  const parts=ver.parts,all=parts.reduce((s,p)=>s+p.length,0);
+  const fig=it=>it.fig?(it.fig.svg?`<div class="fg">${it.fig.svg}</div>`:`<div class="fg"><img src="${esc(it.fig.img)}" alt=""></div>`):'';
   const wl=o.lines>0?`<div class="wls">${'<div class="wl"></div>'.repeat(o.lines)}</div>`:'';
-  const one=(q,n)=>{
-    const t=qType(q),st=`<div class="st"><b>Câu ${n}.</b> ${rm(q.title)}</div>${fig(q)}`;
-    if(t===2)return `<div class="pq">${st}<div class="ts">${[0,1,2,3].filter(i=>String(q.opts[i]).trim()!=='').map(i=>`<div class="tr"><span class="tl"><b>${'abcd'[i]})</b> ${rm(q.opts[i])}</span><span class="tbx">Đ<i class="bx"></i> S<i class="bx"></i></span></div>`).join('')}</div>${wl}</div>`;
-    if(t===3)return `<div class="pq">${st}<div class="sa">Đáp số: <span class="sbox"></span></div>${wl}</div>`;
-    const ops=q.opts.map((x,i)=>({t:x,i})).filter(x=>String(x.t).trim()!=='');
-    const mx=Math.max(0,...ops.map(x=>plain(x.t).length));
-    const cl=o.cols>=3?(mx<=9?'c4':mx<=22?'c2':'c1'):(mx<=13?'c4':mx<=34?'c2':'c1');
-    return `<div class="pq">${st}<div class="po ${cl}">${ops.map(x=>`<div><b>${'ABCD'[x.i]}.</b><span>${rm(x.t)}</span></div>`).join('')}</div>${wl}</div>`;
+  const one=(it,n)=>{
+    const st=`<div class="st"><b>Câu ${n}.</b> ${rm(it.title)}</div>${fig(it)}`;
+    if(it.type===2)return `<div class="pq">${st}<div class="ts">${it.opts.map((t,i)=>`<div class="tr"><span class="tl"><b>${'abcd'[i]})</b> ${rm(t)}</span><span class="tbx">Đ<i class="bx"></i> S<i class="bx"></i></span></div>`).join('')}</div>${wl}</div>`;
+    if(it.type===3)return `<div class="pq">${st}<div class="sa">Đáp số: <span class="sbox"></span></div>${wl}</div>`;
+    const mx=Math.max(0,...it.opts.map(t=>plain(t).length)),cl=o.cols>=3?(mx<=9?'c4':mx<=22?'c2':'c1'):(mx<=13?'c4':mx<=34?'c2':'c1');
+    return `<div class="pq">${st}<div class="po ${cl}">${it.opts.map((t,i)=>`<div><b>${'ABCD'[i]}.</b><span>${rm(t)}</span></div>`).join('')}</div>${wl}</div>`;
   };
   const cnt=parts.map((p,i)=>p.length?p.length+' '+['TN','ĐS','TLN'][i]:'').filter(Boolean).join(' · ');
-  let h=`<div class="ps-head"><div class="l1"><span>${esc(o.lesson||'ĐỀ LUYỆN TẬP')}</span><span>${all.length} câu${cnt?' ('+cnt+')':''}</span></div><div class="l2"><span class="n">Họ và tên: ................................................</span><span class="c">Lớp: ..............</span><span class="d">Điểm: ........</span></div></div>`;
-  h+=`<div class="ps-cols">${parts.map((p,i)=>p.length?`<div class="pp">${PT[i+1]}</div>`+p.map((q,k)=>one(q,k+1)).join(''):'').join('')}</div>`;
+  let head;
+  if(o.tpl==='std'){
+    const l1=(o.kind||'Kiểm tra').toUpperCase()+(o.subject?' – MÔN '+String(o.subject).toUpperCase():'')+(o.grade?' '+esc(o.grade):'');
+    head=`<div class="hd-std"><div class="hs-top"><div class="hs-l">${o.school?`<div>${esc(o.school)}</div>`:''}${o.dept?`<div><b>${esc(o.dept)}</b></div>`:''}</div><div class="hs-c"><div><b>${esc(l1)}</b></div>${o.lesson?`<div><b>${esc(o.lesson)}</b></div>`:''}${o.year?`<div>Năm học: ${esc(o.year)}</div>`:''}${o.time?`<div><i>Thời gian làm bài: ${esc(o.time)} phút, không kể thời gian phát đề</i></div>`:''}</div><div class="hs-r"><span>Mã đề</span><b>${esc(ver.code)}</b></div></div><div class="hs-bot"><span class="n">Họ và tên thí sinh: ...........................................................</span><span>Lớp: ................</span><span>Số báo danh: ..............</span></div></div>`;
+  }else head=`<div class="ps-head"><div class="l1"><span>${esc(o.lesson||'ĐỀ LUYỆN TẬP')}</span><span>${all} câu${cnt?' ('+cnt+')':''} · Mã đề ${esc(ver.code)}</span></div><div class="l2"><span class="n">Họ và tên: ................................................</span><span class="c">Lớp: ..............</span><span class="d">Điểm: ........</span></div></div>`;
+  let h=`<section class="ver${first?'':' vbrk'}">`+head;
+  h+=`<div class="ps-cols">${parts.map((p,i)=>p.length?`<div class="pp">${PT(i,p.length)}</div>`+p.map((it,k)=>one(it,k+1)).join(''):'').join('')}</div><div class="ps-end">––––––––– HẾT –––––––––</div>`;
   if(o.sheet){
-    const bubble=ls=>ls.map(l=>`<span class="pbb">${l}</span>`).join('');
-    const blocks=[];
+    const bubble=ls=>ls.map(l=>`<span class="pbb">${l}</span>`).join(''),blocks=[];
     parts.forEach((p,pi)=>{if(!p.length)return;const tbs=[],per=pi===1?5:10;
       for(let a=0;a<p.length;a+=per){let r='';for(let i=a;i<Math.min(a+per,p.length);i++){
         if(pi===0)r+=`<tr><td class="q">${i+1}</td>${'ABCD'.split('').map(l=>`<td><span class="pbb">${l}</span></td>`).join('')}</tr>`;
@@ -1236,39 +1292,89 @@ function buildSheet(o){
         else r+=`<tr><td class="q">${i+1}</td><td><span class="sbox"></span></td></tr>`}
         tbs.push(`<table>${r}</table>`)}
       blocks.push(`<div class="ps-pt"><span class="cap">Phần ${ROMAN[pi+1]}</span><div class="ps-grid">${tbs.join('')}</div></div>`)});
-    h+=`<div class="ps-ans"><h4>PHIẾU TRẢ LỜI (tô kín đáp án đúng; Phần III ghi đáp số vào ô)</h4>${blocks.join('')}</div>`;
+    h+=`<div class="ps-ans"><h4>PHIẾU TRẢ LỜI – Mã đề ${esc(ver.code)} (tô kín đáp án đúng; Phần III ghi đáp số vào ô)</h4>${blocks.join('')}</div>`;
   }
-  if(o.key){
-    h+=`<div class="ps-key"><h3>Đáp án${o.lesson?' – '+esc(o.lesson):''}</h3>`;
-    parts.forEach((p,pi)=>{if(p.length)h+=`<div class="kl"><span class="kc">Phần ${ROMAN[pi+1]}:</span>${p.map((q,i)=>`<span>${i+1}.${esc(ansText(q))}</span>`).join('')}</div>`});
-    if(o.sol)parts.forEach((p,pi)=>p.forEach((q,i)=>{if(q.sol&&String(q.sol).trim())h+=`<div class="sl"><b>Phần ${ROMAN[pi+1]} – Câu ${i+1}</b> (${esc(ansText(q))}). ${rm(q.sol)}</div>`}));
+  return h+'</section>';
+}
+function keyHtml(set,o){
+  let h=`<div class="ps-key2"><h3>Đáp án${o.lesson?' – '+esc(o.lesson):''}</h3>`;
+  set.forEach(v=>{
+    h+=`<div class="kv${o.sol?' kbrk':''}"><h4>Mã đề ${esc(v.code)}</h4>`;
+    v.parts.forEach((p,pi)=>{if(p.length)h+=`<div class="kl"><span class="kc">Phần ${ROMAN[pi+1]}:</span>${p.map((it,i)=>`<span>${i+1}.${esc(itAns(it))}</span>`).join('')}</div>`});
+    if(o.sol)v.parts.forEach((p,pi)=>p.forEach((it,i)=>{if(it.sol&&String(it.sol).trim())h+=`<div class="sl"><b>Phần ${ROMAN[pi+1]} – Câu ${i+1}</b> (${esc(itAns(it))}). ${rm(it.sol)}</div>`}));
     h+='</div>';
-  }
-  return h;
+  });
+  return h+'</div>';
+}
+function keyAoa(set){
+  const aoa=[['Câu',...set.map(v=>v.code)]];let n=0;
+  [0,1,2].forEach(pi=>{const len=set[0].parts[pi].length;for(let k=0;k<len;k++){n++;aoa.push([n,...set.map(v=>itCell(v.parts[pi][k]))])}});
+  return aoa;
+}
+function downloadKey(set){
+  const ws=XLSX.utils.aoa_to_sheet(keyAoa(set));ws['!cols']=[{wch:8},...set.map(()=>({wch:12}))];
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Đáp án');
+  const d=new Date();XLSX.writeFile(wb,'dap-an-'+set.map(v=>v.code).join('-').slice(0,40)+'-'+d.getFullYear()+p2(d.getMonth()+1)+p2(d.getDate())+'.xlsx');
+}
+let SET=null,SETK='';
+const readCfg=()=>{
+  const o=PDF,g=id=>$('#'+id);
+  o.lesson=g('pfLesson').value.trim();o.tpl=g('pfTpl').value;o.lines=+g('pfLines').value;o.cols=+g('pfCols').value;o.fs=+g('pfFs').value;
+  o.school=g('pfSchool').value.trim();o.dept=g('pfDept').value.trim();o.kind=g('pfKind').value;o.subject=g('pfSubject').value.trim();o.grade=g('pfGrade').value.trim();o.year=g('pfYear').value.trim();o.time=g('pfTime').value.trim();
+  o.ver=Math.max(1,Math.min(12,parseInt(g('pfVer').value,10)||1));o.code0=g('pfCode0').value.trim()||'001';
+  ['shufQ','shufO','keepD','keepFirst','foot','sheet','sol'].forEach(k=>o[k]=g('pf'+k[0].toUpperCase()+k.slice(1)).checked);
+  lsSet('ttn.pdf',JSON.stringify(o));return o;
+};
+function getSet(force){
+  const o=readCfg(),k=JSON.stringify([o.ver,o.code0,o.shufQ,o.shufO,o.keepD,o.keepFirst,Q.length,JSON.stringify(Q).length]);
+  if(force||!SET||k!==SETK){SET=makeSet(o);SETK=k}
+  return SET;
+}
+function pfInfo(){
+  const set=getSet(false),o=PDF,cn=set[0].parts.map(p=>p.length),miss=Q.filter(q=>warnOf(q).length).length;
+  const long=Q.filter(q=>qType(q)===3&&String(q.short||'').trim().length>4).length;
+  $('#pfInfo').textContent='Mã đề: '+set.map(v=>v.code).join(', ')+' · '+cn[0]+' trắc nghiệm (Phần I), '+cn[1]+' đúng-sai (Phần II), '+cn[2]+' trả lời ngắn (Phần III).'+(miss?' '+miss+' câu còn thiếu đáp án (file đáp án để trống ô đó).':'')+(long?' '+long+' đáp số dài hơn 4 ký tự (mẫu Excel chỉ nhận tối đa 4 ký tự).':'');
 }
 function openPdf(){
   if(!Q.length)return toast('Chưa có câu hỏi để xuất đề.');
-  const d=$('#pdfDlg');$('#pfLesson').value=PDF.lesson;$('#pfTpl').value=PDF.tpl;$('#pfLines').value=PDF.lines;$('#pfCols').value=PDF.cols;$('#pfFs').value=PDF.fs;
-  $('#pfSheet').checked=PDF.sheet;$('#pfKey').checked=PDF.key;$('#pfSol').checked=PDF.sol;
-  const miss=Q.filter(q=>warnOf(q).length).length,cn=[1,2,3].map(t=>Q.filter(q=>qType(q)===t).length);
-  $('#pfInfo').textContent=Q.length+' câu sẽ vào đề: '+cn[0]+' trắc nghiệm (Phần I), '+cn[1]+' đúng-sai (Phần II), '+cn[2]+' trả lời ngắn (Phần III).'+(miss?' '+miss+' câu còn thiếu đáp án (trang đáp án sẽ ghi dấu ?).':'');
-  d.showModal();
+  const g=id=>$('#'+id),o=PDF;
+  g('pfLesson').value=o.lesson;g('pfTpl').value=o.tpl;g('pfLines').value=o.lines;g('pfCols').value=o.cols;g('pfFs').value=String(o.fs);
+  g('pfSchool').value=o.school;g('pfDept').value=o.dept;g('pfKind').value=o.kind;g('pfSubject').value=o.subject;g('pfGrade').value=o.grade;g('pfYear').value=o.year;g('pfTime').value=o.time;
+  g('pfVer').value=o.ver;g('pfCode0').value=o.code0;
+  ['shufQ','shufO','keepD','keepFirst','foot','sheet','sol'].forEach(k=>g('pf'+k[0].toUpperCase()+k.slice(1)).checked=!!o[k]);
+  g('pfStd').open=o.tpl==='std';SET=null;pfInfo();$('#pdfDlg').showModal();
 }
-function doPrint(){
-  PDF.lesson=$('#pfLesson').value.trim();PDF.tpl=$('#pfTpl').value;PDF.lines=+$('#pfLines').value;PDF.cols=+$('#pfCols').value;PDF.fs=+$('#pfFs').value;
-  PDF.sheet=$('#pfSheet').checked;PDF.key=$('#pfKey').checked;PDF.sol=$('#pfSol').checked;lsSet('ttn.pdf',JSON.stringify(PDF));
-  const ps=$('#printSheet');ps.innerHTML=buildSheet(PDF);ps.className='t-'+PDF.tpl;ps.style.setProperty('--pc',PDF.cols);ps.style.setProperty('--pfs',PDF.fs+'pt');
-  const t0=document.title;if(PDF.lesson)document.title=PDF.lesson;
-  const done=()=>{ps.innerHTML='';document.title=t0;window.removeEventListener('afterprint',done)};
-  window.addEventListener('afterprint',done);
-  setTimeout(()=>{try{window.print()}catch(e){done();toast('Không mở được hộp thoại in.')}},150);
+function runPrint(html,o,title,tplCls,done,multiPg,footL){o=Object.assign({},o,{footL:footL});
+  const ps=$('#printSheet'),pgs=$('#pgStyle')||document.head.appendChild(Object.assign(document.createElement('style'),{id:'pgStyle'}));
+  pgs.textContent='@page{size:A4;margin:7mm 8mm '+(o.foot&&tplCls!=='eco'?'11mm':'7mm')+' 8mm;'+(o.foot&&tplCls!=='eco'?'@bottom-left{content:"'+(o.footL||'')+'";font:8pt serif}'+(multiPg?'':'@bottom-right{content:"Trang " counter(page);font:8pt serif}'):'')+'}';
+  ps.innerHTML=html;ps.style.color='#000';ps.style.webkitTextFillColor='#000';ps.style.fontSize=o.fs+'pt';ps.className='t-'+(tplCls||o.tpl);ps.style.setProperty('--pc',o.cols);ps.style.setProperty('--pfs',o.fs+'pt');
+  const t0=document.title,dlg=$('#pdfDlg'),wasOpen=dlg.open;if(title)document.title=title;
+  if(wasOpen)dlg.close();
+  const jid=String(Date.now());ps.dataset.job=jid;
+  let ended=false;
+  const fin=()=>{if(ended)return;ended=true;window.removeEventListener('afterprint',fin);document.title=t0;
+    if(done)setTimeout(done,1500)};
+  window.addEventListener('afterprint',fin);
+  setTimeout(()=>{try{window.print()}catch(e){fin();toast('Không mở được hộp thoại in.')}},350);
 }
-$('#pfTpl').addEventListener('change',()=>{const t=TPL[$('#pfTpl').value];$('#pfLines').value=t.lines;$('#pfCols').value=t.cols});
+const examAll=(set,o)=>set.map((v,i)=>examHtml(v,o,i===0,set.length>1)).join('');
+const jobName=o=>(o.lesson||'De-thi').replace(/[\\/:*?"<>|]+/g,' ').trim();
+function doExam(){const o=readCfg(),set=getSet(false);runPrint(examAll(set,o),o,jobName(o)+' - De ('+set.map(v=>v.code).join(',')+')',null,null,set.length>1,set.length>1?'':'Mã đề '+set[0].code)}
+function doKey(){const o=readCfg(),set=getSet(false);runPrint(keyHtml(set,o),o,jobName(o)+' - Dap an','eco')}
+function doXlsx(){const set=getSet(false);downloadKey(set);toast('Đã tải file Excel đáp án ('+set.length+' mã đề)')}
+function doAll(){
+  const o=readCfg(),set=getSet(false);downloadKey(set);
+  runPrint(examAll(set,o),o,jobName(o)+' - De ('+set.map(v=>v.code).join(',')+')',null,()=>runPrint(keyHtml(set,o),o,jobName(o)+' - Dap an','eco'),set.length>1,set.length>1?'':'Mã đề '+set[0].code);
+}
 $('#btnPdf').addEventListener('click',openPdf);
-$('#pdfDlg').addEventListener('close',()=>{const d=$('#pdfDlg');if(d.returnValue==='ok'){d.returnValue='';doPrint()}});
+$('#pfCancel').addEventListener('click',()=>$('#pdfDlg').close());
+$('#pfExam').addEventListener('click',doExam);$('#pfKeyPdf').addEventListener('click',doKey);$('#pfXlsx').addEventListener('click',doXlsx);$('#pfAll').addEventListener('click',doAll);
+$('#pfShuf').addEventListener('click',()=>{getSet(true);pfInfo();toast('Đã trộn lại các mã đề')});
+$('#pfTpl').addEventListener('change',()=>{const t=TPL[$('#pfTpl').value];$('#pfLines').value=t.lines;$('#pfCols').value=t.cols;$('#pfStd').open=$('#pfTpl').value==='std'});
+$('#pdfDlg').addEventListener('change',e=>{if(e.target.closest('#pfVer,#pfCode0,#pfShufQ,#pfShufO,#pfKeepD,#pfKeepFirst')){getSet(false);pfInfo()}});
 function render(){renderMain()}
 applySettings();render();
-window.__ttn={buildSheet,PDF,rm,parseWorkbook,get Q(){return Q},suggestions,GEO,warnOf};
+window.__ttn={examHtml,keyHtml,keyAoa,makeSet,PDF,rm,parseWorkbook,get Q(){return Q},suggestions,GEO,warnOf};
 })();
 </scr@@ipt>
 </body>
