@@ -413,6 +413,8 @@ table.mx{border-collapse:collapse;margin:8px 0;font-size:13px}table.mx th,table.
 <header class="top"><div class="wrap bar">
   <div class="brand">Trình chiếu trắc nghiệm</div>
   <button class="btn" id="btnImport">Tải file Excel</button>
+  <button class="btn" id="btnSampleTop" title="Tải file Excel mẫu gồm 3 loại câu hỏi">⬇ Tải file mẫu</button>
+  <button class="btn" id="btnClearAll" title="Xóa toàn bộ câu hỏi cũ để bắt đầu bộ mới">🗑 Xóa tất cả câu</button>
   <button class="btn" id="btnExport">Lưu Excel</button>
   <button class="btn" id="btnPdf" title="Xuất đề thi in tiết kiệm giấy, lưu thành PDF">Xuất đề PDF</button>
   <button class="btn" id="btnBank" title="Ngân hàng câu hỏi lưu trên Google Sheet riêng">🏦 Ngân hàng</button>
@@ -1478,12 +1480,15 @@ sideUi();
 
 /* ---------- khởi động ---------- */
 function sampleXlsx(){
-  const aoa=[['STT','Câu hỏi','Đáp án (Câu hỏi nhiều đáp án: các đáp án cách nhau bởi ký tự @)','Lời giải','Đáp án A','Đáp án B','Đáp án C','Đáp án D','Cấp độ','Loại câu (1: trắc nghiệm, 2: đúng-sai, 3: trả lời ngắn)','Lớp','Chương','Bài','Chủ đề'],['idx','title','answer','answerText','1','2','3','4','level','type','class','chapter','lesson','topic'],
-   [1,'Cho cấp số cộng $(u_n)$ có $u_1=3$ và công sai $d=4$. Tìm $u_5$.',3,'Ta có $u_5=u_1+4d=3+4\\times 4=19$.','$17$','$18$','$19$','$20$',1,1,'10','Chương 3. Dãy số','Bài 5. Cấp số cộng','Số hạng tổng quát'],
-   [2,'Cho hàm số $y=x^2-4x+3$. Xét tính đúng sai của các mệnh đề sau:','1@3','$y=(x-1)(x-3)$ nên a) đúng.\nĐỉnh $I(2;-1)$ nên b) sai.\nHàm số có hai nghiệm nên c) đúng.','Đồ thị cắt trục hoành tại $x=1$ và $x=3$','Đỉnh của parabol là $I(2;1)$','Hàm số nghịch biến trên $(-\\infty;2)$','Giá trị nhỏ nhất của hàm số bằng $1$',2,2,'10','Chương 6. Hàm số bậc hai','Bài 1. Hàm số bậc hai','Đỉnh, nghiệm'],
-   [3,'Một cấp số nhân có $u_1=2$, công bội $q=3$. Tính $u_4$.','54','$u_4=u_1q^3=2\\cdot 27=54$.','','','','',2,3,'10','Chương 3. Dãy số','Bài 6. Cấp số nhân','Số hạng tổng quát']];
-  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(aoa),'Sheet1');XLSX.writeFile(wb,'cau-hoi-mau.xlsx');
+  const aoa=[["STT", "Câu hỏi", "Đáp án (Câu hỏi nhiều đáp án: các đáp án cách nhau bởi ký tự @)", "Lời giải", "Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D", "Cấp độ", "Loại câu (1: trắc nghiệm, 2: đúng-sai, 3: trả lời ngắn)", "Lớp", "Chương", "Bài", "Chủ đề"], [1, "Cho cấp số cộng $(u_n)$ có $u_1=3$ và công sai $d=4$. Tìm $u_5$.", 3, "Ta có $u_5=u_1+4d=3+4\\times 4=19$.", "$17$", "$18$", "$19$", "$20$", 1, 1, "10", "Chương 3. Dãy số", "Bài 5. Cấp số cộng", "Số hạng tổng quát"], [2, "Hàm số $y=x^2-4x+3$ có đỉnh là điểm nào?", 2, "Hoành độ đỉnh $x=-\\dfrac{b}{2a}=2$, $y=4-8+3=-1$. Đỉnh $I(2;-1)$.", "$I(2;1)$", "$I(2;-1)$", "$I(-2;-1)$", "$I(1;0)$", 2, 1, "10", "Chương 6. Hàm số bậc hai", "Bài 1. Hàm số bậc hai", "Đỉnh, nghiệm"], [3, "Cho hàm số $y=x^2-4x+3$. Xét tính đúng sai của các mệnh đề sau:", "1@3", "$y=(x-1)(x-3)$ nên a) đúng. // Đỉnh $I(2;-1)$ nên b) sai. // Hàm số có hai nghiệm $x=1$, $x=3$ nên c) đúng. // Hàm số nghịch biến trên $(-\\infty;2)$ nên d) sai.", "Đồ thị cắt trục hoành tại $x=1$ và $x=3$", "Đỉnh của parabol là $I(2;1)$", "Hàm số nghịch biến trên $(2;+\\infty)$", "Giá trị nhỏ nhất của hàm số bằng $1$", 2, 2, "10", "Chương 6. Hàm số bậc hai", "Bài 1. Hàm số bậc hai", "Đỉnh, nghiệm"], [4, "Cho cấp số cộng $(u_n)$ có $u_1=1$, $d=2$. Xét các mệnh đề:", "2@3", "$u_2=3$ nên a) sai. // $u_3=5$ nên b) đúng. // $S_3=9$ nên c) đúng. // $u_4=7\\ne 8$ nên d) sai.", "$u_2=2$", "$u_3=5$", "$S_3=9$", "$u_4=8$", 2, 2, "10", "Chương 3. Dãy số", "Bài 5. Cấp số cộng", "Số hạng tổng quát"], [5, "Một cấp số nhân có $u_1=2$, công bội $q=3$. Tính $u_4$.", "54", "$u_4=u_1q^3=2\\cdot 27=54$.", "", "", "", "", 2, 3, "10", "Chương 3. Dãy số", "Bài 6. Cấp số nhân", "Số hạng tổng quát"], [6, "Tính tổng $S=1+2+3+\\dots+100$.", "5050", "$S=\\dfrac{100\\cdot 101}{2}=5050$. // Nếu đáp án là số thập phân, dùng dấu chấm, ví dụ 2.5", "", "", "", "", 1, 3, "10", "Chương 3. Dãy số", "Bài 5. Cấp số cộng", "Số hạng tổng quát"]];
+  const ws=XLSX.utils.aoa_to_sheet(aoa);ws['!cols']=[6,46,16,52,22,22,22,22,9,16,7,24,24,22].map(w=>({wch:w}));
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Cau hoi mau');XLSX.writeFile(wb,'mau-cau-hoi-3-loai.xlsx');
 }
+$('#btnClearAll').addEventListener('click',async()=>{
+  if(!Q.length){toast('Chưa có câu hỏi nào để xóa.');return}
+  if(!await ask({title:'Xóa tất cả '+Q.length+' câu hỏi?',msg:'Toàn bộ câu hỏi và hình vẽ kèm theo trong bài chiếu sẽ bị xóa khỏi trình duyệt này. Nên bấm "Lưu Excel" trước nếu còn cần. Ngân hàng câu hỏi trên Google Sheet không bị ảnh hưởng.',ok:'Xóa tất cả',danger:true}))return;
+  Q=[];S.i=0;saveDeck();render();toast('Đã xóa toàn bộ câu hỏi cũ. Có thể tải file Excel mới.')});
+$('#btnSampleTop').addEventListener('click',sampleXlsx);
 $('#btnImport').addEventListener('click',()=>$('#fXlsx').click());
 $('#fXlsx').addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(f)importFile(f)});
 $('#btnExport').addEventListener('click',exportXlsx);
