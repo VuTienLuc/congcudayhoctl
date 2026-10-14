@@ -2585,7 +2585,7 @@ h3{font-size:17px;font-weight:700}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 .btn.sm{min-height:44px;padding:0 var(--space-2);font-size:14px}
 :focus-visible{outline:2px solid var(--primary);outline-offset:2px;box-shadow:var(--focus)}
-input[type=text],select{min-height:44px;width:100%;padding:0 var(--space-2);border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text);font:15px var(--font-body)}
+input[type=text],input[type=number],select{min-height:44px;width:100%;padding:0 var(--space-2);border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text);font:15px var(--font-body)}
 label.f{display:grid;gap:var(--space-1);font-size:14px;font-weight:600}
 label.f span{color:var(--muted);font-weight:500}
 
@@ -2691,6 +2691,7 @@ footer{margin-top:var(--space-4);font-size:13px;color:var(--muted)}
   <div class="brand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg>Thống kê điểm Toán</div>
   <nav class="tabs" role="tablist" aria-label="Chức năng">
     <button class="tab" role="tab" id="tab-stats" aria-selected="true" data-tab="stats">Thống kê điểm</button>
+    <button class="tab" role="tab" id="tab-k12" aria-selected="false" data-tab="k12">Tiết học K12</button>
     <button class="tab" role="tab" id="tab-classes" aria-selected="false" data-tab="classes">Danh sách lớp</button>
     <button class="tab" role="tab" id="tab-backup" aria-selected="false" data-tab="backup">Sao lưu</button>
     <button class="tab" role="tab" id="tab-gs" aria-selected="false" data-tab="gs">Google Sheet</button>
@@ -2698,6 +2699,27 @@ footer{margin-top:var(--space-4);font-size:13px;color:var(--muted)}
 </div></header>
 
 <main class="wrap">
+  <!-- ======= TIẾT HỌC K12 ======= -->
+  <section id="view-k12" hidden aria-labelledby="tab-k12">
+    <div class="stack">
+      <div class="card stack">
+        <div><h2>Báo cáo tiết học K12Online</h2><p class="lead">Tải file “Báo cáo lượt học” (Chuyên đề, Học liệu, Lượt học, Lượt thảo luận) xuất từ K12Online. Mỗi file là một báo cáo của một khối; app đối chiếu với danh sách lớp để tính lượt học trên mỗi học sinh và so sánh các khối. File có thêm cột Họ và tên, Lớp, Thời gian học thì app thống kê tiếp theo lớp và theo giờ học.</p></div>
+        <div class="grid2">
+          <label class="f">Khối của file sắp tải lên<select id="k12Grade"><option value="10">Khối 10</option><option value="11">Khối 11</option><option value="12">Khối 12</option></select></label>
+          <label class="f">Thời lượng trung bình một lượt học (phút)<input type="number" id="k12Min" min="0" max="240" step="1" inputmode="numeric" placeholder="Để trống nếu file đã có thời gian"></label>
+        </div>
+        <label class="drop" id="dropK12">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m0 0L7 9m5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+          <strong>Chọn hoặc thả file báo cáo lượt học</strong>
+          <span class="muted">.xls, .xlsx hoặc .csv, chọn được nhiều file. Ngày báo cáo lấy từ tên file (ví dụ 14102026_BaoCaoLuotHoc).</span>
+          <input type="file" id="fK12" accept=".xlsx,.xls,.csv" multiple>
+        </label>
+        <div id="k12Files" class="files"></div>
+      </div>
+      <div id="k12Out" class="stack"></div>
+    </div>
+  </section>
+
   <!-- ======= LỚP ======= -->
   <section id="view-classes" hidden aria-labelledby="tab-classes">
     <div class="stack">
@@ -2902,9 +2924,9 @@ const gradeTxt=g=>g?'Khối '+g:'Mọi khối';
 
 /* ---------- tabs ---------- */
 function showTab(t){
-  ['classes','stats','backup','gs'].forEach(x=>$('#view-'+x).hidden=x!==t);
+  ['classes','stats','backup','gs','k12'].forEach(x=>$('#view-'+x).hidden=x!==t);
   $$('.tab').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===t)));
-  if(t==='stats')renderStats();else if(t==='classes')renderClasses();else if(t==='gs')renderGs();else renderBackup();
+  if(t==='stats')renderStats();else if(t==='classes')renderClasses();else if(t==='gs')renderGs();else if(t==='k12')renderK12();else renderBackup();
   window.scrollTo(0,0);
 }
 $$('.tab').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
@@ -3627,18 +3649,179 @@ $('#gsPullBtn').addEventListener('click',()=>{gsRead();gsSync('pull')});
 $('#gsCopy').addEventListener('click',async()=>{const t=$('#gsCode');try{await navigator.clipboard.writeText(GS_CODE);toast('Đã sao chép mã')}catch(e){t.focus();t.select();toast('Đã chọn sẵn mã, bấm Ctrl+C để sao chép')}});
 setTimeout(()=>{if(GS.pull&&GS.url)gsSync('pull',true)},700);
 
+/* =========================================================
+   TIẾT HỌC K12ONLINE (báo cáo lượt học, thời gian học theo khối)
+   ========================================================= */
+let K12=[];try{K12=JSON.parse(lsGet('tkd.k12','[]'))||[]}catch(e){K12=[]}
+const saveK12=()=>{if(!lsSet('tkd.k12',JSON.stringify(K12)))toast('Không lưu được báo cáo tiết học (bộ nhớ trình duyệt đầy hoặc bị chặn).')};
+const KS={date:'',rep:null,sort:{key:'stt',dir:1},min:+lsGet('tkd.k12min','0')||0,grade:lsGet('tkd.k12grade','10')};
+const k12Num=v=>{const x=typeof v==='number'?v:parseFloat(String(v==null?'':v).replace(/[^\d.,-]/g,'').replace(',','.'));return isFinite(x)?x:0};
+function k12Min(v,h){
+  const nz=x=>parseFloat(String(x).replace(',','.'));
+  if(typeof v==='number')return isFinite(v)?(/gio/.test(h)?v*60:/giay/.test(h)?v/60:v):0;
+  const s=String(v==null?'':v).trim();if(!s)return 0;
+  let m=s.match(/(\d+):(\d{2}):(\d{2})/);if(m)return +m[1]*60+ +m[2]+ +m[3]/60;
+  m=s.match(/^(\d+):(\d{2})$/);if(m)return +m[1]*60+ +m[2];
+  const g=s.match(/(\d+(?:[.,]\d+)?)\s*(?:giờ|gio|h)\b/i),p=s.match(/(\d+(?:[.,]\d+)?)\s*(?:phút|phut|p)\b/i),sc=s.match(/(\d+(?:[.,]\d+)?)\s*(?:giây|giay|s)\b/i);
+  if(g||p||sc)return(g?nz(g[1])*60:0)+(p?nz(p[1]):0)+(sc?nz(sc[1])/60:0);
+  const x=nz(s);return isFinite(x)?(/gio/.test(h)?x*60:/giay/.test(h)?x/60:x):0;
+}
+function readK12(wb){
+  for(const n of wb.SheetNames){
+    const a=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:''});
+    for(let i=0;i<Math.min(a.length,25);i++){
+      const H=a[i].map(x=>norm(x));
+      const iv=H.findIndex(h=>/luot (hoc|xem)/.test(h)),il=H.findIndex(h=>/^(hoc lieu|ten bai|bai hoc|tiet hoc|ten hoc lieu)/.test(h)),ina=H.findIndex(isNameHdr),
+        it=H.findIndex(h=>/^chuyen de/.test(h)),id=H.findIndex(h=>/thao luan/.test(h)),icl=H.findIndex(h=>/^lop$|^lop /.test(h)),itm=H.findIndex(h=>/thoi (gian|luong)|tong thoi|so phut|so gio/.test(h));
+      if(il<0&&ina<0)continue;if(iv<0&&itm<0&&id<0)continue;
+      const rows=[];
+      a.slice(i+1).forEach(r=>{
+        if(!r.some(c=>String(c).trim()!==''))return;
+        if(/^tong/.test(norm(r[0]))&&!String(r[il>=0?il:ina]).trim())return;
+        if(ina>=0){const name=splitName(r[ina]).name;if(!name||/^\d+$/.test(name))return;
+          rows.push({n:name,c:icl>=0?String(r[icl]).trim():'',l:il>=0?String(r[il]).trim():'',v:iv>=0?k12Num(r[iv]):0,d:id>=0?k12Num(r[id]):0,m:itm>=0?k12Min(r[itm],H[itm]):0})}
+        else{const l=String(r[il]).trim();if(!l)return;
+          rows.push({t:it>=0?String(r[it]).trim():'',l,v:iv>=0?k12Num(r[iv]):0,d:id>=0?k12Num(r[id]):0,m:itm>=0?k12Min(r[itm],H[itm]):0})}
+      });
+      if(rows.length)return{mode:ina>=0?'student':'lesson',rows,hasTime:itm>=0&&rows.some(r=>r.m>0),sheet:n};
+    }
+  }
+  return null;
+}
+const isoOf=d=>{const m=String(d||'').match(/^(\d{2})\/(\d{2})\/(\d{4})$/);return m?m[3]+'-'+m[2]+'-'+m[1]:''};
+function k12DateOf(name){const m=String(name).match(/(\d{2})(\d{2})(20\d{2})/)||String(name).match(/(\d{2})[-_.](\d{2})[-_.](20\d{2})/);if(m&&+m[1]>=1&&+m[1]<=31&&+m[2]>=1&&+m[2]<=12)return m[1]+'/'+m[2]+'/'+m[3];const d=new Date();return p2(d.getDate())+'/'+p2(d.getMonth()+1)+'/'+d.getFullYear()}
+function k12Sum(f){
+  const V=f.rows.reduce((a,r)=>a+r.v,0),D=f.rows.reduce((a,r)=>a+r.d,0),M=f.rows.reduce((a,r)=>a+r.m,0);
+  const learners=f.mode==='student'?new Set(f.rows.filter(r=>r.v>0||r.m>0).map(r=>norm(r.n))).size:null;
+  return{V,D,M,hasTime:!!f.hasTime,lessons:f.mode==='lesson'?f.rows.length:new Set(f.rows.map(r=>norm(r.l)).filter(Boolean)).size,learners};
+}
+/* báo cáo của một khối tính đến ngày d (mới nhất không muộn hơn d) và báo cáo ngay trước đó */
+function k12Pick(g,date){
+  const list=K12.filter(f=>f.grade===g).sort((a,b)=>(a.iso||'').localeCompare(b.iso||'')||a.t-b.t);
+  const ok=date?list.filter(f=>(f.iso||'')<=date):list;
+  const cur=ok[ok.length-1]||null,prev=cur?ok[ok.length-2]||null:null;return{cur,prev};
+}
+function k12Dates(){return[...new Set(K12.map(f=>f.iso).filter(Boolean))].sort().reverse()}
+const k12Roster=g=>{const cs=classes.filter(c=>!g||gradeOf(c.name)===g);return{cs,n:cs.reduce((a,c)=>a+c.students.length,0)}};
+const k12Hours=(sum)=>sum.hasTime?{h:sum.M/60,est:false}:(KS.min>0&&sum.V>0?{h:sum.V*KS.min/60,est:true}:null);
+const fh=h=>h==null?'—':(h<1?Math.round(h*60)+' phút':fmt(Math.round(h*10)/10)+' giờ');
+const fdel=(a,b)=>{if(b==null)return'<span class="muted">—</span>';const d=a-b;return d===0?'<span class="muted">0</span>':`<span style="color:var(${d>0?'--success':'--danger'});font-weight:600">${d>0?'+':''}${fmt(d)}</span>`};
+
+wireDrop($('#dropK12'),$('#fK12'),async fs=>{
+  const g=$('#k12Grade').value;KS.grade=g;lsSet('tkd.k12grade',g);let ok=0;
+  for(const f of fs){
+    try{
+      const wb=await readFile(f),r=readK12(wb);
+      if(!r){toast('Không nhận ra cột trong '+f.name+'. Cần có cột Học liệu (hoặc Họ và tên) và Lượt học.');continue}
+      const date=k12DateOf(f.name),it={id:uid(),fileName:f.name,date,iso:isoOf(date),grade:g,mode:r.mode,hasTime:r.hasTime,rows:r.rows,t:Date.now()};
+      const j=K12.findIndex(x=>x.fileName===it.fileName&&x.grade===g&&x.date===date);
+      if(j>=0){it.id=K12[j].id;K12[j]=it}else K12.push(it);
+      KS.rep=it.id;ok++;
+    }catch(e){toast('Không đọc được '+f.name+': '+(e.message||e))}
+  }
+  if(ok){saveK12();KS.date='';renderK12();toast('Đã thêm '+ok+' báo cáo tiết học')}
+});
+$('#k12Min').addEventListener('input',e=>{KS.min=Math.max(0,Math.min(240,+e.target.value||0));lsSet('tkd.k12min',String(KS.min));renderK12(true)});
+$('#k12Grade').addEventListener('change',e=>{KS.grade=e.target.value;lsSet('tkd.k12grade',KS.grade)});
+
+function renderK12(keepInput){
+  $('#k12Grade').value=KS.grade;if(!keepInput)$('#k12Min').value=KS.min||'';
+  const fl=$('#k12Files'),out=$('#k12Out');
+  const sorted=K12.slice().sort((a,b)=>(b.iso||'').localeCompare(a.iso||'')||a.grade.localeCompare(b.grade));
+  fl.innerHTML=sorted.length?sorted.map(f=>`<div class="file"><div><strong>${esc(f.fileName)}</strong><div class="lead">${esc(gradeTxt(f.grade))} · báo cáo ngày ${esc(f.date)} · ${f.mode==='student'?f.rows.length+' dòng học sinh':f.rows.length+' học liệu'}${f.hasTime?' · có thời gian học':''}</div></div><button class="btn sm danger-o" data-k12del="${f.id}">Xóa</button></div>`).join(''):'';
+  if(!K12.length){out.innerHTML='<div class="card empty"><strong>Chưa có báo cáo tiết học</strong><span>Xuất “Báo cáo lượt học” từ K12Online, chọn khối rồi tải file lên. Mỗi lần tải là một báo cáo; tải nhiều ngày để xem mức tăng.</span></div>';return}
+  const dates=k12Dates();if(!KS.date||!dates.includes(KS.date))KS.date=dates[0]||'';
+  const GR=['10','11','12'],rows=GR.map(g=>{const p=k12Pick(g,KS.date),r=k12Roster(g);return{g,r,cur:p.cur,prev:p.prev,s:p.cur?k12Sum(p.cur):null,sp:p.prev?k12Sum(p.prev):null}});
+  const anyAll=K12.some(f=>!f.grade);const pAll=anyAll?k12Pick('',KS.date):null;
+  const tot=rows.reduce((a,x)=>{if(x.s){a.V+=x.s.V;a.D+=x.s.D;const h=k12Hours(x.s);if(h)a.H+=h.h;if(h&&h.est)a.est=true;a.n+=x.r.n}return a},{V:0,D:0,H:0,n:0,est:false});
+  const maxV=Math.max(1,...rows.map(x=>x.s&&x.r.n?x.s.V/x.r.n:0));
+  let h=`<div class="card stack"><div class="row between"><div><h2>So sánh các khối</h2><p class="lead">Số lớp và học sinh lấy từ tab Danh sách lớp. Lượt học trên mỗi học sinh = tổng lượt học của khối chia cho sĩ số khối.</p></div>
+    <label class="f" style="min-width:200px">Báo cáo tính đến ngày<select id="k12Date">${dates.map(d=>`<option value="${d}"${d===KS.date?' selected':''}>${esc(d.split('-').reverse().join('/'))}</option>`).join('')}</select></label></div>
+    <div class="kpis"><div class="kpi"><span class="l">Tổng lượt học</span><span class="v">${fmt(tot.V)}</span><span class="s">các khối có báo cáo</span></div>
+    <div class="kpi"><span class="l">Lượt thảo luận</span><span class="v">${fmt(tot.D)}</span><span class="s">&nbsp;</span></div>
+    <div class="kpi"><span class="l">Lượt học / học sinh</span><span class="v">${tot.n?fmt(tot.V/tot.n):'—'}</span><span class="s">${tot.n} học sinh</span></div>
+    <div class="kpi"><span class="l">Thời gian học</span><span class="v">${tot.H?fh(tot.H):'—'}</span><span class="s">${tot.H?(tot.est?'ước tính theo '+KS.min+' phút/lượt':'cộng từ file'):'nhập phút/lượt để ước tính'}</span></div></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Khối</th><th class="num">Lớp</th><th class="num">Học sinh</th><th class="num">Học liệu</th><th class="num">Lượt học</th><th class="num">Lượt/HS</th><th class="num">Thảo luận</th><th class="num">Thời gian học</th><th class="num">Tăng so với lần trước</th></tr></thead><tbody>`;
+  rows.forEach(x=>{
+    if(!x.s){h+=`<tr><td><strong>Khối ${x.g}</strong></td><td class="num">${x.r.cs.length}</td><td class="num">${x.r.n}</td><td colspan="6" class="muted">Chưa có báo cáo</td></tr>`;return}
+    const hh=k12Hours(x.s);
+    h+=`<tr><td><strong>Khối ${x.g}</strong><div class="lead">${esc(x.cur.date)}</div></td><td class="num">${x.r.cs.length}</td><td class="num">${x.r.n}</td><td class="num">${x.s.lessons}</td><td class="num"><strong>${fmt(x.s.V)}</strong></td><td class="num">${x.r.n?fmt(x.s.V/x.r.n):'—'}</td><td class="num">${fmt(x.s.D)}</td><td class="num">${hh?(hh.est?'≈ ':'')+fh(hh.h):'—'}</td><td class="num">${fdel(x.s.V,x.sp?x.sp.V:null)}</td></tr>`});
+  h+=`</tbody></table></div>`;
+  h+=`<div><h3>Lượt học trên mỗi học sinh</h3><div class="dist" style="margin-top:8px">${rows.map(x=>{const v=x.s&&x.r.n?x.s.V/x.r.n:0;return`<div class="r"><span>Khối ${x.g}</span><div class="track"><div class="fill" style="width:${v/maxV*100}%;background:var(--t${x.g==='10'?2:x.g==='11'?1:3})"></div></div><span class="n">${x.s&&x.r.n?fmt(v):'—'}</span></div>`}).join('')}</div></div>`;
+  if(pAll&&pAll.cur)h+=`<div class="alert warn">Có báo cáo chọn “Mọi khối” (${esc(pAll.cur.fileName)}) nên không tách được theo khối. Hãy tải lại và chọn đúng khối.</div>`;
+  h+=`<div class="row"><button class="btn" id="k12Xlsx">Xuất Excel</button></div></div>`;
+  /* chi tiết một báo cáo */
+  if(!sorted.find(f=>f.id===KS.rep)){const c=(rows.find(x=>x.cur)||{}).cur||sorted[0];KS.rep=c?c.id:null}
+  const rep=K12.find(f=>f.id===KS.rep);
+  h+=`<div class="card stack"><h2>Chi tiết từng báo cáo</h2><div class="pills" role="group" aria-label="Chọn báo cáo">${sorted.map(f=>`<button class="pill" data-k12rep="${f.id}" aria-pressed="${f.id===KS.rep}">${esc(gradeTxt(f.grade))} · ${esc(f.date)}</button>`).join('')}</div>${rep?k12Detail(rep):''}</div>`;
+  out.innerHTML=h;
+}
+function k12Prev(rep){const l=K12.filter(f=>f.grade===rep.grade&&f.id!==rep.id&&(f.iso||'')<(rep.iso||'')&&f.mode===rep.mode).sort((a,b)=>b.iso.localeCompare(a.iso));return l[0]||null}
+function k12Detail(rep){
+  const g=rep.grade,R=k12Roster(g),prev=k12Prev(rep),s=k12Sum(rep),hh=k12Hours(s);
+  let h=`<div class="kpis"><div class="kpi"><span class="l">Lượt học</span><span class="v">${fmt(s.V)}</span><span class="s">${prev?'lần trước '+fmt(k12Sum(prev).V):'chưa có báo cáo trước'}</span></div>
+   <div class="kpi"><span class="l">Lượt thảo luận</span><span class="v">${fmt(s.D)}</span><span class="s">&nbsp;</span></div>
+   <div class="kpi"><span class="l">${rep.mode==='student'?'Học sinh đã học':'Học liệu'}</span><span class="v">${rep.mode==='student'?s.learners:s.lessons}</span><span class="s">${rep.mode==='student'&&R.n?'trên '+R.n+' học sinh':'&nbsp;'}</span></div>
+   <div class="kpi"><span class="l">Lượt học / HS</span><span class="v">${R.n?fmt(s.V/R.n):'—'}</span><span class="s">${R.n} học sinh khối ${g}</span></div>
+   <div class="kpi"><span class="l">Thời gian học</span><span class="v">${hh?fh(hh.h):'—'}</span><span class="s">${hh?(hh.est?'ước tính':'cộng từ file'):'chưa có dữ liệu thời gian'}</span></div></div>`;
+  if(rep.mode==='lesson'){
+    const pm=new Map();if(prev)prev.rows.forEach(r=>pm.set(norm(r.l),r));
+    let L=rep.rows.map((r,i)=>({...r,stt:i+1,per:R.n?r.v/R.n:null,dv:prev?(pm.has(norm(r.l))?r.v-pm.get(norm(r.l)).v:r.v):null}));
+    const k=KS.sort.key,dir=KS.sort.dir;L.sort((a,b)=>cmp(a[k==='lesson'?'l':k==='topic'?'t':k],b[k==='lesson'?'l':k==='topic'?'t':k],dir));
+    const topics={};rep.rows.forEach(r=>{const t=r.t||'(Chưa có chuyên đề)';(topics[t]=topics[t]||{v:0,d:0,n:0});topics[t].v+=r.v;topics[t].d+=r.d;topics[t].n++});
+    const tl=Object.entries(topics).sort((a,b)=>b[1].v-a[1].v);const mx=Math.max(1,...tl.map(x=>x[1].v));
+    if(tl.length>1)h+=`<div><h3>Theo chuyên đề</h3><div class="dist" style="margin-top:8px">${tl.slice(0,12).map(([t,o])=>`<div class="r" style="grid-template-columns:minmax(120px,220px) 1fr 76px"><span title="${esc(t)}" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t)}</span><div class="track"><div class="fill" style="width:${o.v/mx*100}%;background:var(--primary)"></div></div><span class="n">${fmt(o.v)}</span></div>`).join('')}</div></div>`;
+    const sb=(key,l,num)=>`<th${num?' class="num"':''}>${sortBtn2(key,l)}</th>`;
+    h+=`<div class="tbl-wrap"><table><thead><tr>${sb('stt','STT',1)}${sb('topic','Chuyên đề')}${sb('lesson','Học liệu')}${sb('v','Lượt học',1)}${sb('per','Lượt/HS',1)}${sb('d','Thảo luận',1)}${prev?sb('dv','Tăng so với '+prev.date,1):''}</tr></thead><tbody>${L.map(r=>`<tr><td class="num">${r.stt}</td><td>${esc(r.t)}</td><td>${esc(r.l)}</td><td class="num"><strong>${fmt(r.v)}</strong></td><td class="num">${r.per==null?'—':fmt(r.per)}</td><td class="num">${fmt(r.d)}</td>${prev?`<td class="num">${fdel(r.dv,0)}</td>`:''}</tr>`).join('')}<tr><td></td><td colspan="2"><strong>Tổng</strong></td><td class="num"><strong>${fmt(s.V)}</strong></td><td class="num">${R.n?fmt(s.V/R.n):'—'}</td><td class="num"><strong>${fmt(s.D)}</strong></td>${prev?'<td></td>':''}</tr></tbody></table></div>`;
+    if(!hh)h+=`<p class="lead">File “Báo cáo lượt học” chỉ có số lượt, chưa có cột thời gian. Muốn xem giờ học theo khối: nhập “thời lượng trung bình một lượt học” ở trên để ước tính, hoặc tải file có cột thời gian học theo học sinh.</p>`;
+  }else{
+    const byName=new Map();rep.rows.forEach(r=>{const k=norm(r.n),o=byName.get(k)||{n:r.n,c:r.c,v:0,d:0,m:0};o.v+=r.v;o.d+=r.d;o.m+=r.m;if(r.c&&!o.c)o.c=r.c;byName.set(k,o)});
+    const pool=classes.filter(c=>!g||gradeOf(c.name)===g),where=new Map();
+    pool.forEach(c=>c.students.forEach(st=>{const k=norm(st.name);if(!where.has(k))where.set(k,c.name)}));
+    const per={};pool.forEach(c=>per[c.name]={cls:c,hs:c.students.length,seen:new Set(),v:0,d:0,m:0});
+    let unk=0;
+    byName.forEach((o,k)=>{const cn=where.get(k)||(o.c&&per[o.c]?o.c:null);if(!cn){unk++;return}const p=per[cn];if(o.v>0||o.m>0)p.seen.add(k);p.v+=o.v;p.d+=o.d;p.m+=o.m});
+    const cl=Object.values(per).sort((a,b)=>a.cls.name.localeCompare(b.cls.name,'vi',{numeric:true}));
+    h+=`<div class="tbl-wrap"><table><thead><tr><th>Lớp</th><th class="num">Sĩ số</th><th class="num">Đã học</th><th class="num">Tỉ lệ</th><th class="num">Lượt học</th><th class="num">Thảo luận</th><th class="num">Tổng thời gian</th><th class="num">TB mỗi HS đã học</th></tr></thead><tbody>${cl.map(p=>`<tr><td><strong>${esc(p.cls.name)}</strong></td><td class="num">${p.hs}</td><td class="num">${p.seen.size}</td><td class="num">${p.hs?Math.round(p.seen.size/p.hs*100)+'%':'—'}</td><td class="num">${fmt(p.v)}</td><td class="num">${fmt(p.d)}</td><td class="num">${rep.hasTime?fh(p.m/60):'—'}</td><td class="num">${rep.hasTime&&p.seen.size?fh(p.m/60/p.seen.size):'—'}</td></tr>`).join('')}</tbody></table></div>`;
+    if(unk)h+=`<div class="alert warn">${unk} học sinh trong file chưa khớp với danh sách lớp nên chưa được tính vào lớp nào.</div>`;
+    const miss=cl.map(p=>({n:p.cls.name,l:p.cls.students.filter(st=>!p.seen.has(norm(st.name)))})).filter(x=>x.l.length);
+    if(miss.length)h+=`<details><summary>Học sinh chưa học (${miss.reduce((a,x)=>a+x.l.length,0)})</summary>${miss.map(x=>`<div style="margin-top:8px"><strong>${esc(x.n)}</strong> · ${x.l.length} em<div class="names">${x.l.map(st=>`<span class="chip miss">${esc(st.name)}</span>`).join('')}</div></div>`).join('')}</details>`;
+  }
+  return h;
+}
+const sortBtn2=(k,l)=>{const on=KS.sort.key===k;return`<button data-k12sort="${k}" aria-label="Sắp xếp theo ${esc(l)}">${esc(l)}<span aria-hidden="true">${on?(KS.sort.dir>0?' ▲':' ▼'):''}</span></button>`};
+$('#view-k12').addEventListener('click',async e=>{
+  const d=e.target.closest('[data-k12del]');
+  if(d){const f=K12.find(x=>x.id===d.dataset.k12del);if(f&&await ask({title:'Xóa báo cáo?',msg:f.fileName+' ('+gradeTxt(f.grade)+', '+f.date+')',ok:'Xóa',danger:true})){K12=K12.filter(x=>x.id!==f.id);saveK12();renderK12()}return}
+  const r=e.target.closest('[data-k12rep]');if(r){KS.rep=r.dataset.k12rep;renderK12(true);return}
+  const s=e.target.closest('[data-k12sort]');if(s){const k=s.dataset.k12sort;KS.sort=KS.sort.key===k?{key:k,dir:-KS.sort.dir}:{key:k,dir:(k==='lesson'||k==='topic'||k==='stt')?1:-1};renderK12(true);return}
+  if(e.target.closest('#k12Xlsx'))exportK12();
+});
+$('#view-k12').addEventListener('change',e=>{if(e.target.id==='k12Date'){KS.date=e.target.value;renderK12(true)}});
+function exportK12(){
+  const wb=XLSX.utils.book_new(),GR=['10','11','12'];
+  const a=[['Khối','Báo cáo ngày','Số lớp','Số học sinh','Số học liệu','Lượt học','Lượt học/HS','Lượt thảo luận','Thời gian học (giờ)','Ghi chú thời gian','Tăng lượt học so với lần trước']];
+  GR.forEach(g=>{const p=k12Pick(g,KS.date),R=k12Roster(g);if(!p.cur){a.push(['Khối '+g,'',R.cs.length,R.n]);return}const s=k12Sum(p.cur),hh=k12Hours(s);a.push(['Khối '+g,p.cur.date,R.cs.length,R.n,s.lessons,s.V,R.n?r2(s.V/R.n):'',s.D,hh?r2(hh.h):'',hh?(hh.est?'ước tính '+KS.min+' phút/lượt':'cộng từ file'):'',p.prev?s.V-k12Sum(p.prev).V:''])});
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(a),'So sánh khối');
+  K12.slice().sort((x,y)=>(y.iso||'').localeCompare(x.iso||'')).forEach((f,i)=>{
+    const rows=f.mode==='lesson'?[['STT','Chuyên đề','Học liệu','Lượt học','Lượt thảo luận'],...f.rows.map((r,j)=>[j+1,r.t,r.l,r.v,r.d])]:[['Họ và tên','Lớp','Học liệu','Lượt học','Lượt thảo luận','Thời gian (phút)'],...f.rows.map(r=>[r.n,r.c,r.l,r.v,r.d,r.m?r2(r.m):''])];
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),(('K'+f.grade+' '+f.date.replace(/\//g,'-')).slice(0,28)+(i>8?'':'')).replace(/[\[\]*?:\\]/g,'-')+(wb.SheetNames.includes(('K'+f.grade+' '+f.date.replace(/\//g,'-')).slice(0,28))?'_'+i:''));
+  });
+  XLSX.writeFile(wb,'tiet-hoc-k12online.xlsx');toast('Đã xuất file Excel');
+}
+
 /* ---------- sao lưu ---------- */
 function renderBackup(){
   const lb=+lsGet('tkd.lastBackup','0');
-  $('#bkInfo').innerHTML='Hiện có <strong>'+classes.length+' lớp</strong> ('+classes.reduce((a,c)=>a+c.students.length,0)+' học sinh), <strong>'+S.files.length+' đợt điểm</strong>. '+(lb?'Lần sao lưu gần nhất: <strong>'+new Date(lb).toLocaleString('vi-VN')+'</strong>.':'<strong>Chưa sao lưu lần nào.</strong>');
+  $('#bkInfo').innerHTML='Hiện có <strong>'+classes.length+' lớp</strong> ('+classes.reduce((a,c)=>a+c.students.length,0)+' học sinh), <strong>'+S.files.length+' đợt điểm</strong>, <strong>'+K12.length+' báo cáo tiết học K12</strong>. '+(lb?'Lần sao lưu gần nhất: <strong>'+new Date(lb).toLocaleString('vi-VN')+'</strong>.':'<strong>Chưa sao lưu lần nào.</strong>');
 }
 function backupBanner(){
-  const lb=+lsGet('tkd.lastBackup','0'),has=classes.length||S.files.length;
+  const lb=+lsGet('tkd.lastBackup','0'),has=classes.length||S.files.length||K12.length;
   if(!has||(lb&&Date.now()-lb<7*864e5))return'';
   return`<div class="alert warn row between"><span>${lb?'Đã hơn 7 ngày chưa sao lưu dữ liệu.':'Dữ liệu chưa được sao lưu.'}</span><button class="btn sm" data-go="backup">Sao lưu ngay</button></div>`;
 }
 $('#bkExport').addEventListener('click',()=>{
-  const data={app:'thong-ke-diem-toan',version:1,savedAt:new Date().toISOString(),classes,exams:S.files,sent:SENT};
+  const data={app:'thong-ke-diem-toan',version:1,savedAt:new Date().toISOString(),classes,exams:S.files,sent:SENT,k12:K12,k12min:KS.min};
   const u=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'})),l=document.createElement('a');
   const d=new Date();l.href=u;l.download='thong-ke-diem-sao-luu-'+d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())+'.json';
   document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);
@@ -3654,6 +3837,7 @@ wireDrop($('#dropBackup'),$('#fBackup'),async fs=>{
     d.exams.forEach(e=>{const j=S.files.findIndex(x=>x.fileName===e.fileName&&(x.date||'')===(e.date||''));if(j>=0)S.files[j]=e;else S.files.push(e)});
     S.files.sort((a,b)=>(a.date||'9').localeCompare(b.date||'9'));
     Object.keys(d.sent||{}).forEach(k=>{const p=k.split('|');p[0]=idMap[p[0]]||p[0];SENT[p.join('|')]=d.sent[k]});
+    if(Array.isArray(d.k12)){d.k12.forEach(e=>{const j=K12.findIndex(x=>x.fileName===e.fileName&&x.grade===e.grade&&x.date===e.date);if(j>=0)K12[j]=e;else K12.push(e)});saveK12();if(d.k12min&&!KS.min){KS.min=d.k12min;lsSet('tkd.k12min',String(KS.min))}}
     saveClasses();saveExams();saveSent();S.active=null;S.split=null;
     if(!getClass()&&classes.length)S.classId=classes[0].id;
     renderBackup();toast('Đã khôi phục '+d.classes.length+' lớp, '+d.exams.length+' đợt điểm');
