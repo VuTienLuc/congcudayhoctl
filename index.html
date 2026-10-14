@@ -2731,15 +2731,12 @@ footer{margin-top:var(--space-4);font-size:13px;color:var(--muted)}
   <section id="view-k12" hidden aria-labelledby="tab-k12">
     <div class="stack">
       <div class="card stack">
-        <div><h2>Báo cáo tiết học K12Online</h2><p class="lead">Tải file “Báo cáo lượt học” (Chuyên đề, Học liệu, Lượt học, Lượt thảo luận) xuất từ K12Online. Mỗi file là một báo cáo của một khối; app đối chiếu với danh sách lớp để tính lượt học trên mỗi học sinh và so sánh các khối. File có thêm cột Họ và tên, Lớp, Thời gian học thì app thống kê tiếp theo lớp và theo giờ học.</p></div>
-        <div class="grid2">
-          <label class="f">Khối của file sắp tải lên<select id="k12Grade"><option value="10">Khối 10</option><option value="11">Khối 11</option><option value="12">Khối 12</option></select></label>
-          <label class="f">Thời lượng trung bình một lượt học (phút)<input type="number" id="k12Min" min="0" max="240" step="1" inputmode="numeric" placeholder="Để trống nếu file đã có thời gian"></label>
-        </div>
+        <div><h2>Báo cáo tiết học K12Online</h2><p class="lead">Tải file <strong>“Báo cáo tiến độ theo học sinh”</strong> xuất từ K12Online. Mỗi file là một bài (tên bài lấy từ tên file, sửa lại được). File phải có đúng các cột: <strong>STT | Họ tên | Ngày sinh | Lớp | % hoàn thành</strong>. App thống kê theo lớp, theo từng bài và xuất Excel mỗi lớp một trang kèm nhận xét tinh thần học bài.</p></div>
+        <div class="row"><button class="btn" id="k12Tpl" type="button">⬇ Tải file mẫu</button></div>
         <label class="drop" id="dropK12">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m0 0L7 9m5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
-          <strong>Chọn hoặc thả file báo cáo lượt học</strong>
-          <span class="muted">.xls, .xlsx hoặc .csv, chọn được nhiều file. Ngày báo cáo lấy từ tên file (ví dụ 14102026_BaoCaoLuotHoc).</span>
+          <strong>Chọn hoặc thả file báo cáo tiến độ (mỗi file một bài)</strong>
+          <span class="muted">.xls, .xlsx hoặc .csv, chọn được nhiều file. Ví dụ tên file: K11-C2-B6 Cấp số cộng.xls</span>
           <input type="file" id="fK12" accept=".xlsx,.xls,.csv" multiple>
         </label>
         <div id="k12Files" class="files"></div>
@@ -3707,164 +3704,170 @@ $('#gsCopy').addEventListener('click',async()=>{const t=$('#gsCode');try{await n
 setTimeout(()=>{if(GS.pull&&GS.url)gsSync('pull',true)},700);
 
 /* =========================================================
-   TIẾT HỌC K12ONLINE (báo cáo lượt học, thời gian học theo khối)
+   TIẾT HỌC K12ONLINE — “Báo cáo tiến độ theo học sinh”
+   File đúng định dạng: STT | Họ tên | Ngày sinh | Lớp | % hoàn thành (mỗi file là một bài)
    ========================================================= */
-let K12=[];try{K12=JSON.parse(lsGet('tkd.k12','[]'))||[]}catch(e){K12=[]}
+let K12=[];try{K12=(JSON.parse(lsGet('tkd.k12','[]'))||[]).filter(f=>f&&f.mode==='progress')}catch(e){K12=[]}
 const saveK12=()=>{if(!lsSet('tkd.k12',JSON.stringify(K12)))toast('Không lưu được báo cáo tiết học (bộ nhớ trình duyệt đầy hoặc bị chặn).')};
-const KS={date:'',rep:null,sort:{key:'stt',dir:1},min:+lsGet('tkd.k12min','0')||0,grade:lsGet('tkd.k12grade','10')};
+const KS={min:0,cls:'',sort:'file',grade:''};
+const K12_HEAD=['STT','Họ tên','Ngày sinh','Lớp','% hoàn thành'];
 const k12Num=v=>{const x=typeof v==='number'?v:parseFloat(String(v==null?'':v).replace(/[^\d.,-]/g,'').replace(',','.'));return isFinite(x)?x:0};
-function k12Min(v,h){
-  const nz=x=>parseFloat(String(x).replace(',','.'));
-  if(typeof v==='number')return isFinite(v)?(/gio/.test(h)?v*60:/giay/.test(h)?v/60:v):0;
-  const s=String(v==null?'':v).trim();if(!s)return 0;
-  let m=s.match(/(\d+):(\d{2}):(\d{2})/);if(m)return +m[1]*60+ +m[2]+ +m[3]/60;
-  m=s.match(/^(\d+):(\d{2})$/);if(m)return +m[1]*60+ +m[2];
-  const g=s.match(/(\d+(?:[.,]\d+)?)\s*(?:giờ|gio|h)\b/i),p=s.match(/(\d+(?:[.,]\d+)?)\s*(?:phút|phut|p)\b/i),sc=s.match(/(\d+(?:[.,]\d+)?)\s*(?:giây|giay|s)\b/i);
-  if(g||p||sc)return(g?nz(g[1])*60:0)+(p?nz(p[1]):0)+(sc?nz(sc[1])/60:0);
-  const x=nz(s);return isFinite(x)?(/gio/.test(h)?x*60:/giay/.test(h)?x/60:x):0;
-}
+const k12Dob=v=>{if(v==null||v==='')return'';if(typeof v==='number'){try{const d=XLSX.SSF.parse_date_code(v);if(d)return p2(d.d)+'/'+p2(d.m)+'/'+d.y}catch(e){}}return String(v).trim()};
 function readK12(wb){
   for(const n of wb.SheetNames){
     const a=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:''});
     for(let i=0;i<Math.min(a.length,25);i++){
       const H=a[i].map(x=>norm(x));
-      const iv=H.findIndex(h=>/luot (hoc|xem)/.test(h)),il=H.findIndex(h=>/^(hoc lieu|ten bai|bai hoc|tiet hoc|ten hoc lieu)/.test(h)),ina=H.findIndex(isNameHdr),
-        it=H.findIndex(h=>/^chuyen de/.test(h)),id=H.findIndex(h=>/thao luan/.test(h)),icl=H.findIndex(h=>/^lop$|^lop /.test(h)),itm=H.findIndex(h=>/thoi (gian|luong)|tong thoi|so phut|so gio/.test(h));
-      if(il<0&&ina<0)continue;if(iv<0&&itm<0&&id<0)continue;
+      const ina=H.findIndex(isNameHdr),icl=H.findIndex(h=>/^lop$/.test(h)),ip=H.findIndex(h=>/hoan thanh/.test(h)),ids=H.findIndex(h=>/^ngay sinh/.test(h));
+      if(ina<0||icl<0||ip<0)continue;
       const rows=[];
       a.slice(i+1).forEach(r=>{
         if(!r.some(c=>String(c).trim()!==''))return;
-        if(/^tong/.test(norm(r[0]))&&!String(r[il>=0?il:ina]).trim())return;
-        if(ina>=0){const name=splitName(r[ina]).name;if(!name||/^\d+$/.test(name))return;
-          rows.push({n:name,c:icl>=0?String(r[icl]).trim():'',l:il>=0?String(r[il]).trim():'',v:iv>=0?k12Num(r[iv]):0,d:id>=0?k12Num(r[id]):0,m:itm>=0?k12Min(r[itm],H[itm]):0})}
-        else{const l=String(r[il]).trim();if(!l)return;
-          rows.push({t:it>=0?String(r[it]).trim():'',l,v:iv>=0?k12Num(r[iv]):0,d:id>=0?k12Num(r[id]):0,m:itm>=0?k12Min(r[itm],H[itm]):0})}
+        const name=splitName(r[ina]).name;if(!name||/^\d+$/.test(name)||/^tong/.test(norm(name)))return;
+        rows.push({n:name,dob:ids>=0?k12Dob(r[ids]):'',c:String(r[icl]).trim(),p:k12Num(r[ip])});
       });
-      if(rows.length)return{mode:ina>=0?'student':'lesson',rows,hasTime:itm>=0&&rows.some(r=>r.m>0),sheet:n};
+      if(rows.length){
+        if(rows.every(r=>r.p<=1)&&rows.some(r=>r.p>0&&r.p<1))rows.forEach(r=>r.p=Math.round(r.p*10000)/100);
+        rows.forEach(r=>{r.p=Math.max(0,Math.min(100,r.p))});
+        return{rows,sheet:n};
+      }
     }
   }
   return null;
 }
-const isoOf=d=>{const m=String(d||'').match(/^(\d{2})\/(\d{2})\/(\d{4})$/);return m?m[3]+'-'+m[2]+'-'+m[1]:''};
-function k12DateOf(name){const m=String(name).match(/(\d{2})(\d{2})(20\d{2})/)||String(name).match(/(\d{2})[-_.](\d{2})[-_.](20\d{2})/);if(m&&+m[1]>=1&&+m[1]<=31&&+m[2]>=1&&+m[2]<=12)return m[1]+'/'+m[2]+'/'+m[3];const d=new Date();return p2(d.getDate())+'/'+p2(d.getMonth()+1)+'/'+d.getFullYear()}
-function k12Sum(f){
-  const V=f.rows.reduce((a,r)=>a+r.v,0),D=f.rows.reduce((a,r)=>a+r.d,0),M=f.rows.reduce((a,r)=>a+r.m,0);
-  const learners=f.mode==='student'?new Set(f.rows.filter(r=>r.v>0||r.m>0).map(r=>norm(r.n))).size:null;
-  return{V,D,M,hasTime:!!f.hasTime,lessons:f.mode==='lesson'?f.rows.length:new Set(f.rows.map(r=>norm(r.l)).filter(Boolean)).size,learners};
+const k12BaiOf=name=>String(name).replace(/\.[^.]+$/,'').replace(/\s*\(\d+\)\s*$/,'').trim()||'Bài';
+const k12Nat=(a,b)=>String(a).localeCompare(String(b),'vi',{numeric:true});
+const k12Given=n=>{const w=String(n).trim().split(/\s+/);return w[w.length-1]||''};
+/* mô hình dữ liệu: lớp → học sinh → điểm % từng bài */
+function k12Model(){
+  const F=K12.slice().sort((a,b)=>k12Nat(a.bai,b.bai)||a.t-b.t),bai=F.map(f=>f.bai);
+  const cm=new Map();
+  F.forEach((f,bi)=>f.rows.forEach(r=>{
+    const cn=r.c||'(Chưa rõ lớp)';if(!cm.has(cn))cm.set(cn,new Map());
+    const m=cm.get(cn),k=norm(r.n)+'|'+norm(r.dob);
+    if(!m.has(k))m.set(k,{n:r.n,dob:r.dob,c:cn,p:new Array(F.length).fill(null),ord:m.size});
+    m.get(k).p[bi]=r.p;
+  }));
+  const classesM=[...cm.entries()].sort((a,b)=>k12Nat(a[0],b[0])).map(([name,m])=>{
+    const st=[...m.values()];
+    st.forEach(s=>{const v=s.p.filter(x=>x!=null);s.avg=v.length?v.reduce((a,b)=>a+b,0)/v.length:0});
+    const per=bai.map((b,bi)=>{const v=st.map(s=>s.p[bi]).filter(x=>x!=null);const n=v.length;return{bai:b,n,avg:n?v.reduce((a,b)=>a+b,0)/n:null,full:v.filter(x=>x>=100).length,zero:v.filter(x=>x<=0).length}});
+    const all=st.flatMap(s=>s.p.filter(x=>x!=null));
+    const tot={n:all.length,avg:all.length?all.reduce((a,b)=>a+b,0)/all.length:0,full:all.filter(x=>x>=100).length,zero:all.filter(x=>x<=0).length};
+    const c={name,st,per,tot};c.nx=k12Comment(c);return c;
+  });
+  return{F,bai,cls:classesM};
 }
-/* báo cáo của một khối tính đến ngày d (mới nhất không muộn hơn d) và báo cáo ngay trước đó */
-function k12Pick(g,date){
-  const list=K12.filter(f=>f.grade===g).sort((a,b)=>(a.iso||'').localeCompare(b.iso||'')||a.t-b.t);
-  const ok=date?list.filter(f=>(f.iso||'')<=date):list;
-  const cur=ok[ok.length-1]||null,prev=cur?ok[ok.length-2]||null:null;return{cur,prev};
+const k12Rank=a=>a>=90?'Rất tốt':a>=70?'Tốt':a>=40?'Cần cố gắng':a>0?'Chưa đạt':'Chưa học';
+/* nhận xét về tinh thần học bài của lớp (dòng cuối) */
+function k12Comment(c){
+  const avg=c.tot.avg,n=c.tot.n||1,fr=Math.round(c.tot.full/n*100),zr=Math.round(c.tot.zero/n*100);
+  const lvl=avg>=90?'Lớp có tinh thần học bài rất tốt, chủ động hoàn thành bài giảng.':avg>=75?'Tinh thần học bài tốt, đa số các em hoàn thành nghiêm túc.':avg>=50?'Tinh thần học bài ở mức khá, còn một bộ phận chưa hoàn thành đầy đủ.':avg>=25?'Tinh thần học bài chưa đều, nhiều em học dở dang hoặc chưa học.':'Tinh thần học bài còn thấp, đa số các em chưa hoàn thành bài giảng.';
+  const weak=c.st.filter(s=>s.avg<50).length,none=c.st.filter(s=>s.avg<=0).length;
+  const act=none?`Cần nhắc ${none} em chưa học bài nào và động viên các em còn lại hoàn thành.`:weak?`Cần động viên ${weak} em hoàn thành chưa đủ.`:'Các em cần tiếp tục phát huy.';
+  return `${lvl} TB ${fmt(avg)}%, ${fr}% lượt học đạt 100%, ${zr}% chưa bắt đầu. ${act}`;
 }
-function k12Dates(){return[...new Set(K12.map(f=>f.iso).filter(Boolean))].sort().reverse()}
-const k12Roster=g=>{const cs=classes.filter(c=>!g||gradeOf(c.name)===g);return{cs,n:cs.reduce((a,c)=>a+c.students.length,0)}};
-const k12Hours=(sum)=>sum.hasTime?{h:sum.M/60,est:false}:(KS.min>0&&sum.V>0?{h:sum.V*KS.min/60,est:true}:null);
-const fh=h=>h==null?'—':(h<1?Math.round(h*60)+' phút':fmt(Math.round(h*10)/10)+' giờ');
-const fdel=(a,b)=>{if(b==null)return'<span class="muted">—</span>';const d=a-b;return d===0?'<span class="muted">0</span>':`<span style="color:var(${d>0?'--success':'--danger'});font-weight:600">${d>0?'+':''}${fmt(d)}</span>`};
-
+function k12Detail2(c){
+  const v=c.per.filter(p=>p.avg!=null);if(v.length<2)return'';
+  const best=v.reduce((a,b)=>b.avg>a.avg?b:a),worst=v.reduce((a,b)=>b.avg<a.avg?b:a),d=v[v.length-1].avg-v[0].avg;
+  return `Bài hoàn thành tốt nhất: “${best.bai}” (${fmt(best.avg)}%); thấp nhất: “${worst.bai}” (${fmt(worst.avg)}%). `+(d>=5?'Xu hướng tích cực: các bài sau được hoàn thành tốt hơn bài đầu.':d<=-5?'Cần chú ý: mức hoàn thành giảm dần ở các bài sau.':'Mức hoàn thành giữa các bài khá ổn định.');
+}
 wireDrop($('#dropK12'),$('#fK12'),async fs=>{
-  const g=$('#k12Grade').value;KS.grade=g;lsSet('tkd.k12grade',g);let ok=0;
+  let ok=0;
   for(const f of fs){
     try{
       const wb=await readFile(f),r=readK12(wb);
-      if(!r){toast('Không nhận ra cột trong '+f.name+'. Cần có cột Học liệu (hoặc Họ và tên) và Lượt học.');continue}
-      const date=k12DateOf(f.name),it={id:uid(),fileName:f.name,date,iso:isoOf(date),grade:g,mode:r.mode,hasTime:r.hasTime,rows:r.rows,t:Date.now()};
-      const j=K12.findIndex(x=>x.fileName===it.fileName&&x.grade===g&&x.date===date);
-      if(j>=0){it.id=K12[j].id;K12[j]=it}else K12.push(it);
-      KS.rep=it.id;ok++;
+      if(!r){toast('File “'+f.name+'” không đúng định dạng. Cần các cột: '+K12_HEAD.join(' | ')+'. Bấm “Tải file mẫu” để xem mẫu.');continue}
+      const bai=k12BaiOf(f.name),it={id:uid(),fileName:f.name,bai,mode:'progress',grade:'',date:'',rows:r.rows,t:Date.now()};
+      const j=K12.findIndex(x=>norm(x.bai)===norm(bai));
+      if(j>=0){it.id=K12[j].id;K12[j]=it}else K12.push(it);ok++;
     }catch(e){toast('Không đọc được '+f.name+': '+(e.message||e))}
   }
-  if(ok){saveK12();KS.date='';renderK12();toast('Đã thêm '+ok+' báo cáo tiết học')}
+  if(ok){saveK12();renderK12();toast('Đã thêm '+ok+' bài')}
 });
-$('#k12Min').addEventListener('input',e=>{KS.min=Math.max(0,Math.min(240,+e.target.value||0));lsSet('tkd.k12min',String(KS.min));renderK12(true)});
-$('#k12Grade').addEventListener('change',e=>{KS.grade=e.target.value;lsSet('tkd.k12grade',KS.grade)});
-
-function renderK12(keepInput){
-  $('#k12Grade').value=KS.grade;if(!keepInput)$('#k12Min').value=KS.min||'';
+const k12Cell=p=>p==null?'<td class="num muted">—</td>':`<td class="num" style="${p>=100?'background:color-mix(in srgb,var(--success) 18%,transparent);':p<=0?'background:color-mix(in srgb,var(--danger) 16%,transparent);color:var(--danger);':''}">${fmt(p)}%</td>`;
+function renderK12(){
   const fl=$('#k12Files'),out=$('#k12Out');
-  const sorted=K12.slice().sort((a,b)=>(b.iso||'').localeCompare(a.iso||'')||a.grade.localeCompare(b.grade));
-  fl.innerHTML=sorted.length?sorted.map(f=>`<div class="file"><div><strong>${esc(f.fileName)}</strong><div class="lead">${esc(gradeTxt(f.grade))} · báo cáo ngày ${esc(f.date)} · ${f.mode==='student'?f.rows.length+' dòng học sinh':f.rows.length+' học liệu'}${f.hasTime?' · có thời gian học':''}</div></div><button class="btn sm danger-o" data-k12del="${f.id}">Xóa</button></div>`).join(''):'';
-  if(!K12.length){out.innerHTML='<div class="card empty"><strong>Chưa có báo cáo tiết học</strong><span>Xuất “Báo cáo lượt học” từ K12Online, chọn khối rồi tải file lên. Mỗi lần tải là một báo cáo; tải nhiều ngày để xem mức tăng.</span></div>';return}
-  const dates=k12Dates();if(!KS.date||!dates.includes(KS.date))KS.date=dates[0]||'';
-  const GR=['10','11','12'],rows=GR.map(g=>{const p=k12Pick(g,KS.date),r=k12Roster(g);return{g,r,cur:p.cur,prev:p.prev,s:p.cur?k12Sum(p.cur):null,sp:p.prev?k12Sum(p.prev):null}});
-  const anyAll=K12.some(f=>!f.grade);const pAll=anyAll?k12Pick('',KS.date):null;
-  const tot=rows.reduce((a,x)=>{if(x.s){a.V+=x.s.V;a.D+=x.s.D;const h=k12Hours(x.s);if(h)a.H+=h.h;if(h&&h.est)a.est=true;a.n+=x.r.n}return a},{V:0,D:0,H:0,n:0,est:false});
-  const maxV=Math.max(1,...rows.map(x=>x.s&&x.r.n?x.s.V/x.r.n:0));
-  let h=`<div class="card stack"><div class="row between"><div><h2>So sánh các khối</h2><p class="lead">Số lớp và học sinh lấy từ tab Danh sách lớp. Lượt học trên mỗi học sinh = tổng lượt học của khối chia cho sĩ số khối.</p></div>
-    <label class="f" style="min-width:200px">Báo cáo tính đến ngày<select id="k12Date">${dates.map(d=>`<option value="${d}"${d===KS.date?' selected':''}>${esc(d.split('-').reverse().join('/'))}</option>`).join('')}</select></label></div>
-    <div class="kpis"><div class="kpi"><span class="l">Tổng lượt học</span><span class="v">${fmt(tot.V)}</span><span class="s">các khối có báo cáo</span></div>
-    <div class="kpi"><span class="l">Lượt thảo luận</span><span class="v">${fmt(tot.D)}</span><span class="s">&nbsp;</span></div>
-    <div class="kpi"><span class="l">Lượt học / học sinh</span><span class="v">${tot.n?fmt(tot.V/tot.n):'—'}</span><span class="s">${tot.n} học sinh</span></div>
-    <div class="kpi"><span class="l">Thời gian học</span><span class="v">${tot.H?fh(tot.H):'—'}</span><span class="s">${tot.H?(tot.est?'ước tính theo '+KS.min+' phút/lượt':'cộng từ file'):'nhập phút/lượt để ước tính'}</span></div></div>
-    <div class="tbl-wrap"><table><thead><tr><th>Khối</th><th class="num">Lớp</th><th class="num">Học sinh</th><th class="num">Học liệu</th><th class="num">Lượt học</th><th class="num">Lượt/HS</th><th class="num">Thảo luận</th><th class="num">Thời gian học</th><th class="num">Tăng so với lần trước</th></tr></thead><tbody>`;
-  rows.forEach(x=>{
-    if(!x.s){h+=`<tr><td><strong>Khối ${x.g}</strong></td><td class="num">${x.r.cs.length}</td><td class="num">${x.r.n}</td><td colspan="6" class="muted">Chưa có báo cáo</td></tr>`;return}
-    const hh=k12Hours(x.s);
-    h+=`<tr><td><strong>Khối ${x.g}</strong><div class="lead">${esc(x.cur.date)}</div></td><td class="num">${x.r.cs.length}</td><td class="num">${x.r.n}</td><td class="num">${x.s.lessons}</td><td class="num"><strong>${fmt(x.s.V)}</strong></td><td class="num">${x.r.n?fmt(x.s.V/x.r.n):'—'}</td><td class="num">${fmt(x.s.D)}</td><td class="num">${hh?(hh.est?'≈ ':'')+fh(hh.h):'—'}</td><td class="num">${fdel(x.s.V,x.sp?x.sp.V:null)}</td></tr>`});
-  h+=`</tbody></table></div>`;
-  h+=`<div><h3>Lượt học trên mỗi học sinh</h3><div class="dist" style="margin-top:8px">${rows.map(x=>{const v=x.s&&x.r.n?x.s.V/x.r.n:0;return`<div class="r"><span>Khối ${x.g}</span><div class="track"><div class="fill" style="width:${v/maxV*100}%;background:var(--t${x.g==='10'?2:x.g==='11'?1:3})"></div></div><span class="n">${x.s&&x.r.n?fmt(v):'—'}</span></div>`}).join('')}</div></div>`;
-  if(pAll&&pAll.cur)h+=`<div class="alert warn">Có báo cáo chọn “Mọi khối” (${esc(pAll.cur.fileName)}) nên không tách được theo khối. Hãy tải lại và chọn đúng khối.</div>`;
-  h+=`<div class="row"><button class="btn" id="k12Xlsx">Xuất Excel</button></div></div>`;
-  /* chi tiết một báo cáo */
-  if(!sorted.find(f=>f.id===KS.rep)){const c=(rows.find(x=>x.cur)||{}).cur||sorted[0];KS.rep=c?c.id:null}
-  const rep=K12.find(f=>f.id===KS.rep);
-  h+=`<div class="card stack"><h2>Chi tiết từng báo cáo</h2><div class="pills" role="group" aria-label="Chọn báo cáo">${sorted.map(f=>`<button class="pill" data-k12rep="${f.id}" aria-pressed="${f.id===KS.rep}">${esc(gradeTxt(f.grade))} · ${esc(f.date)}</button>`).join('')}</div>${rep?k12Detail(rep):''}</div>`;
+  const sorted=K12.slice().sort((a,b)=>k12Nat(a.bai,b.bai)||a.t-b.t);
+  fl.innerHTML=sorted.map(f=>{const cs=[...new Set(f.rows.map(r=>r.c))].sort(k12Nat);return`<div class="file"><div style="flex:1;min-width:0"><input type="text" value="${esc(f.bai)}" data-k12name="${f.id}" aria-label="Tên bài" style="font-weight:700;max-width:100%"><div class="lead">${f.rows.length} học sinh · lớp ${esc(cs.join(', '))} · file ${esc(f.fileName)}</div></div><button class="btn sm danger-o" data-k12del="${f.id}">Xóa</button></div>`}).join('');
+  if(!K12.length){out.innerHTML='<div class="card empty"><strong>Chưa có báo cáo tiết học</strong><span>Xuất “Báo cáo tiến độ theo học sinh” của từng bài từ K12Online rồi tải lên (mỗi file là một bài). Chưa có file? Bấm “Tải file mẫu”.</span></div>';return}
+  const M=k12Model();if(!M.cls.some(c=>c.name===KS.cls))KS.cls=M.cls[0].name;
+  const nHS=M.cls.reduce((a,c)=>a+c.st.length,0),allv=M.cls.reduce((a,c)=>({s:a.s+c.tot.avg*c.tot.n,n:a.n+c.tot.n,f:a.f+c.tot.full}),{s:0,n:0,f:0});
+  let h=`<div class="card stack"><div class="row between"><div><h2>Tổng hợp theo lớp</h2><p class="lead">Ô thể hiện % hoàn thành trung bình của lớp ở từng bài.</p></div><button class="btn primary" id="k12Xlsx">Xuất Excel theo từng lớp</button></div>
+   <div class="kpis"><div class="kpi"><span class="l">Số bài</span><span class="v">${M.bai.length}</span><span class="s">&nbsp;</span></div><div class="kpi"><span class="l">Số lớp</span><span class="v">${M.cls.length}</span><span class="s">${nHS} học sinh</span></div>
+   <div class="kpi"><span class="l">% hoàn thành TB</span><span class="v">${allv.n?fmt(allv.s/allv.n)+'%':'—'}</span><span class="s">tất cả các lớp</span></div><div class="kpi"><span class="l">Lượt học đạt 100%</span><span class="v">${allv.n?Math.round(allv.f/allv.n*100)+'%':'—'}</span><span class="s">&nbsp;</span></div></div>
+   <div class="tbl-wrap"><table><thead><tr><th>Lớp</th><th class="num">Sĩ số</th>${M.bai.map(b=>`<th class="num" title="${esc(b)}">${esc(b.length>26?b.slice(0,24)+'…':b)}</th>`).join('')}<th class="num">TB chung</th></tr></thead><tbody>${M.cls.map(c=>`<tr><td><strong>${esc(c.name)}</strong></td><td class="num">${c.st.length}</td>${c.per.map(p=>k12Cell(p.avg)).join('')}<td class="num"><strong>${fmt(c.tot.avg)}%</strong></td></tr>`).join('')}</tbody></table></div></div>`;
+  const c=M.cls.find(x=>x.name===KS.cls);
+  let st=c.st.slice();
+  if(KS.sort==='name')st.sort((a,b)=>k12Given(a.n).localeCompare(k12Given(b.n),'vi')||a.n.localeCompare(b.n,'vi'));else if(KS.sort==='low')st.sort((a,b)=>a.avg-b.avg||a.ord-b.ord);else st.sort((a,b)=>a.ord-b.ord);
+  const pct=(x,n)=>n?Math.round(x/n*100)+'%':'—';
+  h+=`<div class="card stack"><div class="row between"><h2>Chi tiết lớp</h2><label class="f" style="min-width:200px">Sắp xếp<select id="k12Sort"><option value="file"${KS.sort==='file'?' selected':''}>Theo thứ tự trong file</option><option value="name"${KS.sort==='name'?' selected':''}>Theo tên A → Z</option><option value="low"${KS.sort==='low'?' selected':''}>% thấp → cao</option></select></label></div>
+   <div class="pills" role="group" aria-label="Chọn lớp">${M.cls.map(x=>`<button class="pill" data-k12cls="${esc(x.name)}" aria-pressed="${x.name===KS.cls}">${esc(x.name)}</button>`).join('')}</div>
+   <div class="tbl-wrap"><table><thead><tr><th class="num">STT</th><th>Họ tên</th><th>Ngày sinh</th>${M.bai.map(b=>`<th class="num" title="${esc(b)}">${esc(b.length>26?b.slice(0,24)+'…':b)}</th>`).join('')}<th class="num">TB các bài</th><th>Xếp loại</th></tr></thead><tbody>${st.map((s,i)=>`<tr><td class="num">${i+1}</td><td>${esc(s.n)}</td><td>${esc(s.dob)}</td>${s.p.map(k12Cell).join('')}<td class="num"><strong>${fmt(s.avg)}%</strong></td><td>${k12Rank(s.avg)}</td></tr>`).join('')}</tbody>
+   <tfoot><tr><th colspan="3">% hoàn thành trung bình</th>${c.per.map(p=>`<td class="num"><strong>${p.avg==null?'—':fmt(p.avg)+'%'}</strong></td>`).join('')}<td class="num"><strong>${fmt(c.tot.avg)}%</strong></td><td></td></tr>
+   <tr><th colspan="3">% học sinh hoàn thành 100%</th>${c.per.map(p=>`<td class="num">${pct(p.full,p.n)}</td>`).join('')}<td class="num">${pct(c.tot.full,c.tot.n)}</td><td></td></tr>
+   <tr><th colspan="3">% học sinh chưa học (0%)</th>${c.per.map(p=>`<td class="num">${pct(p.zero,p.n)}</td>`).join('')}<td class="num">${pct(c.tot.zero,c.tot.n)}</td><td></td></tr></tfoot></table></div>
+   <div class="alert"><strong>Nhận xét lớp ${esc(c.name)}:</strong> ${esc(c.nx)}${k12Detail2(c)?'<br>'+esc(k12Detail2(c)):''}</div></div>`;
   out.innerHTML=h;
 }
-function k12Prev(rep){const l=K12.filter(f=>f.grade===rep.grade&&f.id!==rep.id&&(f.iso||'')<(rep.iso||'')&&f.mode===rep.mode).sort((a,b)=>b.iso.localeCompare(a.iso));return l[0]||null}
-function k12Detail(rep){
-  const g=rep.grade,R=k12Roster(g),prev=k12Prev(rep),s=k12Sum(rep),hh=k12Hours(s);
-  let h=`<div class="kpis"><div class="kpi"><span class="l">Lượt học</span><span class="v">${fmt(s.V)}</span><span class="s">${prev?'lần trước '+fmt(k12Sum(prev).V):'chưa có báo cáo trước'}</span></div>
-   <div class="kpi"><span class="l">Lượt thảo luận</span><span class="v">${fmt(s.D)}</span><span class="s">&nbsp;</span></div>
-   <div class="kpi"><span class="l">${rep.mode==='student'?'Học sinh đã học':'Học liệu'}</span><span class="v">${rep.mode==='student'?s.learners:s.lessons}</span><span class="s">${rep.mode==='student'&&R.n?'trên '+R.n+' học sinh':'&nbsp;'}</span></div>
-   <div class="kpi"><span class="l">Lượt học / HS</span><span class="v">${R.n?fmt(s.V/R.n):'—'}</span><span class="s">${R.n} học sinh khối ${g}</span></div>
-   <div class="kpi"><span class="l">Thời gian học</span><span class="v">${hh?fh(hh.h):'—'}</span><span class="s">${hh?(hh.est?'ước tính':'cộng từ file'):'chưa có dữ liệu thời gian'}</span></div></div>`;
-  if(rep.mode==='lesson'){
-    const pm=new Map();if(prev)prev.rows.forEach(r=>pm.set(norm(r.l),r));
-    let L=rep.rows.map((r,i)=>({...r,stt:i+1,per:R.n?r.v/R.n:null,dv:prev?(pm.has(norm(r.l))?r.v-pm.get(norm(r.l)).v:r.v):null}));
-    const k=KS.sort.key,dir=KS.sort.dir;L.sort((a,b)=>cmp(a[k==='lesson'?'l':k==='topic'?'t':k],b[k==='lesson'?'l':k==='topic'?'t':k],dir));
-    const topics={};rep.rows.forEach(r=>{const t=r.t||'(Chưa có chuyên đề)';(topics[t]=topics[t]||{v:0,d:0,n:0});topics[t].v+=r.v;topics[t].d+=r.d;topics[t].n++});
-    const tl=Object.entries(topics).sort((a,b)=>b[1].v-a[1].v);const mx=Math.max(1,...tl.map(x=>x[1].v));
-    if(tl.length>1)h+=`<div><h3>Theo chuyên đề</h3><div class="dist" style="margin-top:8px">${tl.slice(0,12).map(([t,o])=>`<div class="r" style="grid-template-columns:minmax(120px,220px) 1fr 76px"><span title="${esc(t)}" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t)}</span><div class="track"><div class="fill" style="width:${o.v/mx*100}%;background:var(--primary)"></div></div><span class="n">${fmt(o.v)}</span></div>`).join('')}</div></div>`;
-    const sb=(key,l,num)=>`<th${num?' class="num"':''}>${sortBtn2(key,l)}</th>`;
-    h+=`<div class="tbl-wrap"><table><thead><tr>${sb('stt','STT',1)}${sb('topic','Chuyên đề')}${sb('lesson','Học liệu')}${sb('v','Lượt học',1)}${sb('per','Lượt/HS',1)}${sb('d','Thảo luận',1)}${prev?sb('dv','Tăng so với '+prev.date,1):''}</tr></thead><tbody>${L.map(r=>`<tr><td class="num">${r.stt}</td><td>${esc(r.t)}</td><td>${esc(r.l)}</td><td class="num"><strong>${fmt(r.v)}</strong></td><td class="num">${r.per==null?'—':fmt(r.per)}</td><td class="num">${fmt(r.d)}</td>${prev?`<td class="num">${fdel(r.dv,0)}</td>`:''}</tr>`).join('')}<tr><td></td><td colspan="2"><strong>Tổng</strong></td><td class="num"><strong>${fmt(s.V)}</strong></td><td class="num">${R.n?fmt(s.V/R.n):'—'}</td><td class="num"><strong>${fmt(s.D)}</strong></td>${prev?'<td></td>':''}</tr></tbody></table></div>`;
-    if(!hh)h+=`<p class="lead">File “Báo cáo lượt học” chỉ có số lượt, chưa có cột thời gian. Muốn xem giờ học theo khối: nhập “thời lượng trung bình một lượt học” ở trên để ước tính, hoặc tải file có cột thời gian học theo học sinh.</p>`;
-  }else{
-    const byName=new Map();rep.rows.forEach(r=>{const k=norm(r.n),o=byName.get(k)||{n:r.n,c:r.c,v:0,d:0,m:0};o.v+=r.v;o.d+=r.d;o.m+=r.m;if(r.c&&!o.c)o.c=r.c;byName.set(k,o)});
-    const pool=classes.filter(c=>!g||gradeOf(c.name)===g),where=new Map();
-    pool.forEach(c=>c.students.forEach(st=>{const k=norm(st.name);if(!where.has(k))where.set(k,c.name)}));
-    const per={};pool.forEach(c=>per[c.name]={cls:c,hs:c.students.length,seen:new Set(),v:0,d:0,m:0});
-    let unk=0;
-    byName.forEach((o,k)=>{const cn=where.get(k)||(o.c&&per[o.c]?o.c:null);if(!cn){unk++;return}const p=per[cn];if(o.v>0||o.m>0)p.seen.add(k);p.v+=o.v;p.d+=o.d;p.m+=o.m});
-    const cl=Object.values(per).sort((a,b)=>a.cls.name.localeCompare(b.cls.name,'vi',{numeric:true}));
-    h+=`<div class="tbl-wrap"><table><thead><tr><th>Lớp</th><th class="num">Sĩ số</th><th class="num">Đã học</th><th class="num">Tỉ lệ</th><th class="num">Lượt học</th><th class="num">Thảo luận</th><th class="num">Tổng thời gian</th><th class="num">TB mỗi HS đã học</th></tr></thead><tbody>${cl.map(p=>`<tr><td><strong>${esc(p.cls.name)}</strong></td><td class="num">${p.hs}</td><td class="num">${p.seen.size}</td><td class="num">${p.hs?Math.round(p.seen.size/p.hs*100)+'%':'—'}</td><td class="num">${fmt(p.v)}</td><td class="num">${fmt(p.d)}</td><td class="num">${rep.hasTime?fh(p.m/60):'—'}</td><td class="num">${rep.hasTime&&p.seen.size?fh(p.m/60/p.seen.size):'—'}</td></tr>`).join('')}</tbody></table></div>`;
-    if(unk)h+=`<div class="alert warn">${unk} học sinh trong file chưa khớp với danh sách lớp nên chưa được tính vào lớp nào.</div>`;
-    const miss=cl.map(p=>({n:p.cls.name,l:p.cls.students.filter(st=>!p.seen.has(norm(st.name)))})).filter(x=>x.l.length);
-    if(miss.length)h+=`<details><summary>Học sinh chưa học (${miss.reduce((a,x)=>a+x.l.length,0)})</summary>${miss.map(x=>`<div style="margin-top:8px"><strong>${esc(x.n)}</strong> · ${x.l.length} em<div class="names">${x.l.map(st=>`<span class="chip miss">${esc(st.name)}</span>`).join('')}</div></div>`).join('')}</details>`;
-  }
-  return h;
-}
-const sortBtn2=(k,l)=>{const on=KS.sort.key===k;return`<button data-k12sort="${k}" aria-label="Sắp xếp theo ${esc(l)}">${esc(l)}<span aria-hidden="true">${on?(KS.sort.dir>0?' ▲':' ▼'):''}</span></button>`};
 $('#view-k12').addEventListener('click',async e=>{
   const d=e.target.closest('[data-k12del]');
-  if(d){const f=K12.find(x=>x.id===d.dataset.k12del);if(f&&await ask({title:'Xóa báo cáo?',msg:f.fileName+' ('+gradeTxt(f.grade)+', '+f.date+')',ok:'Xóa',danger:true})){K12=K12.filter(x=>x.id!==f.id);saveK12();renderK12()}return}
-  const r=e.target.closest('[data-k12rep]');if(r){KS.rep=r.dataset.k12rep;renderK12(true);return}
-  const s=e.target.closest('[data-k12sort]');if(s){const k=s.dataset.k12sort;KS.sort=KS.sort.key===k?{key:k,dir:-KS.sort.dir}:{key:k,dir:(k==='lesson'||k==='topic'||k==='stt')?1:-1};renderK12(true);return}
-  if(e.target.closest('#k12Xlsx'))exportK12();
+  if(d){const f=K12.find(x=>x.id===d.dataset.k12del);if(f&&await ask({title:'Xóa bài?',msg:f.bai+' ('+f.rows.length+' học sinh)',ok:'Xóa',danger:true})){K12=K12.filter(x=>x.id!==f.id);saveK12();renderK12()}return}
+  const r=e.target.closest('[data-k12cls]');if(r){KS.cls=r.dataset.k12cls;renderK12();return}
+  if(e.target.closest('#k12Xlsx')){exportK12();return}
+  if(e.target.closest('#k12Tpl'))k12Template();
 });
-$('#view-k12').addEventListener('change',e=>{if(e.target.id==='k12Date'){KS.date=e.target.value;renderK12(true)}});
+$('#view-k12').addEventListener('change',e=>{
+  if(e.target.id==='k12Sort'){KS.sort=e.target.value;renderK12();return}
+  const nm=e.target.closest('[data-k12name]');
+  if(nm){const f=K12.find(x=>x.id===nm.dataset.k12name),v=nm.value.trim();if(f&&v){f.bai=v;saveK12();renderK12()}}
+});
+function k12Template(){
+  const a=[K12_HEAD,[1,'Nguyễn Văn A','01/01/2010','11B1',100],[2,'Trần Thị B','15/03/2010','11B1',60],[3,'Lê Văn C','20/07/2010','11B2',0],[4,'Phạm Thị D','05/11/2010','11B2',94]];
+  const ws=XLSX.utils.aoa_to_sheet(a);ws['!cols']=[{wch:6},{wch:28},{wch:14},{wch:10},{wch:14}];
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Báo cáo tiến độ theo học sinh');
+  XLSX.writeFile(wb,'mau-bao-cao-tien-do-hoc-sinh-K12.xlsx');toast('Đã tải file mẫu. Đặt tên file theo tên bài, ví dụ K11-C2-B6 Cấp số cộng.xlsx');
+}
 function exportK12(){
-  const wb=XLSX.utils.book_new(),GR=['10','11','12'];
-  const a=[['Khối','Báo cáo ngày','Số lớp','Số học sinh','Số học liệu','Lượt học','Lượt học/HS','Lượt thảo luận','Thời gian học (giờ)','Ghi chú thời gian','Tăng lượt học so với lần trước']];
-  GR.forEach(g=>{const p=k12Pick(g,KS.date),R=k12Roster(g);if(!p.cur){a.push(['Khối '+g,'',R.cs.length,R.n]);return}const s=k12Sum(p.cur),hh=k12Hours(s);a.push(['Khối '+g,p.cur.date,R.cs.length,R.n,s.lessons,s.V,R.n?r2(s.V/R.n):'',s.D,hh?r2(hh.h):'',hh?(hh.est?'ước tính '+KS.min+' phút/lượt':'cộng từ file'):'',p.prev?s.V-k12Sum(p.prev).V:''])});
-  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(a),'So sánh khối');
-  K12.slice().sort((x,y)=>(y.iso||'').localeCompare(x.iso||'')).forEach((f,i)=>{
-    const rows=f.mode==='lesson'?[['STT','Chuyên đề','Học liệu','Lượt học','Lượt thảo luận'],...f.rows.map((r,j)=>[j+1,r.t,r.l,r.v,r.d])]:[['Họ và tên','Lớp','Học liệu','Lượt học','Lượt thảo luận','Thời gian (phút)'],...f.rows.map(r=>[r.n,r.c,r.l,r.v,r.d,r.m?r2(r.m):''])];
-    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),(('K'+f.grade+' '+f.date.replace(/\//g,'-')).slice(0,28)+(i>8?'':'')).replace(/[\[\]*?:\\]/g,'-')+(wb.SheetNames.includes(('K'+f.grade+' '+f.date.replace(/\//g,'-')).slice(0,28))?'_'+i:''));
+  if(!K12.length){toast('Chưa có báo cáo để xuất');return}
+  const M=k12Model(),wb=XLSX.utils.book_new(),today=new Date(),ds=p2(today.getDate())+'/'+p2(today.getMonth()+1)+'/'+today.getFullYear();
+  const pc=x=>x==null?'':r2(x),pr=(x,n)=>n?r2(x/n*100):'';
+  /* tổng hợp */
+  const S=[['TỔNG HỢP TIẾN ĐỘ HỌC BÀI TRÊN K12ONLINE — MÔN TOÁN'],['Ngày xuất: '+ds+' · '+M.bai.length+' bài · '+M.cls.length+' lớp'],[],['Lớp','Sĩ số',...M.bai.map(b=>b+' (%)'),'TB chung (%)','% lượt học đạt 100%','% lượt chưa học','Nhận xét tinh thần học bài']];
+  M.cls.forEach(c=>S.push([c.name,c.st.length,...c.per.map(p=>pc(p.avg)),pc(c.tot.avg),pr(c.tot.full,c.tot.n),pr(c.tot.zero,c.tot.n),c.nx]));
+  const T=M.cls.reduce((a,c)=>({s:a.s+c.tot.avg*c.tot.n,n:a.n+c.tot.n,f:a.f+c.tot.full,z:a.z+c.tot.zero,h:a.h+c.st.length}),{s:0,n:0,f:0,z:0,h:0});
+  S.push(['Tất cả các lớp',T.h,...M.bai.map((b,bi)=>{let s=0,n=0;M.cls.forEach(c=>{const p=c.per[bi];if(p.avg!=null){s+=p.avg*p.n;n+=p.n}});return n?r2(s/n):''}),T.n?r2(T.s/T.n):'',pr(T.f,T.n),pr(T.z,T.n),'']);
+  const ws0=XLSX.utils.aoa_to_sheet(S);
+  ws0['!cols']=[{wch:16},{wch:8},...M.bai.map(()=>({wch:18})),{wch:12},{wch:18},{wch:16},{wch:150}];
+  XLSX.utils.book_append_sheet(wb,ws0,'Tổng hợp');
+  /* từng lớp */
+  const used=new Set(['Tổng hợp']);
+  M.cls.forEach(c=>{
+    const nb=M.bai.length,last=3+nb+1,A=[];
+    A.push(['BÁO CÁO TIẾN ĐỘ HỌC BÀI TRÊN K12ONLINE — LỚP '+c.name.toUpperCase()]);
+    A.push(['Môn Toán · '+nb+' bài · Ngày xuất: '+ds]);A.push([]);
+    A.push(['STT','Họ và tên','Ngày sinh',...M.bai.map(b=>b+' (% hoàn thành)'),'TB các bài (%)','Xếp loại tinh thần học bài']);
+    c.st.slice().sort((a,b)=>a.ord-b.ord).forEach((s,i)=>A.push([i+1,s.n,s.dob,...s.p.map(pc),r2(s.avg),k12Rank(s.avg)]));
+    A.push([]);
+    const lab=t=>[t,'','']; 
+    A.push([...lab('Sĩ số có trong báo cáo'),...c.per.map(p=>p.n),c.st.length,'']);
+    A.push([...lab('% hoàn thành trung bình'),...c.per.map(p=>pc(p.avg)),r2(c.tot.avg),'']);
+    A.push([...lab('Số HS hoàn thành 100%'),...c.per.map(p=>p.full),c.tot.full,'']);
+    A.push([...lab('% HS hoàn thành 100%'),...c.per.map(p=>pr(p.full,p.n)),pr(c.tot.full,c.tot.n),'']);
+    A.push([...lab('Số HS chưa học (0%)'),...c.per.map(p=>p.zero),c.tot.zero,'']);
+    A.push([...lab('% HS chưa học (0%)'),...c.per.map(p=>pr(p.zero,p.n)),pr(c.tot.zero,c.tot.n),'']);
+    A.push([]);
+    const d2=k12Detail2(c);if(d2)A.push(['Nhận xét theo bài: '+d2]);
+    A.push(['NHẬN XÉT TINH THẦN HỌC BÀI: '+c.nx]);
+    const ws=XLSX.utils.aoa_to_sheet(A);
+    const lastR=A.length-1,mg=[{s:{r:0,c:0},e:{r:0,c:last}},{s:{r:1,c:0},e:{r:1,c:last}}];
+    const r0=4+c.st.length+1;for(let r=r0;r<r0+6;r++)mg.push({s:{r,c:0},e:{r,c:2}});
+    for(let r=lastR-(d2?1:0);r<=lastR;r++)mg.push({s:{r,c:0},e:{r,c:last}});
+    ws['!merges']=mg;ws['!cols']=[{wch:6},{wch:30},{wch:13},...M.bai.map(()=>({wch:22})),{wch:14},{wch:Math.max(44,200-(6+30+13+22*nb+14))}];
+    let nm=String(c.name).replace(/[\[\]*?:\/\\]/g,'-').slice(0,28)||'Lớp',k=2,b0=nm;while(used.has(nm.toLowerCase())||used.has(nm))nm=b0.slice(0,26)+'_'+k++;used.add(nm);
+    XLSX.utils.book_append_sheet(wb,ws,nm);
   });
-  XLSX.writeFile(wb,'tiet-hoc-k12online.xlsx');toast('Đã xuất file Excel');
+  XLSX.writeFile(wb,'tien-do-hoc-bai-k12online.xlsx');toast('Đã xuất Excel: mỗi lớp một trang');
 }
 
 /* =========================================================
