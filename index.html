@@ -2585,7 +2585,7 @@ h3{font-size:17px;font-weight:700}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 .btn.sm{min-height:44px;padding:0 var(--space-2);font-size:14px}
 :focus-visible{outline:2px solid var(--primary);outline-offset:2px;box-shadow:var(--focus)}
-input[type=text],input[type=number],select{min-height:44px;width:100%;padding:0 var(--space-2);border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text);font:15px var(--font-body)}
+input[type=text],input[type=number],input[type=datetime-local],select{min-height:44px;width:100%;padding:0 var(--space-2);border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text);font:15px var(--font-body)}
 label.f{display:grid;gap:var(--space-1);font-size:14px;font-weight:600}
 label.f span{color:var(--muted);font-weight:500}
 
@@ -2692,6 +2692,7 @@ footer{margin-top:var(--space-4);font-size:13px;color:var(--muted)}
   <nav class="tabs" role="tablist" aria-label="Chức năng">
     <button class="tab" role="tab" id="tab-stats" aria-selected="true" data-tab="stats">Thống kê điểm</button>
     <button class="tab" role="tab" id="tab-k12" aria-selected="false" data-tab="k12">Tiết học K12</button>
+    <button class="tab" role="tab" id="tab-tb" aria-selected="false" data-tab="tb">Thông báo K12</button>
     <button class="tab" role="tab" id="tab-classes" aria-selected="false" data-tab="classes">Danh sách lớp</button>
     <button class="tab" role="tab" id="tab-backup" aria-selected="false" data-tab="backup">Sao lưu</button>
     <button class="tab" role="tab" id="tab-gs" aria-selected="false" data-tab="gs">Google Sheet</button>
@@ -2717,6 +2718,34 @@ footer{margin-top:var(--space-4);font-size:13px;color:var(--muted)}
         <div id="k12Files" class="files"></div>
       </div>
       <div id="k12Out" class="stack"></div>
+    </div>
+  </section>
+
+  <!-- ======= THÔNG BÁO BÀI TẬP K12 ======= -->
+  <section id="view-tb" hidden aria-labelledby="tab-tb">
+    <div class="stack">
+      <div class="card stack">
+        <div><h2>Thông báo làm bài trên K12Online</h2><p class="lead">Điền thông tin bài, chọn một kiểu ghi chú nhanh, app tạo sẵn thông báo gửi học sinh qua Zalo hoặc tin nhắn. Có 20 mẫu để chọn hoặc bấm ngẫu nhiên.</p></div>
+        <div class="grid2">
+          <label class="f">Gửi cho<select id="tbTo"></select></label>
+          <label class="f">Loại<select id="tbKind"><option value="test">Bài kiểm tra</option><option value="lesson">Bài giảng</option></select></label>
+        </div>
+        <label class="f">Tên bài<input type="text" id="tbTen" placeholder="Ví dụ: Bài 2. Cấp số cộng" autocomplete="off"></label>
+        <div class="grid2">
+          <label class="f">Ngày giờ kết thúc<input type="datetime-local" id="tbHan"></label>
+          <label class="f">Người gửi (ký tên)<input type="text" id="tbThay" autocomplete="off"></label>
+        </div>
+        <div><strong style="font-size:14px">Ghi chú nhanh</strong> <span class="lead" id="tbQHint"></span><div class="pills" id="tbQuick" style="margin-top:8px"></div></div>
+        <label class="f">Ghi chú bổ sung (không bắt buộc)<textarea id="tbNote" class="m" style="min-height:70px" placeholder="Ví dụ: Làm bằng máy tính, được làm 1 lần, thời gian 45 phút."></textarea></label>
+      </div>
+      <div class="card stack">
+        <div class="row between"><h2>Thông báo gửi học sinh</h2><button class="btn" id="tbRand">🎲 Mẫu ngẫu nhiên</button></div>
+        <div class="pills" id="tbTpl" role="group" aria-label="20 mẫu thông báo"></div>
+        <div id="tbHead" style="color:#fff;font-weight:700;padding:10px 14px;border-radius:var(--radius)"></div>
+        <textarea id="tbOut" class="m" style="min-height:300px" aria-label="Nội dung thông báo"></textarea>
+        <p class="lead">Có thể sửa trực tiếp trong khung. Đổi thông tin hoặc đổi mẫu thì nội dung được tạo lại.</p>
+        <div class="row"><button class="btn primary" id="tbCopy">Sao chép</button><button class="btn" id="tbShare">Chia sẻ</button><button class="btn" id="tbPng">Tải ảnh thông báo (PNG)</button></div>
+      </div>
     </div>
   </section>
 
@@ -2924,9 +2953,9 @@ const gradeTxt=g=>g?'Khối '+g:'Mọi khối';
 
 /* ---------- tabs ---------- */
 function showTab(t){
-  ['classes','stats','backup','gs','k12'].forEach(x=>$('#view-'+x).hidden=x!==t);
+  ['classes','stats','backup','gs','k12','tb'].forEach(x=>$('#view-'+x).hidden=x!==t);
   $$('.tab').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===t)));
-  if(t==='stats')renderStats();else if(t==='classes')renderClasses();else if(t==='gs')renderGs();else if(t==='k12')renderK12();else renderBackup();
+  if(t==='stats')renderStats();else if(t==='classes')renderClasses();else if(t==='gs')renderGs();else if(t==='k12')renderK12();else if(t==='tb')renderTB();else renderBackup();
   window.scrollTo(0,0);
 }
 $$('.tab').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
@@ -3808,6 +3837,119 @@ function exportK12(){
     XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),(('K'+f.grade+' '+f.date.replace(/\//g,'-')).slice(0,28)+(i>8?'':'')).replace(/[\[\]*?:\\]/g,'-')+(wb.SheetNames.includes(('K'+f.grade+' '+f.date.replace(/\//g,'-')).slice(0,28))?'_'+i:''));
   });
   XLSX.writeFile(wb,'tiet-hoc-k12online.xlsx');toast('Đã xuất file Excel');
+}
+
+/* =========================================================
+   THÔNG BÁO BÀI TẬP TRÊN K12ONLINE (20 mẫu, 10 kiểu ghi chú nhanh)
+   ========================================================= */
+const TBQ=[
+ ['💪','Động viên',['Cố lên các em, mỗi lần luyện tập là một bước tiến. Thầy tin các em làm được! 💪','Chưa giỏi ngay cũng không sao, quan trọng là các em bắt đầu. Thầy luôn đồng hành cùng các em.','Mỗi bài làm là một viên gạch xây nền tảng. Cố gắng thêm một chút nữa nhé!']],
+ ['🌟','Khích lệ',['Lớp mình đã rất cố gắng thời gian qua, thầy rất tự hào. Giữ vững phong độ nhé! 🌟','Những bạn đã hoàn thành sớm thật đáng khen. Các bạn còn lại hãy tăng tốc nào!','Thầy thấy tiến bộ rõ rệt ở nhiều em. Tiếp tục phát huy nhé!']],
+ ['😄','Hài hước',['Deadline đang chạy nhanh hơn cả tốc độ wifi nhà bạn. Vào làm ngay kẻo hụt hơi nhé! 🏃💨','Bài này không cắn đâu, chỉ “cắn” điểm của bạn nếu quên làm thôi 😄','Thầy chỉ nhắc hai lần, lần thứ ba là… thầy điểm danh bằng tên. 😎']],
+ ['🎁','Phần thưởng',['Bạn nào hoàn thành đúng hạn với kết quả tốt sẽ được thầy cộng điểm khuyến khích! 🎁','Ba bạn có điểm cao nhất sẽ được tuyên dương trước lớp và nhận quà nhỏ. 🏆','Cả lớp hoàn thành 100% đúng hạn, thầy sẽ có một bất ngờ dành tặng! 🎉']],
+ ['⏰','Nhắc nhẹ',['Các em nhớ sắp xếp thời gian, đừng để sát giờ mới làm kẻo lỗi mạng lại tiếc nhé.','Làm sớm để còn kịp hỏi thầy khi gặp chỗ chưa hiểu nhé!','Đừng chờ đến phút cuối, mỗi ngày làm một ít sẽ nhẹ nhàng hơn nhiều.']],
+ ['🏁','Thi đua',['Cuộc đua giữa các lớp đang rất hấp dẫn! Lớp nào có tỉ lệ hoàn thành cao nhất sẽ được vinh danh. 🏁','Cùng nhau đưa lớp mình lên đầu bảng. Mỗi bạn là một mắt xích quan trọng!','Tinh thần đồng đội: bạn nào xong rồi hãy nhắc bạn bên cạnh cùng làm nhé!']],
+ ['🙏','Cảm ơn',['Cảm ơn các em đã luôn nghiêm túc trong học tập. Thầy rất trân trọng điều đó. 🙏','Cảm ơn các em đã hợp tác với thầy suốt thời gian qua!','Thầy cảm ơn những bạn đã hoàn thành đúng hạn, đó là sự tự giác rất đáng quý.']],
+ ['📝','Mẹo làm bài',['Mẹo nhỏ: đọc kỹ đề, làm câu dễ trước, câu khó để sau và nhớ kiểm tra lại đáp án. 📝','Xem lại lý thuyết và ví dụ mẫu khoảng 10 phút trước khi làm, hiệu quả bất ngờ đấy!','Chuẩn bị giấy nháp, máy tính cầm tay và một góc học yên tĩnh để làm bài thật tốt.']],
+ ['🤝','Hỗ trợ',['Gặp khó khăn hoặc lỗi kỹ thuật? Nhắn ngay cho thầy, thầy sẵn sàng hỗ trợ. 🤝','Câu nào chưa hiểu, các em cứ chụp ảnh gửi thầy, thầy sẽ hướng dẫn nhé!','Nếu chưa có thiết bị hoặc mạng, hãy báo thầy sớm để cùng tìm cách.']],
+ ['✨','Truyền cảm hứng',['“Kiên trì mỗi ngày một chút, rồi bạn sẽ ngạc nhiên về chính mình.” ✨','Toán học không dành cho người giỏi nhất, mà dành cho người không bỏ cuộc. 🌱','Mỗi bài tập hôm nay là hạt giống cho thành công ngày mai. 🌳']]
+];
+const TBT=[
+ ['Gọn gàng','📢',['#0ea5e9','#2563eb'],['📢 THÔNG BÁO {LOAI}','{Goi} ơi,','📌 Bài: {ten}','⏰ Hạn cuối: {han} ({conlai})','💻 Làm trên K12Online','💬 {ghichu}','— {thay}']],
+ ['Bảng tin lớp','🗞️',['#f97316','#ef4444'],['🗞️ BẢNG TIN LỚP','━━━━━━━━━━━━','🔹 Nội dung: {ten}','🔹 Hình thức: {loai} trên K12Online','🔹 Kết thúc: {han}','🔹 {conlai}','━━━━━━━━━━━━','✍️ {ghichu}','','Trân trọng,','{thay}']],
+ ['Nhắc việc thân thiện','🌼',['#f472b6','#fb923c'],['Chào {goi} 🌼','Thầy gửi lời nhắc nhỏ: {viec} “{ten}” trên K12Online nhé.','⏳ Hạn cuối {han} ({conlai}).','','{ghichu}','','Chúc các em học thật vui! 🎈','— {thay}']],
+ ['Thư ngắn từ thầy','✉️',['#14b8a6','#0ea5e9'],['✉️ Gửi {goi},','','Thầy có {loai} mới tên là “{ten}” đang chờ các em trên K12Online.','Các em nhớ {viec} xong trước {han} ({conlai}) nhé.','','{ghichu}','','Thân ái,','{thay}']],
+ ['Thử thách','🎯',['#8b5cf6','#ec4899'],['🎯 THỬ THÁCH MỚI ĐÃ MỞ!','','🏁 Tên thử thách: {ten}','🎮 Dạng: {loai} (K12Online)','⏱️ Về đích trước: {han} — {conlai}','','{ghichu}','','Sẵn sàng chưa {goi}? Bắt đầu thôi! 🚀','— {thay}']],
+ ['Đếm ngược','⏳',['#ef4444','#f59e0b'],['⏳ ĐẾM NGƯỢC: {CONLAI}','','📘 {ten}','({loai} trên K12Online)','📅 Kết thúc: {han}','','{ghichu}','','👉 {Goi} vào {viec} ngay hôm nay để khỏi vội vàng nhé!','{thay}']],
+ ['Nhiệm vụ học tập','🎒',['#22c55e','#0ea5e9'],['🎒 NHIỆM VỤ HỌC TẬP','━━━━━━━━━━━━','✅ Nhiệm vụ: {viec} “{ten}”','🗺️ Địa điểm: K12Online','🕒 Thời hạn: {han}','🎁 Phần thưởng: sự tiến bộ của chính em','━━━━━━━━━━━━','{ghichu}','— {thay}']],
+ ['Thông báo chính thức','📋',['#475569','#1e293b'],['THÔNG BÁO','V/v: {viec} “{ten}” trên K12Online','','Kính gửi: {goi}.','Giáo viên bộ môn Toán thông báo: các em {viec} xong trước {han} ({conlai}).','Ghi chú: {ghichu}','','Đề nghị các em thực hiện nghiêm túc.','{thay}']],
+ ['Chào buổi sáng','🌅',['#fbbf24','#f97316'],['🌅 Chào buổi sáng, {goi}!','','Một ngày mới, một bài học mới:','📖 “{ten}” — {loai} trên K12Online','🗓️ Hạn: {han} ({conlai})','','{ghichu}','','Chúc cả lớp một ngày tràn đầy năng lượng! ☀️','— {thay}']],
+ ['Tin nóng','🔥',['#dc2626','#f97316'],['🔥 TIN NÓNG TỪ LỚP TOÁN 🔥','','⚡ {Loai} “{ten}” vừa lên sóng trên K12Online!','⏰ Chốt sổ: {han} ({conlai})','','{ghichu}','','Đừng bỏ lỡ nhé {goi}! 📣','{thay}']],
+ ['Hành trình toán học','🧭',['#0891b2','#6366f1'],['🧭 HÀNH TRÌNH TOÁN HỌC','','Chặng tiếp theo: “{ten}”','📍 {Loai} · K12Online','🏁 Đích đến: {han} ({conlai})','','{ghichu}','','Mỗi chặng đi qua là một bước lớn. Cùng tiến lên {goi}! 🌟','— {thay}']],
+ ['Checklist','☑️',['#10b981','#3b82f6'],['☑️ CHECKLIST HÔM NAY','','⬜ Mở K12Online','⬜ {Viec}: {ten}','⬜ Nộp trước {han}','⬜ Kiểm tra lại kết quả','','⏳ {conlai}','{ghichu}','','Tick đủ 4 ô là hoàn hảo! ✔️','— {thay}']],
+ ['Cuộc đua','🏆',['#eab308','#f97316'],['🏆 CUỘC ĐUA {LOP}','','Vòng mới: {ten}','🚦 Xuất phát: ngay bây giờ','🏁 Vạch đích: {han} ({conlai})','','{ghichu}','','Ai {viec} sớm, người đó giành lợi thế! 🥇','— {thay}']],
+ ['Thiệp xanh','💌',['#34d399','#059669'],['💌 Thiệp nhắc nhẹ gửi {goi}','','🌿 “{ten}” đang đợi các em trên K12Online.','🌿 Hạn hoàn thành: {han} ({conlai}).','','{ghichu}','','Thầy tin các em sẽ làm thật tốt! 🌱','— {thay}']],
+ ['Giờ toán vui vẻ','🎲',['#a855f7','#06b6d4'],['🎲 GIỜ TOÁN VUI VẺ 🎲','','Bài mới: {ten} ({loai})','📱 Chơi ở: K12Online','⌛ Hết giờ: {han}','📊 Tình hình: {conlai}','','{ghichu}','','Vào là vui, làm là giỏi! 😄','{thay}']],
+ ['Mật thư','🕵️',['#334155','#7c3aed'],['🕵️ MẬT THƯ TỪ THẦY','','Mã nhiệm vụ: {ten}','Địa điểm bí mật: K12Online','Thời hạn giải mã: {han} ({conlai})','','{ghichu}','','{Goi} hãy hoàn thành nhiệm vụ trước khi mật thư tự hủy nhé! 🔍','— {thay}']],
+ ['Phi hành đoàn','🚀',['#4f46e5','#0ea5e9'],['🚀 PHI HÀNH ĐOÀN {LOP}','','Nhiệm vụ: {viec} “{ten}”','🛰️ Trạm điều khiển: K12Online','🌍 Hạ cánh trước: {han} ({conlai})','','{ghichu}','','Đếm ngược nào: 3 … 2 … 1 … Cất cánh! 🌌','— {thay}']],
+ ['Cơ hội ghi điểm','⭐',['#f59e0b','#84cc16'],['⭐ CƠ HỘI GHI ĐIỂM ⭐','','📚 {Loai}: {ten}','🗓️ Nộp trước: {han} ({conlai})','💻 Nền tảng: K12Online','','{ghichu}','','Làm đúng hạn, làm nghiêm túc là đã thắng một nửa! 🎉','— {thay}']],
+ ['Ngắn gọn','💬',['#06b6d4','#3b82f6'],['💬 {Goi}: {viec} “{ten}” trên K12Online trước {han} ({conlai}) nhé!','{ghichu}','— {thay}']],
+ ['Lời nhắn ấm áp','☕',['#d97706','#b45309'],['☕ Một lời nhắn ấm áp','','Gửi {goi},','Trong lúc nghỉ ngơi, các em nhớ ghé K12Online để {viec} “{ten}” nhé.','Thầy hẹn các em đến hết {han} ({conlai}).','','{ghichu}','','Chúc các em nhiều niềm vui học Toán! 💛','— {thay}']]
+];
+const TBD=['Chủ nhật','thứ Hai','thứ Ba','thứ Tư','thứ Năm','thứ Sáu','thứ Bảy'];
+const tbLocal=d=>d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())+'T'+p2(d.getHours())+':'+p2(d.getMinutes());
+const TB=Object.assign({to:'all',kind:'test',ten:'',han:'',note:'',quick:-1,qv:0,tpl:0,thay:'Thầy Vũ Tiến Lực',manual:false},(()=>{try{return JSON.parse(lsGet('tkd.tb','{}'))||{}}catch(e){return{}}})());
+const saveTB=()=>lsSet('tkd.tb',JSON.stringify({to:TB.to,kind:TB.kind,ten:TB.ten,han:TB.han,note:TB.note,quick:TB.quick,qv:TB.qv,tpl:TB.tpl,thay:TB.thay}));
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+function tbVars(){
+  const k=TB.kind==='test'?{loai:'bài kiểm tra',viec:'làm bài kiểm tra'}:{loai:'bài giảng',viec:'học bài giảng'};
+  let lop='cả lớp',goi='các em';
+  if(TB.to.startsWith('g:')){lop='khối '+TB.to.slice(2);goi='các em khối '+TB.to.slice(2)}
+  else if(TB.to.startsWith('c:')){const c=classes.find(x=>x.id===TB.to.slice(2));if(c){lop='lớp '+c.name;goi='các em lớp '+c.name}}
+  let han='(chưa chọn hạn)',conlai='';
+  if(TB.han){const d=new Date(TB.han);if(!isNaN(d)){han=p2(d.getHours())+':'+p2(d.getMinutes())+', '+TBD[d.getDay()]+' ngày '+p2(d.getDate())+'/'+p2(d.getMonth()+1)+'/'+d.getFullYear();
+    const t0=new Date();t0.setHours(0,0,0,0);const t1=new Date(d);t1.setHours(0,0,0,0);const n=Math.round((t1-t0)/864e5);
+    conlai=n<0?'đã quá hạn':n===0?'hết hạn trong hôm nay':n===1?'còn đến ngày mai':'còn '+n+' ngày'}}
+  const q=TB.quick>=0?TBQ[TB.quick][2][TB.qv%3]:'';
+  const ghichu=[q,TB.note.trim()].filter(Boolean).join(' ');
+  return{ten:TB.ten.trim()||'(tên bài)',loai:k.loai,Loai:cap(k.loai),LOAI:k.loai.toUpperCase(),viec:k.viec,Viec:cap(k.viec),lop,LOP:lop.toUpperCase(),goi,Goi:cap(goi),han,conlai:conlai||'',CONLAI:(conlai||'').toUpperCase(),ghichu,thay:TB.thay.trim()||'Thầy cô'};
+}
+function tbBuild(){
+  const v=tbVars(),t=TBT[TB.tpl];
+  let lines=t[3].filter(l=>!(l.includes('{ghichu}')&&!v.ghichu));
+  let s=lines.map(l=>l.replace(/\{(\w+)\}/g,(m,k)=>v[k]!=null?v[k]:m).replace(/\(\)/g,'').replace(/\s+—\s+$/,'')).join('\n');
+  s=s.replace(/ \(\)/g,'').replace(/\n{3,}/g,'\n\n').trim();
+  return s;
+}
+function renderTB(){
+  const sel=$('#tbTo');
+  sel.innerHTML='<option value="all">Tất cả các lớp</option>'+['10','11','12'].map(g=>`<option value="g:${g}">Cả khối ${g}</option>`).join('')+classes.map(c=>`<option value="c:${esc(c.id)}">Lớp ${esc(c.name)}</option>`).join('');
+  if(![...sel.options].some(o=>o.value===TB.to))TB.to='all';
+  sel.value=TB.to;$('#tbKind').value=TB.kind;$('#tbTen').value=TB.ten;
+  if(!TB.han){const d=new Date();d.setDate(d.getDate()+3);d.setHours(23,59,0,0);TB.han=tbLocal(d)}
+  $('#tbHan').value=TB.han;$('#tbNote').value=TB.note;$('#tbThay').value=TB.thay;
+  $('#tbQuick').innerHTML=TBQ.map((q,i)=>`<button class="pill" data-tbq="${i}" aria-pressed="${TB.quick===i}">${q[0]} ${q[1]}</button>`).join('')+(TB.quick>=0?'<button class="pill" data-tbq="-1">✕ Bỏ ghi chú nhanh</button>':'');
+  $('#tbQHint').textContent=TB.quick>=0?'Bấm lại kiểu đang chọn để đổi sang câu khác cùng phong cách.':'Chọn một kiểu để thêm câu ghi chú sẵn vào thông báo.';
+  $('#tbTpl').innerHTML=TBT.map((t,i)=>`<button class="pill" data-tbt="${i}" aria-pressed="${TB.tpl===i}"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,${t[2][0]},${t[2][1]});margin-right:6px"></span>${i+1}. ${esc(t[0])}</button>`).join('');
+  tbOut();
+}
+function tbOut(force){
+  const t=TBT[TB.tpl];
+  $('#tbHead').style.background='linear-gradient(135deg,'+t[2][0]+','+t[2][1]+')';
+  $('#tbHead').textContent=t[1]+'  Mẫu '+(TB.tpl+1)+'/20 · '+t[0];
+  $('#tbOut').value=tbBuild();
+}
+(function(){
+  const g=id=>document.getElementById(id);
+  const upd=()=>{TB.to=g('tbTo').value;TB.kind=g('tbKind').value;TB.ten=g('tbTen').value;TB.han=g('tbHan').value;TB.note=g('tbNote').value;TB.thay=g('tbThay').value;saveTB();tbOut()};
+  ['tbTo','tbKind','tbTen','tbHan','tbNote','tbThay'].forEach(id=>{g(id).addEventListener('input',upd);g(id).addEventListener('change',upd)});
+  g('view-tb').addEventListener('click',async e=>{
+    const q=e.target.closest('[data-tbq]');
+    if(q){const i=+q.dataset.tbq;if(i===TB.quick&&i>=0)TB.qv=(TB.qv+1)%3;else{TB.quick=i;TB.qv=Math.floor(Math.random()*3)}saveTB();renderTB();return}
+    const t=e.target.closest('[data-tbt]');if(t){TB.tpl=+t.dataset.tbt;saveTB();renderTB();return}
+    if(e.target.closest('#tbRand')){let n;do{n=Math.floor(Math.random()*TBT.length)}while(n===TB.tpl&&TBT.length>1);TB.tpl=n;saveTB();renderTB();return}
+    if(e.target.closest('#tbCopy')){const s=g('tbOut').value;try{await navigator.clipboard.writeText(s);toast('Đã sao chép thông báo')}catch(_){g('tbOut').select();toast('Đã chọn sẵn nội dung, bấm Ctrl+C để sao chép')}return}
+    if(e.target.closest('#tbShare')){const s=g('tbOut').value;if(navigator.share){try{await navigator.share({text:s})}catch(_){}}else{try{await navigator.clipboard.writeText(s);toast('Trình duyệt chưa hỗ trợ chia sẻ, đã sao chép nội dung')}catch(_){toast('Hãy bấm Sao chép')}}return}
+    if(e.target.closest('#tbPng'))tbPng();
+  });
+})();
+function tbPng(){
+  const t=TBT[TB.tpl],text=$('#tbOut').value.split('\n'),W=1080,pad=70,fs=40,lh=60,font='"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif';
+  const cv=document.createElement('canvas'),c=cv.getContext('2d');c.font='500 '+fs+'px '+font;
+  const maxW=W-2*pad-2*50,out=[];
+  text.forEach(l=>{if(!l.trim()){out.push('');return}let cur='';l.split(' ').forEach(w=>{const tt=cur?cur+' '+w:w;if(c.measureText(tt).width>maxW&&cur){out.push(cur);cur=w}else cur=tt});out.push(cur)});
+  const headH=150,H=Math.max(700,pad+headH+40+out.length*lh+90+pad);
+  cv.width=W;cv.height=H;
+  const g=c.createLinearGradient(0,0,W,H);g.addColorStop(0,t[2][0]);g.addColorStop(1,t[2][1]);c.fillStyle=g;c.fillRect(0,0,W,H);
+  c.globalAlpha=.12;c.fillStyle='#fff';c.beginPath();c.arc(W-80,90,220,0,7);c.fill();c.beginPath();c.arc(60,H-60,170,0,7);c.fill();c.globalAlpha=1;
+  const rr=(x,y,w,h,r)=>{c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()};
+  c.fillStyle='rgba(255,255,255,.97)';c.shadowColor='rgba(0,0,0,.25)';c.shadowBlur=40;c.shadowOffsetY=14;rr(pad,pad,W-2*pad,H-2*pad,44);c.fill();c.shadowColor='transparent';
+  c.fillStyle=g;c.save();rr(pad,pad,W-2*pad,headH,44);c.clip();c.fillRect(pad,pad,W-2*pad,headH);c.restore();
+  c.fillStyle='#fff';c.font='800 54px '+font;c.textBaseline='middle';c.fillText(t[1]+'  THÔNG BÁO BÀI TẬP',pad+50,pad+headH/2);
+  c.fillStyle='#1c1917';c.font='500 '+fs+'px '+font;c.textBaseline='alphabetic';
+  let y=pad+headH+40+fs+4;out.forEach(l=>{c.fillText(l,pad+50,y);y+=lh});
+  c.fillStyle='#78716c';c.font='500 26px '+font;c.fillText('Lớp Toán · K12Online',pad+50,H-pad-34);
+  cv.toBlob(b=>{const u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='thong-bao-bai-tap.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);toast('Đã tải ảnh thông báo')},'image/png');
 }
 
 /* ---------- sao lưu ---------- */
