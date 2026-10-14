@@ -218,7 +218,7 @@ dialog .stack{gap:var(--space-3)}
 #bkDlg input[type=number]{width:76px}
 #bkDlg .three,#bkImp .three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}#bkDlg .ck,#bkImp .ck{display:flex;gap:8px;align-items:flex-start;font-size:14px;margin:4px 0}
 #bkDlg [aria-pressed=true]{background:var(--primary);border-color:var(--primary);color:var(--primary-contrast)}
-.bklist{max-height:42vh;overflow:auto;border:1px solid var(--border);border-radius:10px}
+.bklist{max-height:56vh;min-height:30vh;overflow:auto;border:1px solid var(--border);border-radius:10px}
 .bki{display:flex;gap:10px;align-items:flex-start;padding:8px 12px;border-bottom:1px solid var(--border);cursor:pointer}.bki:hover{background:var(--surface-2)}
 .bki input{margin-top:6px;flex:none;width:18px;height:18px}.bki .bkt{display:inline-block;background:var(--primary-soft);padding:0 7px;border-radius:99px;font-size:12px}
 .bki small{display:block;margin-top:2px}
@@ -546,6 +546,7 @@ table.mx{border-collapse:collapse;margin:8px 0;font-size:13px}table.mx th,table.
 <div class="three"><div class="pf"><label for="fTag">Thẻ chủ đề</label><select id="fTag"></select></div><label class="ck" style="align-self:end"><input type="checkbox" id="fStar"> <span>Chỉ câu ★ yêu thích</span></label><label class="ck" style="align-self:end"><input type="checkbox" id="fFig"> <span>Chỉ câu có hình 🖼</span></label>
 <label class="ck" style="align-self:end"><input type="checkbox" id="fWrong"> <span>Chỉ câu ⚠ học sinh hay sai</span></label></div>
 <div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn sm" type="button" id="bkRev">📚 Gom bộ ôn tập (★ + hay sai)</button><span class="muted" style="font-size:13px">Chọn sẵn mọi câu ★ hoặc hay sai trong bộ lọc</span></div>
+<div id="bkTy" class="row" style="flex-wrap:wrap;gap:6px;margin:6px 0"></div>
 <div id="bkList" class="bklist" role="list"></div>
 <div class="row" style="justify-content:space-between;flex-wrap:wrap;gap:8px"><span id="bkSel" class="muted"></span>
 <span class="row" style="flex-wrap:wrap;gap:8px"><button class="btn sm danger" type="button" id="bkDel">Xóa khỏi ngân hàng</button><button class="btn" type="button" id="bkPdf" title="Nạp câu đã chọn rồi mở hộp xuất đề PDF, trộn nhiều mã đề">Xuất đề PDF…</button><button class="btn" type="button" id="bkRep">Thay bộ hiện tại</button><button class="btn primary" type="button" id="bkAdd">Thêm vào bài chiếu</button></span></div></div>
@@ -1896,6 +1897,7 @@ function bkFilters(){
   bkOpts('#fLop',u('lop'),'Tất cả lớp');bkOpts('#fChu',u('chuong'),'Tất cả chương');bkOpts('#fBai',u('bai'),'Tất cả bài');
 }
 const LVN={1:'Nhận biết',2:'Thông hiểu',3:'Vận dụng',4:'Vận dụng cao'};
+function bkFiltered0(){const t=$('#fTyp').value;$('#fTyp').value='0';try{return bkFiltered()}finally{$('#fTyp').value=t}}
 function bkFiltered(){
   const lop=$('#fLop').value,chu=$('#fChu').value,bai=$('#fBai').value,ty=+$('#fTyp').value,lv=+$('#fLv').value,kw=norm($('#fQ').value),fresh=$('#fFresh').checked,lim=Date.now()-30*864e5;
   return BK.items.filter(x=>{const m=x.q.m||{};
@@ -1910,6 +1912,7 @@ function bkRender(){
   bkView=bkFiltered();
   $('#bkStat').textContent=bkOk()?('Ngân hàng có '+BK.items.length+' câu. Đang lọc: '+bkView.length+' câu.'+(BK.pend.length?' Còn '+BK.pend.length+' câu chờ gửi lên.':'')):'Chưa kết nối Google Sheet. Mở "Cài đặt Google Sheet" để dán địa chỉ Web App.';
   const shown=bkView.slice(0,300);
+  {const cur=+$('#fTyp').value,base=bkFiltered0();$('#bkTy').innerHTML=[[0,'Tất cả',base.length],[1,'Trắc nghiệm',base.filter(x=>qType(x.q)===1).length],[2,'Đúng – Sai',base.filter(x=>qType(x.q)===2).length],[3,'Trả lời ngắn',base.filter(x=>qType(x.q)===3).length]].map(t=>`<button type="button" class="btn sm" data-ty="${t[0]}" aria-pressed="${cur===t[0]}">${t[1]} (${t[2]})</button>`).join('')}
   $('#bkList').innerHTML=shown.length?shown.map(x=>{const m=x.q.m||{},lab=[m.lop&&'Lớp '+m.lop,m.chuong,m.bai].filter(Boolean).join(' · '),fl=(m.star?'<span class="fl">★</span> ':'')+(m.wrong?'<span class="fl bad">⚠ sai '+m.wrong+'</span> ':''),tg=(m.tags||[]).map(t=>'<em class="tag">'+esc(t)+'</em>').join(' ');
     return `<label class="bki" role="listitem"><input type="checkbox" data-k="${esc(x.k)}"${bkSelSet.has(x.k)?' checked':''}><span><b class="bkt">${TSHORT[qType(x.q)]}</b> ${hasFig(x.q)?'<span class="fl" title="Có hình vẽ">🖼</span> ':''}${fl}<span class="bkq">${rm(String(x.q.title).slice(0,260))}</span>${(x.q.svg||x.q.img)?'<span class="bkth">'+figureHtml(x.q)+'</span>':''}<small class="muted">${tg?tg+' ':''}${esc(LVN[x.q.level]||'')}${lab?' · '+esc(lab):''} · ${x.n?'đã chiếu '+x.n+' lần'+(x.last?' (gần nhất '+new Date(x.last).toLocaleDateString('vi-VN')+')':''):'chưa chiếu'}</small></span></label>`}).join('')+(bkView.length>300?`<p class="muted">Hiển thị 300 câu đầu, hãy lọc thêm để thu hẹp.</p>`:''):'<p class="muted" style="padding:12px">Không có câu nào khớp bộ lọc.</p>';
   bkCount();
@@ -1922,6 +1925,7 @@ $('#bkDlg').addEventListener('click',e=>{const t=e.target.closest('[data-bt]');i
 ['#fLop','#fChu','#fBai','#fTyp','#fLv','#fFresh','#fTag','#fStar','#fWrong','#fFig'].forEach(i=>$(i).addEventListener('change',bkRender));
 $('#fQ').addEventListener('input',bkRender);
 $('#bkList').addEventListener('change',e=>{const c=e.target.closest('input[data-k]');if(!c)return;c.checked?bkSelSet.add(c.dataset.k):bkSelSet.delete(c.dataset.k);bkCount()});
+$('#bkTy').addEventListener('click',e=>{const b=e.target.closest('[data-ty]');if(!b)return;$('#fTyp').value=b.dataset.ty;bkRender()});
 $('#bkAll').addEventListener('click',()=>{bkView.forEach(x=>bkSelSet.add(x.k));bkRender()});
 $('#bkNone').addEventListener('click',()=>{bkSelSet.clear();bkRender()});
 $('#bkRand').addEventListener('click',()=>{const n=Math.max(1,Math.min(200,+$('#bkRn').value||10));bkSelSet.clear();bkTake(bkView,n).forEach(x=>bkSelSet.add(x.k));bkRender();toast('Đã bốc ngẫu nhiên '+Math.min(n,bkView.length)+' câu')});
