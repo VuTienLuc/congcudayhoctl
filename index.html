@@ -224,6 +224,27 @@ dialog .stack{gap:var(--space-3)}
 .bki small{display:block;margin-top:2px}
 #qlist .fl,.bki .fl{color:#d99a00;font-weight:700}.fl.bad{color:#c0392b}.bki .tag{display:inline-block;font-style:normal;font-size:11px;background:var(--surface-2);border:1px solid var(--border);border-radius:99px;padding:0 7px;margin-right:2px}
 .bkth{display:block;margin-top:6px}.bkth img,.bkth svg{max-height:84px;max-width:240px;width:auto;height:auto;border:1px solid var(--border);border-radius:6px;background:#fff}
+#mdDlg{max-width:min(860px,96vw);max-height:94vh;overflow:auto}#mdDlg textarea{font:inherit;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:inherit;width:100%}
+#mdDlg .mdsub{display:grid;gap:6px;border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:var(--surface-2)}
+#pstage.zoomed{overflow:hidden}#pstage.zoomed #ann,#pstage.zoomed #dtool{display:none}#pstage.zoomed{cursor:grab}#pstage.panning{cursor:grabbing}
+#zmSel{position:absolute;inset:0;z-index:20;cursor:crosshair;background:rgba(0,0,0,.10);touch-action:none}
+#zmSel[hidden],#zmBar[hidden]{display:none}
+#zmBand{position:absolute;border:3px dashed var(--yellow,#f5b800);background:rgba(245,184,0,.18);border-radius:6px;pointer-events:none}
+.zmhint{font-size:13px;color:var(--text,#222);background:rgba(255,255,255,.88);border-radius:99px;padding:2px 10px}
+#zmSel .zmhint{position:absolute;left:50%;top:10px;transform:translateX(-50%)}
+#zmBar{position:absolute;top:10px;right:12px;z-index:21;display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+#present.laser,#present.laser *{cursor:none!important}
+#laser{position:fixed;left:0;top:0;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;pointer-events:none;z-index:300;display:none;background:radial-gradient(circle,#fff 0 10%,#ff1a1a 24%,rgba(255,0,0,.6) 52%,rgba(255,0,0,0) 72%);box-shadow:0 0 22px 8px rgba(255,0,0,.45);transition:width .12s,height .12s,margin .12s}
+#laser.hit{width:56px;height:56px;margin:-28px 0 0 -28px}
+#rvBox{position:absolute;inset:0;z-index:60;background:rgba(10,14,24,.8);display:none;place-items:center;padding:16px}
+#rvBox.on{display:grid}
+.rvp{background:var(--surface);color:var(--text,inherit);border-radius:16px;width:min(920px,96vw);max-height:92%;overflow:auto;padding:18px 20px;display:grid;gap:12px;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.rvg{display:grid;grid-template-columns:repeat(auto-fill,minmax(68px,1fr));gap:8px}
+.rvt{position:relative;aspect-ratio:1;border:2px solid var(--border);border-radius:12px;background:var(--surface-2);color:inherit;font:700 22px/1 inherit;cursor:pointer;display:grid;place-items:center}
+.rvt[aria-pressed=true]{background:var(--primary);border-color:var(--primary);color:var(--primary-contrast,#fff)}
+.rvt.wr{outline:3px solid #e0a100;outline-offset:1px}
+.rvt .b{position:absolute;top:3px;right:5px;font-size:14px}.rvt .b small{opacity:.55;font-size:12px}
+.rvprev{min-height:3.2em;border:1px dashed var(--border);border-radius:10px;padding:8px 12px;font-size:16px;color:var(--text,inherit)}
 #pgDlg{max-width:min(860px,96vw);max-height:94vh;overflow:auto}#pgDlg .pf{display:grid;gap:4px;margin:4px 0}#pgDlg .pf>label,#pgDlg .pf>span{font-weight:600;font-size:14px}
 #pgDlg input[type=text],#pgDlg select,#pgDlg textarea{font:inherit;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:inherit;width:100%}
 #pgDlg .three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}#pgDlg .ck{display:flex;gap:8px;align-items:flex-start;font-size:14px;margin:2px 0;font-weight:400}
@@ -234,6 +255,20 @@ table.mx{border-collapse:collapse;margin:8px 0;font-size:13px}table.mx th,table.
 #autoDlg .pf{display:grid;gap:4px;margin:6px 0}#autoDlg .pf label{font-weight:600;font-size:14px}#autoDlg select{font:inherit;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:inherit;width:100%}#autoDlg .ck{display:flex;gap:8px;align-items:flex-start;font-size:15px;margin:6px 0}#autoDlg .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 #stage{overflow:auto;padding:calc(var(--space-4)*var(--k)) clamp(16px,4vw,64px)}
 .pbot{display:flex;gap:var(--space-2);flex-wrap:wrap;align-items:center;justify-content:center;padding:10px var(--space-3);border-top:1px solid var(--border);background:var(--surface)}
+.pbot{border-top:0!important;background:transparent!important;gap:4px!important;padding:6px var(--space-3) 10px!important;position:relative}
+.pbot .btn,.pbot select{background:transparent!important;border-color:transparent!important;box-shadow:none!important;color:var(--text);opacity:.55;transition:opacity .15s,background .15s,transform .15s}
+.pbot .btn[data-ic]{font-size:0!important;width:42px;min-width:42px;height:42px;min-height:42px;padding:0!important;border-radius:50%;position:relative;display:inline-flex;align-items:center;justify-content:center}
+.pbot .btn[data-ic]::before{content:attr(data-ic);font-size:19px;line-height:1;font-weight:600}
+.pbot .btn:hover:not(:disabled),.pbot .btn:focus-visible,.pbot select:hover,.pbot select:focus-visible{opacity:1;background:color-mix(in srgb,var(--surface) 80%,transparent)!important;border-color:var(--border)!important}
+.pbot .btn[hidden]{display:none!important}
+.pbot .btn:active:not(:disabled){transform:scale(.92)}
+.pbot .btn:disabled{opacity:.25}
+.pbot .btn[aria-pressed="true"]{opacity:1;background:color-mix(in srgb,var(--primary) 18%,transparent)!important;border-color:color-mix(in srgb,var(--primary) 45%,transparent)!important}
+.pbot .btn.primary[data-ic]{opacity:.9;background:color-mix(in srgb,var(--primary) 22%,transparent)!important}
+.pbot .btn[data-tip]::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translate(-50%,4px);background:rgba(20,24,33,.92);color:#fff;font-size:13px;font-weight:500;line-height:1.2;padding:6px 10px;border-radius:8px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s,transform .15s;z-index:60;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.pbot .btn[data-tip]:hover::after,.pbot .btn[data-tip]:focus-visible::after{opacity:1;transform:translate(-50%,0);transition-delay:.25s}
+.pbot select{font-size:12px;min-height:34px!important;padding:0 6px;max-width:112px}
+@media (hover:none){.pbot .btn[data-tip]::after{display:none}}
 .pbot select{width:auto;min-height:44px}
 #present.focus .ptop,#present.focus .pbot{display:none}
 #present.focus{grid-template-rows:minmax(0,1fr)}
@@ -423,11 +458,12 @@ table.mx{border-collapse:collapse;margin:8px 0;font-size:13px}table.mx th,table.
   <button class="btn" id="btnClearAll" title="Xóa toàn bộ câu hỏi cũ để bắt đầu bộ mới">🗑 Xóa tất cả câu</button>
   <button class="btn" id="btnExport">Lưu Excel</button>
   <button class="btn" id="btnPdf" title="Xuất đề thi in tiết kiệm giấy, lưu thành PDF">Xuất đề PDF</button>
+  <button class="btn" id="btnMd" title="Xuất, nhập câu hỏi dạng Markdown 3 phần (trắc nghiệm, đúng sai, trả lời ngắn)">📝 Markdown</button>
   <button class="btn" id="btnPg" title="Sinh prompt cho AI tạo câu hỏi theo Lớp, Chương, Bài (SGK Kết nối tri thức) rồi nhập JSON về">🤖 Sinh prompt AI</button>
   <button class="btn" id="btnBank" title="Ngân hàng câu hỏi lưu trên Google Sheet riêng">🏦 Ngân hàng</button>
   <button class="btn" id="btnAuto" title="Cài đặt thời gian mỗi câu, lời giải và trình chiếu tự động">⚙ Tự động</button>
   <button class="btn primary" id="btnPlay">▶ Trình chiếu</button>
-  <input type="file" id="fXlsx" accept=".xlsx,.xls,.csv" hidden>
+  <input type="file" id="fXlsx" accept=".xlsx,.xls,.csv,.json,.md,.txt" hidden>
 </div></header>
 
 <main class="wrap" id="main"></main>
@@ -435,7 +471,15 @@ table.mx{border-collapse:collapse;margin:8px 0;font-size:13px}table.mx th,table.
 <!-- trình chiếu -->
 <div id="present" role="dialog" aria-modal="true" aria-label="Trình chiếu">
   <div class="ptop"><span class="count" id="pcount"></span><div class="prog" aria-hidden="true"><i id="pprog"></i></div><span class="timer" id="ptimer" hidden>0</span><button class="btn" data-p="focus" title="Ẩn thanh công cụ (H)">Ẩn thanh</button><button class="btn" data-p="exit" aria-label="Thoát trình chiếu">✕ Thoát</button></div>
-  <div id="pstage"><div id="stage"></div><div id="sol" role="region" aria-label="Lời giải"></div><div id="notes"></div><canvas id="ann" aria-label="Lớp vẽ trên bài"></canvas><div id="dtool" role="toolbar" aria-label="Bút vẽ và công cụ đại số, hình học"></div></div>
+  <div id="pstage"><div id="stage"></div><div id="sol" role="region" aria-label="Lời giải"></div><div id="notes"></div><canvas id="ann" aria-label="Lớp vẽ trên bài"></canvas><div id="zmSel" hidden><i id="zmBand"></i><span class="zmhint">Kéo chuột để chọn vùng cần phóng to, bấm Esc để hủy</span></div><div id="zmBar" hidden><button class="btn sm" type="button" data-zm="out" title="Thu nhỏ bớt">−</button><button class="btn sm" type="button" data-zm="in" title="Phóng thêm">+</button><button class="btn sm primary" type="button" data-zm="reset">Thu nhỏ hết (Esc)</button><span class="zmhint">Kéo để di chuyển</span></div><div id="dtool" role="toolbar" aria-label="Bút vẽ và công cụ đại số, hình học"></div></div>
+  <div id="rvBox" role="dialog" aria-modal="true" aria-label="Chọn câu chiếu lại"><div class="rvp">
+    <div class="row between"><h2 style="margin:0">Chọn câu để chiếu lại</h2><button class="btn sm" type="button" data-rv="close">Đóng</button></div>
+    <p class="muted" id="rvHint" style="margin:0;font-size:14px"></p>
+    <div class="rvg" id="rvGrid"></div>
+    <div class="rvprev" id="rvPrev">Rê chuột vào một ô để xem nội dung câu.</div>
+    <div class="row" style="flex-wrap:wrap;gap:8px;justify-content:space-between"><span class="row" style="flex-wrap:wrap;gap:8px"><button class="btn sm" type="button" data-rv="wrong">⚠ Chọn câu sai</button><button class="btn sm" type="button" data-rv="all">Chọn tất cả</button><button class="btn sm" type="button" data-rv="none">Bỏ chọn</button></span><button class="btn primary" type="button" data-rv="go" id="rvGo">▶ Chiếu lại</button></div>
+  </div></div>
+  <div id="laser" aria-hidden="true"></div>
   <aside id="side" aria-label="Cửa sổ trang web" aria-hidden="true">
     <div class="shead"><div class="stabs" role="tablist"></div><span class="sgrow"></span>
       <button type="button" class="sb" data-s="dock" title="Chuyển sang bên kia" aria-label="Đổi bên">⇄</button>
@@ -455,6 +499,9 @@ table.mx{border-collapse:collapse;margin:8px 0;font-size:13px}table.mx th,table.
     <button class="btn" data-p="auto" id="pAuto" hidden>⏸ Tạm dừng</button>
     <button class="btn" data-p="cfg" id="pCfg" title="Cài đặt tự động / thời gian">⚙</button>
     <button class="btn" data-p="snd" id="pSnd" aria-pressed="true" title="Bật/tắt âm thanh đúng sai (M)">🔊 Âm thanh</button>
+    <button class="btn" data-p="review" id="pReview" title="Chọn câu để chiếu lại (R)">🔁 Ôn lại</button>
+    <button class="btn" data-p="laser" id="pLaser" aria-pressed="false" title="Con trỏ laser (L)">🔴 Laser</button>
+    <button class="btn" data-p="zoom" id="pZoom" aria-pressed="false" title="Kéo chọn vùng để phóng to (Z)">🔍 Phóng to</button>
     <button class="btn" data-p="draw" id="pDraw" aria-pressed="false" title="Bút vẽ (P)">✏️ Bút vẽ</button>
     <button class="btn" data-p="next">Sau ▶</button>
     <span class="row" role="group" aria-label="Cỡ chữ"><button class="btn" data-p="fs-" aria-label="Giảm cỡ chữ">A−</button><button class="btn" data-p="fs+" aria-label="Tăng cỡ chữ">A+</button></span>
@@ -512,12 +559,12 @@ table.mx{border-collapse:collapse;margin:8px 0;font-size:13px}table.mx th,table.
 <textarea id="bkCode" rows="8" readonly style="font:12px/1.4 ui-monospace,monospace"></textarea></div>
 </div></dialog>
 <dialog id="pgDlg"><div class="stack"><div class="row between"><h2>Sinh prompt tạo câu hỏi cho ngân hàng</h2><button class="btn sm" type="button" id="pgClose">Đóng</button></div>
-<p class="lead" style="margin:0">Chọn Lớp, Chương, Bài theo mục lục SGK Toán Kết nối tri thức và số câu cần sinh. Công cụ tạo sẵn prompt cho "giáo viên Toán xuất sắc chuyên luyện thi"; thầy dán prompt vào ChatGPT, Claude hay Gemini, rồi dán JSON AI trả về xuống phần dưới để nhập vào bài chiếu và ngân hàng.</p>
+<p class="lead" style="margin:0">Chọn Lớp, Chương, Bài theo mục lục SGK Toán Kết nối tri thức và số câu cần sinh (trắc nghiệm, nhiều đáp án, trả lời ngắn). Công cụ tạo sẵn prompt cho "giáo viên Toán xuất sắc chuyên luyện thi"; thầy dán prompt vào ChatGPT, Claude hay Gemini, rồi dán JSON AI trả về xuống phần dưới để nhập vào bài chiếu và ngân hàng.</p>
 <div class="three"><div class="pf"><label for="pgL">Lớp</label><select id="pgL"><option>10</option><option>11</option><option>12</option></select></div><div class="pf"><label for="pgC">Chương</label><select id="pgC"></select></div><div class="pf"><label for="pgB">Bài</label><select id="pgB"></select></div></div>
 <label class="pf"><span>Chủ đề riêng (tuỳ chọn, ví dụ "bài toán thực tế về parabol")</span><input type="text" id="pgT" placeholder="Để trống nếu bám đúng bài"></label>
 <div class="pf"><label>Số câu theo cấp độ</label><table class="mx"><thead><tr><th></th><th>Nhận biết</th><th>Thông hiểu</th><th>Vận dụng thấp</th><th>Vận dụng cao</th></tr></thead><tbody>
 <tr><th>Trắc nghiệm 1 đáp án</th><td><input type="number" min="0" max="50" value="0" data-pm="1" data-pl="1" aria-label="Một đáp án, cấp độ 1"></td><td><input type="number" min="0" max="50" value="0" data-pm="1" data-pl="2" aria-label="Một đáp án, cấp độ 2"></td><td><input type="number" min="0" max="50" value="0" data-pm="1" data-pl="3" aria-label="Một đáp án, cấp độ 3"></td><td><input type="number" min="0" max="50" value="0" data-pm="1" data-pl="4" aria-label="Một đáp án, cấp độ 4"></td></tr>
-<tr><th>Nhiều đáp án đúng (@)</th><td><input type="number" min="0" max="50" value="0" data-pm="2" data-pl="1" aria-label="Nhiều đáp án, cấp độ 1"></td><td><input type="number" min="0" max="50" value="0" data-pm="2" data-pl="2" aria-label="Nhiều đáp án, cấp độ 2"></td><td><input type="number" min="0" max="50" value="0" data-pm="2" data-pl="3" aria-label="Nhiều đáp án, cấp độ 3"></td><td><input type="number" min="0" max="50" value="0" data-pm="2" data-pl="4" aria-label="Nhiều đáp án, cấp độ 4"></td></tr></tbody></table><span class="muted" id="pgTot" style="font-size:13px"></span></div>
+<tr><th>Nhiều đáp án đúng (@)</th><td><input type="number" min="0" max="50" value="0" data-pm="2" data-pl="1" aria-label="Nhiều đáp án, cấp độ 1"></td><td><input type="number" min="0" max="50" value="0" data-pm="2" data-pl="2" aria-label="Nhiều đáp án, cấp độ 2"></td><td><input type="number" min="0" max="50" value="0" data-pm="2" data-pl="3" aria-label="Nhiều đáp án, cấp độ 3"></td><td><input type="number" min="0" max="50" value="0" data-pm="2" data-pl="4" aria-label="Nhiều đáp án, cấp độ 4"></td></tr><tr><th>Trả lời ngắn (đáp án số)</th><td><input type="number" min="0" max="50" value="0" data-pm="3" data-pl="1" aria-label="Trả lời ngắn, cấp độ 1"></td><td><input type="number" min="0" max="50" value="0" data-pm="3" data-pl="2" aria-label="Trả lời ngắn, cấp độ 2"></td><td><input type="number" min="0" max="50" value="0" data-pm="3" data-pl="3" aria-label="Trả lời ngắn, cấp độ 3"></td><td><input type="number" min="0" max="50" value="0" data-pm="3" data-pl="4" aria-label="Trả lời ngắn, cấp độ 4"></td></tr></tbody></table><span class="muted" id="pgTot" style="font-size:13px"></span></div>
 <div class="three"><div class="pf"><label for="pgA">Đối tượng học sinh</label><select id="pgA"><option>Đại trà (cơ bản + vận dụng)</option><option>Yếu, mất gốc (lấy lại nền tảng)</option><option>Khá, giỏi (vận dụng cao, 8-10 điểm)</option><option>Luyện thi nước rút (kỹ năng phòng thi)</option></select></div></div>
 <div class="pf"><label>Nguồn tài liệu AI cần tổng hợp</label>
 <label class="ck"><input type="checkbox" data-ps="Sách giáo khoa Toán Kết nối tri thức với cuộc sống (đúng mục lục bài, ví dụ, luyện tập, vận dụng, bài tập cuối bài)" checked> <span>SGK Kết nối tri thức</span></label>
@@ -531,8 +578,21 @@ table.mx{border-collapse:collapse;margin:8px 0;font-size:13px}table.mx th,table.
 <textarea id="pgOut" rows="9" readonly style="font:12px/1.45 ui-monospace,monospace"></textarea>
 <hr style="border:0;border-top:1px solid var(--border);width:100%">
 <h3 style="margin:0">Nhập JSON AI trả về</h3>
+<div class="row" style="gap:8px;flex-wrap:wrap"><label class="btn" style="cursor:pointer">📂 Chọn file JSON…<input type="file" id="pgF" accept=".json,.txt,application/json,text/plain" hidden></label><span class="muted" style="font-size:13px">hoặc dán nội dung vào ô dưới</span></div>
 <textarea id="pgJ" rows="6" placeholder="Dán toàn bộ JSON (có thể kèm dấu ```json). Công cụ tự bỏ dòng mẫu idx/title, đổi $$…$$ thành công thức dòng, và gắn nhãn Lớp, Chương, Bài." style="font:12px/1.45 ui-monospace,monospace"></textarea>
 <div class="row" style="flex-wrap:wrap;gap:8px;justify-content:flex-end"><span class="muted" id="pgMsg" style="margin-right:auto;font-size:13px"></span><button class="btn" type="button" id="pgRep">Thay bộ hiện tại</button><button class="btn primary" type="button" id="pgAdd">Thêm vào bài chiếu</button></div>
+</div></dialog>
+<dialog id="mdDlg"><div class="stack"><div class="row between"><h2>Markdown câu hỏi (3 phần)</h2><button class="btn sm" type="button" id="mdClose">Đóng</button></div>
+<p class="lead" style="margin:0">Xuất bộ câu hỏi hiện tại thành mã Markdown đúng định dạng: PHẦN I trắc nghiệm, PHẦN II đúng sai, PHẦN III trả lời ngắn (dòng &lt;Key=…&gt;). Cũng có thể nhập ngược Markdown cùng định dạng, rồi bấm "Lưu Excel" để có file Excel.</p>
+<div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn primary" type="button" id="mdCopy">📋 Sao chép mã Markdown</button><button class="btn" type="button" id="mdDown">⬇ Tải file .md</button><button class="btn" type="button" id="mdXlsx">⬇ Lưu Excel</button><button class="btn" type="button" id="mdSample">⬇ Tải mẫu Markdown</button></div>
+<textarea id="mdOut" rows="10" readonly style="font:12px/1.45 ui-monospace,monospace"></textarea>
+<div class="mdsub"><strong>Chuyển sang trang Soạn giảng</strong><span class="muted" style="font-size:13px">Dán mã Markdown vào trang soạn giảng để chuyển thành Word, PDF, PowerPoint.</span>
+<div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn primary" type="button" id="mdGo">📋 Sao chép Markdown rồi mở trang</button><a class="btn" id="mdLink" href="https://soangiangvbm.vercel.app/" target="_blank" rel="noopener noreferrer">🌐 Chỉ mở trang soangiangvbm.vercel.app</a></div></div>
+<hr style="border:0;border-top:1px solid var(--border);width:100%">
+<h3 style="margin:0">Nhập từ Markdown</h3>
+<div class="row" style="gap:8px;flex-wrap:wrap"><label class="btn" style="cursor:pointer">📂 Chọn file .md / .txt…<input type="file" id="mdF" accept=".md,.markdown,.txt,text/markdown,text/plain" hidden></label><span class="muted" style="font-size:13px">hoặc dán nội dung vào ô dưới</span></div>
+<textarea id="mdIn" rows="6" placeholder="## PHẦN I. Câu trắc nghiệm nhiều phương án lựa chọn&#10;Câu 1. …&#10;A. …&#10;Đáp án: A" style="font:12px/1.45 ui-monospace,monospace"></textarea>
+<div class="row" style="flex-wrap:wrap;gap:8px;justify-content:flex-end"><span class="muted" id="mdMsg" style="margin-right:auto;font-size:13px"></span><button class="btn" type="button" id="mdRep">Thay bộ hiện tại</button><button class="btn primary" type="button" id="mdAdd">Thêm vào bài chiếu</button></div>
 </div></dialog>
 <dialog id="geoDlg"></dialog>
 <dialog id="pdfDlg"><div class="stack" id="pdfBox"><h2>Xuất đề thi PDF · trộn nhiều mã đề</h2>
@@ -696,7 +756,8 @@ function parseSheet(ws){
 function readFile(f){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>{try{res(XLSX.read(new Uint8Array(r.result),{type:'array'}))}catch(e){rej(e)}};r.onerror=()=>rej(r.error);r.readAsArrayBuffer(f)})}
 async function importFile(f){
   try{
-    const qs=parseWorkbook(await readFile(f));
+    const isTxt=/\.(json|txt|md|markdown)$/i.test(f.name);let txt='';if(isTxt)txt=await f.text();
+    const qs=isTxt?(/^\s*[\[`]/.test(txt)?pgParse(txt):mdParse(txt)):parseWorkbook(await readFile(f));
     if(Q.length&&!await ask({title:'Thay bộ câu hỏi hiện tại?',msg:'File mới có '+qs.length+' câu. Bộ '+Q.length+' câu đang có sẽ được thay thế.',ok:'Thay thế',danger:true}))return;
     Q=qs.map(fixQ);Q.forEach(tagQ);S.i=0;saveDeck();render();
     const bad=Q.filter(q=>warnOf(q).length).length;
@@ -756,7 +817,7 @@ function renderMain(){
   const m=$('#main');
   if(!Q.length){
     m.innerHTML=`<div class="stack" style="padding:var(--space-4) 0"><div class="card stack"><div><h2>Bắt đầu</h2><p class="lead">Tải file Excel câu hỏi trắc nghiệm. Cột cần có: Câu hỏi, Đáp án đúng (1 đến 4 hoặc A đến D), Lời giải, Đáp án A, B, C, D, Cấp độ. Công thức viết trong $...$ hoặc $$...$$ đều hiển thị như nhau.</p></div>
-    <label class="drop" id="dropMain"><strong>Chọn hoặc thả file Excel câu hỏi</strong><span class="muted">.xlsx, .xls hoặc .csv</span><input type="file" id="fMain" accept=".xlsx,.xls,.csv"></label>
+    <label class="drop" id="dropMain"><strong>Chọn hoặc thả file Excel / JSON câu hỏi</strong><span class="muted">.xlsx, .xls, .csv, .json (từ AI) hoặc .md (Markdown)</span><input type="file" id="fMain" accept=".xlsx,.xls,.csv,.json,.md,.txt"></label>
     <div class="row"><button class="btn" id="btnSample">Tải file Excel mẫu</button><button class="btn" id="btnBlank">Soạn câu hỏi từ đầu</button></div></div></div>`;
     const dm=$('#dropMain'),fm=$('#fMain');
     ['dragenter','dragover'].forEach(e=>dm.addEventListener(e,ev=>{ev.preventDefault();dm.classList.add('over')}));
@@ -989,7 +1050,7 @@ function play(){
   const ok=Q.filter(q=>!warnOf(q).length);
   if(!ok.length)return toast('Chưa có câu hỏi hợp lệ để chiếu. Kiểm tra các câu đánh dấu "!".');
   if(ok.length<Q.length)toast('Bỏ qua '+(Q.length-ok.length)+' câu chưa hợp lệ (đánh dấu !)');
-  P.order=ok.slice();P.i=0;try{bkMarkPlayed(P.order)}catch(e){}tellParent(true);$('#present').classList.add('on');document.body.style.overflow='hidden';
+  P.order=ok.slice();P.base=ok.slice();P.wr=new Set();P.i=0;zmReset();try{bkMarkPlayed(P.order)}catch(e){}tellParent(true);$('#present').classList.add('on');document.body.style.overflow='hidden';
   fsAsk('on');
   show();
 }
@@ -998,19 +1059,39 @@ function fsAsk(cmd){
   try{if(cmd==='off'||(cmd==='toggle'&&document.fullscreenElement)){if(document.fullscreenElement)document.exitFullscreen()}else if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen()}catch(e){}
 }
 function tellParent(on){try{if(window.parent!==window)window.parent.postMessage({ttn:'present',on:on},'*')}catch(e){}}
-function exitPlay(){tellParent(false);annOff();stopTimer();$('#present').classList.remove('on','focus');document.body.style.overflow='';fsAsk('off')}
+function exitPlay(){tellParent(false);closeReview();zmReset();setLaser(false);annOff();stopTimer();$('#present').classList.remove('on','focus');document.body.style.overflow='';fsAsk('off')}
 function show(){
-  stopTimer();clearTimeUp();AN.pend=null;AN.poly=null;AN.sel=null;P.reveal=false;P.sol=false;closeNoteInput(false);annRender();
+  stopTimer();clearTimeUp();zmReset();AN.pend=null;AN.poly=null;AN.sel=null;P.reveal=false;P.sol=false;closeNoteInput(false);annRender();
   const n=P.order.length;
   $('#pcount').textContent=P.i<n?'Câu '+(P.i+1)+' / '+n:'Hết bài';$('#pprog').style.width=(Math.min(P.i,n)/n*100)+'%';
   const st=$('#stage'),sol=$('#sol');sol.classList.remove('on');$('#pstage').classList.remove('split');P.step=null;st.style.paddingBottom='';st.scrollTop=0;
-  if(P.i>=n){st.innerHTML=`<div class="endcard"><div>Hoàn thành ${n} câu</div><div class="row"><button class="btn primary" data-p="restart">Chiếu lại từ đầu</button><button class="btn" data-p="exit">Thoát</button></div></div>`;$('#ptimer').hidden=true;updBtns();return}
+  if(P.i>=n){st.innerHTML=`<div class="endcard"><div>Hoàn thành ${n} câu</div><div class="row"><button class="btn primary" data-p="review">🔁 Ôn lại câu sai${P.wr&&P.wr.size?' ('+P.wr.size+')':''}</button><button class="btn" data-p="restart">Chiếu lại từ đầu</button><button class="btn" data-p="exit">Thoát</button></div></div>`;$('#ptimer').hidden=true;updBtns();return}
   const q=P.order[P.i];
   st.innerHTML=`<div class="row" style="margin-bottom:var(--space-3)"><span class="lvl">${LV[q.level]||''}</span><span class="lvl typ">Phần ${ROMAN[qType(q)]} · ${TYPES[qType(q)]}</span></div>`+cardHtml(q,{layout:ST.layout,reveal:false,play:true});
   updBtns();startTimer();
 }
 function playStar(){const q=P.order[P.i];if(!q)return;const on=!(q.m&&q.m.star);flagQ(q,{star:on?1:0});updBtns();toast(on?'★ Đã gắn sao câu này (vào bộ ôn tập)':'Đã bỏ sao câu này',1800)}
-function playWrong(){const q=P.order[P.i];if(!q)return;flagQ(q,{wrong:1});updBtns();toast('⚠ Đã ghi: đa số học sinh sai câu này (lần '+q.m.wrong+'). Câu được gắn nhãn "hay sai" để chiếu lại.',3200)}
+function playWrong(){const q=P.order[P.i];if(!q)return;if(P.wr)P.wr.add(q);flagQ(q,{wrong:1});updBtns();toast('⚠ Đã ghi: đa số học sinh sai câu này (lần '+q.m.wrong+'). Cuối giờ bấm "Ôn lại" để chiếu lại.',3200)}
+/* ===== Thanh dưới: icon gọn, chú thích khi rê chuột ===== */
+const PB_IC={prev:'◀',next:'▶',reveal:'👁',sol:'💡',cfg:'⚙',full:'⛶','fs-':'A−','fs+':'A+',auto:'⏸',star:'☆',wrong:'⚠',snd:'🔊',review:'🔁',laser:'🔴',zoom:'🔍',draw:'✏️'};
+function pbSync(){$$('.pbot .btn[data-p]').forEach(b=>{
+  const k=b.dataset.p;let t=(b.textContent||'').trim(),ic=PB_IC[k]||'•',lab=t;
+  if(t){const m=t.match(/^([^\p{L}\p{N}]+)\s*(.*)$/u);if(m&&m[2]){ic=m[1].trim();lab=m[2]}else if(m&&!m[2]){ic=m[1].trim();lab=''}}
+  if(k==='prev'||k==='next'){ic=PB_IC[k];lab=k==='prev'?'Trước':'Sau'}
+  if(k==='fs-'||k==='fs+'){ic=PB_IC[k];lab=k==='fs-'?'Giảm cỡ chữ':'Tăng cỡ chữ'}
+  if(k==='reveal')lab=t||'Đáp án';
+  if(k==='sol')lab=t||'Lời giải';
+  if(k==='cfg'||k==='full'){lab=b.dataset.lab||b.getAttribute('aria-label')||(b.getAttribute('title')||'').replace(/\s*\(.*\)$/,'')||lab}
+  if(!b.dataset.lab&&(k==='cfg'||k==='full'))b.dataset.lab=lab;
+  const tt=b.dataset.tt!=null?b.dataset.tt:(b.dataset.tt=(b.getAttribute('title')||''));
+  const sc=(tt.match(/\(([A-Za-z])\)\s*$/)||[])[1];
+  const tip=(lab||tt.replace(/\s*\(.*\)$/,''))+(sc?'  ·  '+sc:'');
+  if(b.dataset.ic!==ic)b.dataset.ic=ic;if(b.dataset.tip!==tip)b.dataset.tip=tip;
+  b.setAttribute('aria-label',lab||tip);if(b.hasAttribute('title'))b.removeAttribute('title');
+})}
+(function(){const bar=document.querySelector('.pbot');if(!bar)return;
+  new MutationObserver(()=>pbSync()).observe(bar,{childList:true,subtree:true,characterData:true});pbSync();
+  $$('.pbot select').forEach(x=>{if(!x.title)x.title=x.getAttribute('aria-label')||''});})();
 function updBtns(){const n=P.order.length,end=P.i>=n;$('#pReveal').textContent=P.reveal?'Ẩn đáp án':'Hiện đáp án';$('#pReveal').disabled=end;$('#pSol').disabled=end||!String((P.order[P.i]||{}).sol||'').trim();$('#pSol').textContent=P.sol?'Ẩn lời giải':'Lời giải';const cq=P.order[P.i],ms=(cq&&cq.m)||{};$('#pStar').disabled=end;$('#pWrong').disabled=end;$('#pStar').setAttribute('aria-pressed',String(!!ms.star));$('#pStar').textContent=(ms.star?'★':'☆')+' Câu hay';$('#pWrong').textContent='⚠ Đa số sai'+(ms.wrong?' ('+ms.wrong+')':'')}
 function setReveal(on){clearTimeUp();
   const q=P.order[P.i];if(!q)return;P.reveal=on;const c=$('#stage .qcard');
@@ -1122,6 +1203,7 @@ $('#present').addEventListener('click',e=>{
   else if(a==='star'){playStar()}else if(a==='wrong'){playWrong()}
   else if(a==='draw'){toggleDraw()}
   else if(a==='restart'){P.i=0;show()}
+  else if(a==='review'){openReview()}else if(a==='laser'){setLaser(!RV.laser)}else if(a==='zoom'){zmStart()}
 });
 $('#showbar').addEventListener('click',()=>$('#present').classList.remove('focus'));
 $('#pLayout').addEventListener('change',e=>{ST.layout=e.target.value;saveSet();const r=P.reveal,s=P.sol;show();if(r)setReveal(true);if(s)setSol(true);renderPvIfEdit()});
@@ -1131,6 +1213,11 @@ function renderPvIfEdit(){if($('#pv'))updatePreview()}
 document.addEventListener('keydown',e=>{
   if(!$('#present').classList.contains('on')||e.target.matches('select,input,textarea'))return;
   const k=e.key;
+  if($('#rvBox').classList.contains('on')){if(k==='Escape'){e.preventDefault();closeReview()}return}
+  if(ZM.sel||ZM.on){if(k==='Escape'){e.preventDefault();zmReset();return}}
+  if(k==='l'||k==='L'){setLaser(!RV.laser);return}
+  if(k==='z'||k==='Z'){zmStart();return}
+  if(k==='r'||k==='R'){openReview();return}
   if(AN.open&&AN.pend&&k==='Escape'){e.preventDefault();AN.pend=null;annRender();return}
   if(AN.open&&AN.poly&&AN.tool==='poly'){
     if(k==='Enter'){e.preventDefault();finishPoly();return}
@@ -1908,25 +1995,25 @@ const LVT=['','Nhận biết','Thông hiểu','Vận dụng thấp','Vận dụn
 function pgBuild(){
   const sl=pgSel(),cn=pgCounts(),topic=$('#pgT').value.trim(),extra=$('#pgX').value.trim(),aud=$('#pgA').value;
   const src=$$('#pgDlg input[data-ps]:checked').map(c=>'- '+c.dataset.ps);
-  const sum=k=>[1,2,3,4].reduce((a,l)=>a+(cn[k+'-'+l]||0),0),n1=sum(1),n2=sum(2),tot=n1+n2;
-  $('#pgTot').textContent='Tổng: '+tot+' câu ('+n1+' một đáp án, '+n2+' nhiều đáp án)';
+  const sum=k=>[1,2,3,4].reduce((a,l)=>a+(cn[k+'-'+l]||0),0),n1=sum(1),n2=sum(2),n3=sum(3),tot=n1+n2+n3;
+  $('#pgTot').textContent='Tổng: '+tot+' câu ('+n1+' một đáp án, '+n2+' nhiều đáp án, '+n3+' trả lời ngắn)';
   const P=[];
   P.push('Hãy đóng vai một giáo viên Toán THPT xuất sắc với 20 năm kinh nghiệm thực chiến trong giảng dạy, biên soạn đề và luyện thi tốt nghiệp THPT (theo định hướng đề thi 2025 của Bộ GD&ĐT). Bạn am hiểu sâu Chương trình GDPT 2018 và bộ sách Toán "Kết nối tri thức với cuộc sống".');
   P.push('Nhiệm vụ của bạn là biên soạn NGÂN HÀNG CÂU HỎI TRẮC NGHIỆM chất lượng cao cho:');
   P.push('- Lớp: '+sl.lop+'\n- Chương: '+sl.chuong+'\n- Bài: '+(sl.bai||'Toàn bộ các bài của chương, chia đều số câu cho các bài sau:\n  '+sl.bais.join('\n  '))+(topic?'\n- Chủ đề trọng tâm: '+topic:''));
   P.push('\n### 1. ĐỐI TƯỢNG HỌC SINH MỤC TIÊU\n'+aud);
   P.push('\n### 2. NGUỒN TÀI LIỆU CẦN TỔNG HỢP\nHãy tổng hợp, chọn lọc dạng toán và mức độ từ các nguồn sau:\n'+(src.join('\n')||'- Sách giáo khoa Toán Kết nối tri thức với cuộc sống')+'\nQuy tắc: bám sát nội dung, thuật ngữ, ký hiệu và thứ tự kiến thức đúng mục lục bài nêu trên; học từ cách ra đề của các nguồn nhưng TỰ BIÊN SOẠN câu mới, không sao chép nguyên văn, không bịa câu "trích từ đề thi X"; không ra câu ngoài phạm vi bài học.');
-  const rows=[];for(const [k,nm] of [[1,'trắc nghiệm 1 đáp án đúng'],[2,'trắc nghiệm nhiều đáp án đúng (từ 2 đáp án trở lên)']]){const p=[1,2,3,4].filter(l=>cn[k+'-'+l]).map(l=>cn[k+'-'+l]+' câu mức '+LVT[l]+' (Cấp độ '+l+')');if(p.length)rows.push('- '+sum(k)+' câu '+nm+': '+p.join('; ')+'.')}
+  const rows=[];for(const [k,nm] of [[1,'trắc nghiệm 1 đáp án đúng'],[2,'trắc nghiệm nhiều đáp án đúng (từ 2 đáp án trở lên)'],[3,'trả lời ngắn (đáp án là một số, không có phương án A đến D)']]){const p=[1,2,3,4].filter(l=>cn[k+'-'+l]).map(l=>cn[k+'-'+l]+' câu mức '+LVT[l]+' (Cấp độ '+l+')');if(p.length)rows.push('- '+sum(k)+' câu '+nm+': '+p.join('; ')+'.')}
   P.push('\n### 3. SỐ LƯỢNG VÀ CẤU TRÚC\nHãy sinh ra CHÍNH XÁC '+tot+' câu hỏi, gồm:\n'+(rows.join('\n')||'- (chưa chọn số câu)')+'\nSắp xếp từ dễ đến khó, trộn đều vị trí đáp án đúng giữa A, B, C, D.');
-  P.push('\n### 4. YÊU CẦU CHẤT LƯỢNG\n- Mỗi câu chỉ có một đáp án đúng rõ ràng (hoặc đúng các đáp án đã ghi với câu nhiều đáp án); các phương án nhiễu xây dựng từ lỗi sai thường gặp của học sinh (sai dấu, nhầm công thức, thiếu điều kiện, nhầm khái niệm).\n- Đề bài rõ ràng, đủ dữ kiện, số liệu đẹp, không mơ hồ; câu vận dụng gắn tình huống thực tế hợp lý.\n- Lời giải trình bày từng bước ngắn gọn; ngăn cách các ý bằng ký hiệu " // " để có thể xuống dòng khi trình chiếu.\n- Tự kiểm tra lại toàn bộ phép tính và đáp án trước khi xuất; loại bỏ câu có đáp án gây tranh cãi; không trùng lặp ý giữa các câu.\n- Mức độ: 1 Nhận biết, 2 Thông hiểu, 3 Vận dụng thấp, 4 Vận dụng cao, phân bổ đúng số lượng nêu ở mục 3.'+(extra?'\n\n### YÊU CẦU ĐẶC BIỆT TỪ GIÁO VIÊN\n'+extra:''));
+  P.push('\n### 4. YÊU CẦU CHẤT LƯỢNG\n- Mỗi câu chỉ có một đáp án đúng rõ ràng (hoặc đúng các đáp án đã ghi với câu nhiều đáp án); các phương án nhiễu xây dựng từ lỗi sai thường gặp của học sinh (sai dấu, nhầm công thức, thiếu điều kiện, nhầm khái niệm).\n- Đề bài rõ ràng, đủ dữ kiện, số liệu đẹp, không mơ hồ; câu vận dụng gắn tình huống thực tế hợp lý.\n- Lời giải NGẮN GỌN, DỄ HIỂU: mỗi ý một dòng, ngăn cách các ý bằng ký hiệu " // " để xuống dòng khi trình chiếu; đi thẳng từ công thức ra đáp số, KHÔNG viết bước thay số chi tiết; chỉ nêu công thức hoặc định lý cần dùng, biến đổi then chốt, kết quả và đáp án (tối đa 3 đến 5 ý). Ví dụ: Hoành độ đỉnh $$x=-b/(2a)=2$$ // $$y=-1$$ // Đỉnh $$I(2;-1)$$ // Chọn B.\n- Tự kiểm tra lại toàn bộ phép tính và đáp án trước khi xuất; loại bỏ câu có đáp án gây tranh cãi; không trùng lặp ý giữa các câu.\n- Mức độ: 1 Nhận biết, 2 Thông hiểu, 3 Vận dụng thấp, 4 Vận dụng cao, phân bổ đúng số lượng nêu ở mục 3.'+(extra?'\n\n### YÊU CẦU ĐẶC BIỆT TỪ GIÁO VIÊN\n'+extra:''));
   P.push('\n### 5. CẤU TRÚC ĐẦU RA BẮT BUỘC (JSON NGÂN HÀNG CÂU HỎI TRẮC NGHIỆM)');
   P.push('Thay vì trình bày văn bản thông thường, hãy tạo hệ thống câu hỏi trắc nghiệm và BẮT BUỘC xuất ra duy nhất một môi trường code JSON theo đúng quy định định dạng sau:\n');
-  P.push('**Hướng dẫn:**\n- Cấp độ Loại câu hỏi:\n  1 Nhận biết\n  2 Thông hiểu\n  3 Vận dụng thấp\n  4 Vận dụng cao\n- Nhập câu hỏi có ký tự đặc biệt: Câu hỏi/phương án trả lời có chứa các công thức toán học: phải nhập mã latex, các công thức chứa mã latex được đặt giữa 2 dấu `$$` ở đầu và cuối công thức.\n- Trong JSON, mỗi dấu gạch chéo ngược của LaTeX phải viết thành hai dấu (ví dụ \\\\dfrac{a}{b}, \\\\sqrt{x}) để JSON hợp lệ.\n- Cột Đáp án: câu một đáp án ghi số 1 đến 4 (tương ứng A đến D); câu nhiều đáp án ghi các số cách nhau bởi ký tự @ (ví dụ 1@3).\n- Lưu ý: KHÔNG ĐƯỢC PHÉP thay đổi hai dòng tiêu đề đầu tiên (tức là Object đầu tiên với các key STT: "idx", Câu hỏi: "title"...) của định dạng mẫu.\n');
+  P.push('**Hướng dẫn:**\n- Cấp độ Loại câu hỏi:\n  1 Nhận biết\n  2 Thông hiểu\n  3 Vận dụng thấp\n  4 Vận dụng cao\n- Nhập câu hỏi có ký tự đặc biệt: Câu hỏi/phương án trả lời có chứa các công thức toán học: phải nhập mã latex, các công thức chứa mã latex được đặt giữa 2 dấu `$$` ở đầu và cuối công thức.\n- Trong JSON, mỗi dấu gạch chéo ngược của LaTeX phải viết thành hai dấu (ví dụ \\\\dfrac{a}{b}, \\\\sqrt{x}) để JSON hợp lệ.\n- Cột Lời giải: ngắn gọn, mỗi ý một đoạn cách nhau bởi ký hiệu // , đi thẳng từ công thức ra đáp số, không thay số chi tiết.\n- Câu trả lời ngắn: để trống (chuỗi rỗng) cả 4 cột Đáp án A, B, C, D; cột Đáp án ghi kết quả là một SỐ dưới dạng chuỗi (tối đa 4 ký tự kể cả dấu âm và dấu chấm thập phân, dùng dấu chấm cho số thập phân, đã làm tròn theo yêu cầu đề, ví dụ "54", "-2.5"); đề bài phải nêu rõ yêu cầu làm tròn nếu cần.\n- Cột Đáp án: câu một đáp án ghi số 1 đến 4 (tương ứng A đến D); câu nhiều đáp án ghi các số cách nhau bởi ký tự @ (ví dụ 1@3).\n- Lưu ý: KHÔNG ĐƯỢC PHÉP thay đổi hai dòng tiêu đề đầu tiên (tức là Object đầu tiên với các key STT: "idx", Câu hỏi: "title"...) của định dạng mẫu.\n');
   P.push('**Đầu ra bắt buộc môi trường code json sau:**');
   P.push(PG_TPL);
   return P.join('\n');
 }
-const PG_TPL="```json\n[\n  {\n    \"STT\": \"idx\",\n    \"Câu hỏi\": \"title\",\n    \"Đáp án (Câu hỏi nhiều đáp án: các đáp án cách nhau bởi ký tự @)\": \"answer\",\n    \"Lời giải\": \"answerText\",\n    \"Đáp án A\": 1,\n    \"Đáp án B\": 2,\n    \"Đáp án C\": 3,\n    \"Đáp án D\": 4,\n    \"Cấp độ\": \"level\",\n    \"__EMPTY\": \"\"\n  },\n  {\n    \"STT\": 1,\n    \"Câu hỏi\": \"2+2=?\",\n    \"Đáp án (Câu hỏi nhiều đáp án: các đáp án cách nhau bởi ký tự @)\": 1,\n    \"Lời giải\": \"2+2=4\",\n    \"Đáp án A\": \"$$4{{R}^{2}}$$\",\n    \"Đáp án B\": 2,\n    \"Đáp án C\": 3,\n    \"Đáp án D\": 5,\n    \"Cấp độ\": 1,\n    \"__EMPTY\": \"\"\n  },\n  {\n    \"STT\": 2,\n    \"Câu hỏi\": \"1 + 1 = ?\",\n    \"Đáp án (Câu hỏi nhiều đáp án: các đáp án cách nhau bởi ký tự @)\": \"1@2\",\n    \"Lời giải\": \"2, Hai\",\n    \"Đáp án A\": 2,\n    \"Đáp án B\": \"Hai\",\n    \"Đáp án C\": 3,\n    \"Đáp án D\": 4,\n    \"Cấp độ\": 1,\n    \"__EMPTY\": \"\"\n  }\n]\n```";
+const PG_TPL="```json\n[\n  {\n    \"STT\": \"idx\",\n    \"Câu hỏi\": \"title\",\n    \"Đáp án (Câu hỏi nhiều đáp án: các đáp án cách nhau bởi ký tự @)\": \"answer\",\n    \"Lời giải\": \"answerText\",\n    \"Đáp án A\": 1,\n    \"Đáp án B\": 2,\n    \"Đáp án C\": 3,\n    \"Đáp án D\": 4,\n    \"Cấp độ\": \"level\",\n    \"__EMPTY\": \"\"\n  },\n  {\n    \"STT\": 1,\n    \"Câu hỏi\": \"2+2=?\",\n    \"Đáp án (Câu hỏi nhiều đáp án: các đáp án cách nhau bởi ký tự @)\": 1,\n    \"Lời giải\": \"2+2=4\",\n    \"Đáp án A\": \"$$4{{R}^{2}}$$\",\n    \"Đáp án B\": 2,\n    \"Đáp án C\": 3,\n    \"Đáp án D\": 5,\n    \"Cấp độ\": 1,\n    \"__EMPTY\": \"\"\n  },\n  {\n    \"STT\": 2,\n    \"Câu hỏi\": \"1 + 1 = ?\",\n    \"Đáp án (Câu hỏi nhiều đáp án: các đáp án cách nhau bởi ký tự @)\": \"1@2\",\n    \"Lời giải\": \"2, Hai\",\n    \"Đáp án A\": 2,\n    \"Đáp án B\": \"Hai\",\n    \"Đáp án C\": 3,\n    \"Đáp án D\": 4,\n    \"Cấp độ\": 1,\n    \"__EMPTY\": \"\"\n  },\n  {\n    \"STT\": 3,\n    \"Câu hỏi\": \"Một cấp số nhân có $$u_1=2$$, công bội $$q=3$$. Tính $$u_4$$.\",\n    \"Đáp án (Câu hỏi nhiều đáp án: các đáp án cách nhau bởi ký tự @)\": \"54\",\n    \"Lời giải\": \"$$u_4=u_1q^3$$ // $$=54$$\",\n    \"Đáp án A\": \"\",\n    \"Đáp án B\": \"\",\n    \"Đáp án C\": \"\",\n    \"Đáp án D\": \"\",\n    \"Cấp độ\": 2,\n    \"__EMPTY\": \"\"\n  }\n]\n```";
 function pgRefresh(){PG.l=$('#pgL').value;PG.c=+$('#pgC').value||0;PG.b=+$('#pgB').value||0;lsSet('ttn.pg',JSON.stringify({...PG,n:pgCounts()}));$('#pgOut').value=pgBuild()}
 function openPg(){
   $('#pgL').value=PG.l||'10';pgFill();
@@ -1968,7 +2055,234 @@ $('#pgDlg').addEventListener('input',e=>{if(e.target.matches('input[data-pm],inp
 $('#pgDlg').addEventListener('change',e=>{if(e.target.matches('input[data-ps]'))pgRefresh()});
 $('#pgCopy').addEventListener('click',async()=>{pgRefresh();try{await navigator.clipboard.writeText($('#pgOut').value);toast('Đã sao chép prompt. Hãy dán vào ChatGPT, Claude hoặc Gemini.',3500)}catch(e){$('#pgOut').select();document.execCommand('copy');toast('Đã chọn prompt, nhấn Ctrl+C để sao chép')}});
 $('#pgDown').addEventListener('click',()=>{pgRefresh();const sl=pgSel(),a=document.createElement('a');a.href=URL.createObjectURL(new Blob([$('#pgOut').value],{type:'text/plain;charset=utf-8'}));a.download='prompt-lop'+sl.lop+'-'+norm(sl.chuong.split('.')[0]).replace(/\s+/g,'')+'.txt';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)});
+$('#pgF').addEventListener('change',async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{$('#pgJ').value=await f.text();const n=pgParse($('#pgJ').value).length;$('#pgMsg').textContent='Đã đọc file '+f.name+': '+n+' câu. Chọn Thêm hoặc Thay.'}catch(err){$('#pgMsg').textContent='✘ '+(err.message||err)}});
 $('#pgAdd').addEventListener('click',()=>pgLoad(false));$('#pgRep').addEventListener('click',()=>pgLoad(true));
+
+
+/* ---------- Markdown 3 phần: xuất và nhập ---------- */
+const MD_SAMPLE=String.raw`## PHẦN I. Câu trắc nghiệm nhiều phương án lựa chọn
+*Thí sinh trả lời từ câu 1 đến câu 4. Mỗi câu chỉ chọn một phương án đúng.*
+
+Câu 1. Cho tam giác $ABC$ có $BC=a, AC=b, AB=c$. Theo định lí sin trong tam giác, mệnh đề nào sau đây đúng?
+A. $\dfrac{a}{\sin A}=\dfrac{b}{\sin B}=\dfrac{c}{\sin C}=2R$
+B. $\dfrac{a}{\sin A}=\dfrac{b}{\sin B}=\dfrac{c}{\sin C}=R$
+C. $a\sin A=b\sin B=c\sin C=2R$
+D. $\dfrac{a}{\cos A}=\dfrac{b}{\cos B}=\dfrac{c}{\cos C}=2R$
+Đáp án: A
+
+Câu 2. Tam giác $ABC$ có $a=7, b=8, c=5$. Giá trị $\cos A$ bằng:
+A. $0,5$
+B. $0,25$
+C. $-0,5$
+D. $1$
+Đáp án: A
+Lời giải
+Áp dụng hệ quả định lí Cosin: $\cos A=\dfrac{b^2+c^2-a^2}{2bc}=\dfrac{64+25-49}{2\cdot8\cdot5}=\dfrac{40}{80}=0,5$.
+
+Câu 3. Công thức nào sau đây dùng để tính diện tích tam giác $ABC$?
+A. $S=\dfrac{1}{2}ab\sin C$
+B. $S=\dfrac{1}{2}ab\cos C$
+C. $S=ab\sin C$
+D. $S=\dfrac{1}{2}(a+b)\sin C$
+Đáp án: A
+
+Câu 4. Tam giác $ABC$ có $a=6$ và $\widehat{A}=30^\circ$. Bán kính đường tròn ngoại tiếp tam giác bằng:
+A. $3$
+B. $6$
+C. $12$
+D. $4$
+Đáp án: B
+Lời giải
+Theo định lí sin: $2R=\dfrac{a}{\sin A}=\dfrac{6}{\sin 30^\circ}=\dfrac{6}{0,5}=12 \Rightarrow R=6$.
+
+## PHẦN II. Câu trắc nghiệm đúng sai
+*Thí sinh trả lời câu 5. Trong mỗi ý a), b), c), d), chọn đúng hoặc sai.*
+
+Câu 5. Cho tam giác $ABC$ có $a=13, b=14, c=15$.
+a) Nửa chu vi của tam giác là $p=21$.
+b) Diện tích tam giác (theo công thức Heron) bằng $84$.
+c) Bán kính đường tròn nội tiếp tam giác là $r=4$.
+d) Bán kính đường tròn ngoại tiếp tam giác là $R=8$.
+Đáp án: a, b, c
+Lời giải
+$p=\dfrac{13+14+15}{2}=21$. Theo Heron: $S=\sqrt{p(p-a)(p-b)(p-c)}=\sqrt{21\cdot8\cdot7\cdot6}=\sqrt{7056}=84$. Bán kính nội tiếp $r=\dfrac{S}{p}=\dfrac{84}{21}=4$. Bán kính ngoại tiếp $R=\dfrac{abc}{4S}=\dfrac{13\cdot14\cdot15}{4\cdot84}=8,125\neq8$, nên ý d) sai.
+
+## PHẦN III. Câu trắc nghiệm trả lời ngắn
+*Thí sinh trả lời từ câu 6 đến câu 8.*
+
+Câu 6. Tam giác $ABC$ có $AB=5, AC=8, \widehat{A}=60^\circ$. Tính độ dài cạnh $BC$.
+<Key=7>
+Lời giải
+$BC^2=AB^2+AC^2-2\cdot AB\cdot AC\cdot\cos A=25+64-2\cdot5\cdot8\cdot0,5=49 \Rightarrow BC=7$.
+
+Câu 7. Tam giác $ABC$ vuông tại $A$ có $AB=6, AC=8$. Tính bán kính đường tròn ngoại tiếp tam giác (làm tròn đến hàng đơn vị).
+<Key=5>
+Lời giải
+$BC=\sqrt{AB^2+AC^2}=\sqrt{36+64}=10$. Vì tam giác vuông tại $A$ nên $BC$ là đường kính đường tròn ngoại tiếp, suy ra $R=\dfrac{BC}{2}=5$.
+
+Câu 8. Một mảnh đất hình tam giác có ba cạnh lần lượt là $3\,m, 4\,m, 5\,m$. Tính diện tích mảnh đất đó (đơn vị $m^2$).
+<Key=6>`;
+function mdExport(){
+  const nz=x=>String(x==null?'':x).replace(/\s*\n\s*/g,' ').trim(),P3=[[],[],[]];
+  Q.forEach(q=>P3[qType(q)-1].push(q));let n=0;const out=[];
+  const range=(a,b)=>a===b?'câu '+a:'từ câu '+a+' đến câu '+b;
+  const sol=q=>String(q.sol||'').trim()?['Lời giải',...solLines(q.sol)]:[];
+  const head=(t,hint)=>{if(out.length)out.push('');out.push('## '+t,hint,'')};
+  if(P3[0].length){const a=n+1,b=n+P3[0].length;head('PHẦN I. Câu trắc nghiệm nhiều phương án lựa chọn','*Thí sinh trả lời '+range(a,b)+'. Mỗi câu chỉ chọn một phương án đúng.*');
+    P3[0].forEach(q=>{out.push('Câu '+(++n)+'. '+String(q.title).trim());q.opts.forEach((o,i)=>{if(String(o).trim())out.push('ABCD'[i]+'. '+nz(o))});if(q.ans>=0)out.push('Đáp án: '+'ABCD'[q.ans]);out.push(...sol(q),'')})}
+  if(P3[1].length){const a=n+1,b=n+P3[1].length;head('PHẦN II. Câu trắc nghiệm đúng sai','*Thí sinh trả lời '+range(a,b)+'. Trong mỗi ý a), b), c), d), chọn đúng hoặc sai.*');
+    P3[1].forEach(q=>{out.push('Câu '+(++n)+'. '+String(q.title).trim());q.opts.forEach((o,i)=>{if(String(o).trim())out.push('abcd'[i]+') '+nz(o))});const t=[0,1,2,3].filter(i=>q.tf[i]===true).map(i=>'abcd'[i]);out.push('Đáp án: '+(t.length?t.join(', '):'không có ý nào đúng'));out.push(...sol(q),'')})}
+  if(P3[2].length){const a=n+1,b=n+P3[2].length;head('PHẦN III. Câu trắc nghiệm trả lời ngắn','*Thí sinh trả lời '+range(a,b)+'.*');
+    P3[2].forEach(q=>{out.push('Câu '+(++n)+'. '+String(q.title).trim());out.push('<Key='+nz(q.short)+'>');out.push(...sol(q),'')})}
+  return out.join('\n').replace(/\$\$/g,'$').replace(/\n{3,}/g,'\n\n').trim()+'\n';
+}
+function mdBuild(c){
+  const type=c.key!=null?3:Object.keys(c.s).length?2:Object.keys(c.o).length?1:(c.sec===3?3:c.sec===2?2:1),q=blankQ(type);
+  q.title=c.t.join('\n').trim();q.sol=c.sol.join(' // ');
+  if(type===1){q.opts=['A','B','C','D'].map(k=>c.o[k]||'');const m=c.ans.match(/[A-Da-d1-4]/);if(m){const ch=m[0].toUpperCase();q.ans='ABCD'.includes(ch)?'ABCD'.indexOf(ch):parseInt(ch)-1}}
+  else if(type===2){q.opts=['a','b','c','d'].map(k=>c.s[k]||'');const set=new Set(c.ans.toLowerCase().split(/[,;@\s]+/).map(x=>x.replace(/\)$/,'')).filter(x=>/^[a-d]$/.test(x)));q.tf=q.opts.map((o,i)=>o?set.has('abcd'[i]):null)}
+  else{q.opts=['','','',''];q.short=String(c.key!=null?c.key:c.ans).trim()}
+  return fixQ(q);
+}
+function mdParse(text){
+  const out=[];let sec=0,cur=null,last=null;
+  const fin=()=>{if(cur){const q=mdBuild(cur);if(q.title||q.opts.some(Boolean))out.push(q)}cur=null;last=null};
+  for(const raw of String(text||'').replace(/\r/g,'').replace(/\$\$/g,'$').split('\n')){
+    const ln=raw.trim(),nl=norm(ln).toLowerCase();let m;
+    if(m=nl.match(/^#+\s*phan\s*(iii|ii|i)\b/)){fin();sec=m[1].length;continue}
+    if(m=ln.match(/^\**\s*C[âa]u\s*(\d+)\s*[.:)]\s*(.*)$/i)){fin();cur={sec,t:[m[2]],o:{},s:{},ans:'',key:null,sol:[],st:'t'};continue}
+    if(!cur)continue;
+    if(cur.st==='sol'){if(ln)cur.sol.push(ln);continue}
+    if(/^loi giai\b/.test(nl)){cur.st='sol';const r=ln.replace(/^l[ờo]i gi[ảa]i\s*:?\s*/i,'');if(r)cur.sol.push(r);continue}
+    if(m=ln.match(/^<\s*key\s*=\s*(.*?)\s*>$/i)){cur.key=m[1];continue}
+    if(/^dap an\b/.test(nl)){cur.ans=ln.replace(/^đ[áa]p [áa]n\s*:?\s*/i,'');continue}
+    if(m=ln.match(/^([A-D])\s*[.)]\s*(.*)$/)){cur.o[m[1]]=m[2];last=['o',m[1]];cur.st='o';continue}
+    if(m=ln.match(/^([a-d])\s*\)\s*(.*)$/)){cur.s[m[1]]=m[2];last=['s',m[1]];cur.st='o';continue}
+    if(!ln)continue;
+    if(cur.st==='t'&&!last)cur.t.push(ln);else if(last)cur[last[0]][last[1]]+=' '+ln;
+  }
+  fin();
+  if(!out.length)throw new Error('Không thấy câu hỏi nào dạng "Câu 1. …"');
+  return out;
+}
+const mdOpen=()=>{$('#mdOut').value=Q.length?mdExport():'(Chưa có câu hỏi nào. Hãy tải file hoặc nhập Markdown ở dưới.)';$('#mdMsg').textContent='';if(!$('#mdDlg').open)$('#mdDlg').showModal()};
+function mdSave(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+text],{type:type||'text/markdown;charset=utf-8'}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
+async function mdLoad(replace){
+  let qs;try{qs=mdParse($('#mdIn').value)}catch(e){$('#mdMsg').textContent='✘ '+(e.message||e);return}
+  qs.forEach(tagQ);
+  if(replace&&Q.length&&!await ask({title:'Thay bộ câu hỏi hiện tại?',msg:'Bộ '+Q.length+' câu đang có sẽ được thay bằng '+qs.length+' câu từ Markdown.',ok:'Thay thế',danger:true}))return;
+  Q=replace?qs:Q.concat(qs);S.i=replace?0:Math.max(0,Q.length-qs.length);saveDeck();render();
+  $('#mdDlg').close();$('#mdIn').value='';
+  const cn=[1,2,3].map(t=>qs.filter(q=>qType(q)===t).length),bad=qs.filter(q=>warnOf(q).length).length;
+  toast('Đã nhập '+qs.length+' câu ('+cn[0]+' trắc nghiệm, '+cn[1]+' đúng-sai, '+cn[2]+' trả lời ngắn)'+(bad?'. '+bad+' câu cần kiểm tra (đánh dấu !)':''),5000);
+  if(replace)setTimeout(()=>{try{bkAfterImport()}catch(e){}},400);
+}
+$('#btnMd').addEventListener('click',mdOpen);$('#mdClose').addEventListener('click',()=>$('#mdDlg').close());
+$('#mdCopy').addEventListener('click',async()=>{const t=Q.length?mdExport():'';if(!t){toast('Chưa có câu hỏi để xuất.');return}try{await navigator.clipboard.writeText(t);toast('Đã sao chép mã Markdown',2500)}catch(e){$('#mdOut').select();document.execCommand('copy');toast('Đã chọn mã, nhấn Ctrl+C để sao chép')}});
+$('#mdDown').addEventListener('click',()=>{if(!Q.length){toast('Chưa có câu hỏi để xuất.');return}const d=new Date();mdSave('cau-hoi-'+d.getFullYear()+p2(d.getMonth()+1)+p2(d.getDate())+'.md',mdExport())});
+$('#mdXlsx').addEventListener('click',()=>{if(!Q.length){toast('Chưa có câu hỏi để xuất.');return}exportXlsx()});
+$('#mdGo').addEventListener('click',async()=>{
+  const url='https://soangiangvbm.vercel.app/';let ok=false;
+  if(Q.length){try{await navigator.clipboard.writeText(mdExport());ok=true}catch(e){try{$('#mdOut').select();ok=document.execCommand('copy')}catch(_){}}}
+  window.open(url,'_blank','noopener');
+  toast(!Q.length?'Chưa có câu hỏi để sao chép. Đã mở trang Soạn giảng.':ok?'Đã sao chép Markdown. Hãy dán (Ctrl+V) vào trang Soạn giảng.':'Không tự sao chép được, hãy bấm "Sao chép mã Markdown" rồi dán vào trang.',5000)});
+$('#mdSample').addEventListener('click',()=>mdSave('mau-cau-hoi-markdown.md',MD_SAMPLE+'\n'));
+$('#mdF').addEventListener('change',async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;$('#mdIn').value=await f.text();try{$('#mdMsg').textContent='Đã đọc '+f.name+': '+mdParse($('#mdIn').value).length+' câu. Chọn Thêm hoặc Thay.'}catch(err){$('#mdMsg').textContent='✘ '+(err.message||err)}});
+$('#mdAdd').addEventListener('click',()=>mdLoad(false));$('#mdRep').addEventListener('click',()=>mdLoad(true));
+
+
+/* ---------- ôn lại câu sai, laser, phóng to vùng ---------- */
+const RV={sel:new Set(),laser:false};
+function rvTileHtml(q,i){
+  const wr=P.wr&&P.wr.has(q),old=q.m&&q.m.wrong>0,st=q.m&&q.m.star;
+  return `<button type="button" class="rvt${wr?' wr':''}" data-i="${i}" aria-pressed="${RV.sel.has(i)}" title="${esc(plain(q.title).slice(0,90))}">${i+1}<span class="b">${wr?'⚠':old?'<small>⚠</small>':''}${st?'★':''}</span></button>`;
+}
+function rvRender(){
+  const base=P.base||[];
+  $('#rvGrid').innerHTML=base.map(rvTileHtml).join('');
+  const nw=P.wr?P.wr.size:0;
+  $('#rvHint').textContent=nw?('Có '+nw+' câu vừa được ghi nhận đa số lớp làm sai (viền vàng, ⚠). Bấm vào ô để chọn hoặc bỏ chọn.'):'Chưa ghi câu sai nào trong tiết này (dùng nút "⚠ Đa số sai" khi chiếu). Thầy có thể tự bấm chọn các câu cần chiếu lại.';
+  $('#rvGo').textContent='▶ Chiếu lại ('+RV.sel.size+' câu)';$('#rvGo').disabled=!RV.sel.size;
+}
+function openReview(){
+  if(!$('#present').classList.contains('on')||!(P.base||[]).length)return;
+  zmReset();RV.sel=new Set();(P.base||[]).forEach((q,i)=>{if(P.wr&&P.wr.has(q))RV.sel.add(i)});
+  rvRender();$('#rvPrev').innerHTML='Rê chuột vào một ô để xem nội dung câu.';$('#rvBox').classList.add('on');stopTimer();
+}
+function closeReview(){$('#rvBox').classList.remove('on')}
+$('#rvBox').addEventListener('click',e=>{
+  const t=e.target.closest('.rvt');
+  if(t){const i=+t.dataset.i;RV.sel.has(i)?RV.sel.delete(i):RV.sel.add(i);t.setAttribute('aria-pressed',String(RV.sel.has(i)));$('#rvGo').textContent='▶ Chiếu lại ('+RV.sel.size+' câu)';$('#rvGo').disabled=!RV.sel.size;return}
+  const b=e.target.closest('[data-rv]');if(!b){if(e.target.id==='rvBox')closeReview();return}
+  const a=b.dataset.rv,base=P.base||[];
+  if(a==='close'){closeReview();if(P.i<P.order.length&&!P.reveal)startTimer()}
+  else if(a==='all'){base.forEach((q,i)=>RV.sel.add(i));rvRender()}
+  else if(a==='none'){RV.sel.clear();rvRender()}
+  else if(a==='wrong'){RV.sel.clear();base.forEach((q,i)=>{if(P.wr&&P.wr.has(q))RV.sel.add(i)});rvRender();if(!RV.sel.size)toast('Chưa có câu nào được ghi nhận là sai trong tiết này.')}
+  else if(a==='go'){if(!RV.sel.size)return;P.order=base.filter((q,i)=>RV.sel.has(i));P.i=0;closeReview();show();toast('Chiếu lại '+P.order.length+' câu đã chọn',2500)}
+});
+$('#rvGrid').addEventListener('pointerover',e=>{const t=e.target.closest('.rvt');if(!t)return;const q=(P.base||[])[+t.dataset.i];if(q)$('#rvPrev').innerHTML='<b>Câu '+(+t.dataset.i+1)+'.</b> '+rm(String(q.title).slice(0,300))});
+/* laser */
+function setLaser(on){
+  RV.laser=!!on;$('#present').classList.toggle('laser',RV.laser);$('#pLaser').setAttribute('aria-pressed',String(RV.laser));
+  if(!RV.laser)$('#laser').style.display='none';else toast('Laser bật: di chuột để chỉ. Bấm L để tắt.',1800);
+}
+document.addEventListener('pointermove',e=>{
+  if(!RV.laser||!$('#present').classList.contains('on'))return;
+  const l=$('#laser'),r=$('#present').getBoundingClientRect();
+  if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom){l.style.display='none';return}
+  l.style.display='block';l.style.transform='translate('+e.clientX+'px,'+e.clientY+'px)';
+},{passive:true});
+document.addEventListener('pointerdown',e=>{if(RV.laser){const l=$('#laser');l.classList.add('hit');setTimeout(()=>l.classList.remove('hit'),180)}},{passive:true});
+/* phóng to một vùng */
+const ZM={sel:false,on:false,s:1,rx:0,ry:0,drag:null,pan:null};
+const ZEL=['#stage','#sol','#notes'];
+function zmApply(){
+  const ps=$('#pstage'),pb=ps.getBoundingClientRect(),W=pb.width,H=pb.height,s=ZM.s;
+  ZM.rx=Math.max(0,Math.min(ZM.rx,W-W/s));ZM.ry=Math.max(0,Math.min(ZM.ry,H-H/s));
+  ZEL.forEach(id=>{const el=$(id);if(!el)return;const eb=el.getBoundingClientRect();
+    const keep=el._zm;let ex,ey;
+    if(el._zm){ex=el._zm.ex;ey=el._zm.ey}else{ex=eb.left-pb.left;ey=eb.top-pb.top;el._zm={ex,ey}}
+    el.style.transformOrigin='0 0';el.style.transform='translate('+((s-1)*ex-s*ZM.rx)+'px,'+((s-1)*ey-s*ZM.ry)+'px) scale('+s+')'});
+}
+function zmReset(){
+  ZM.sel=false;ZM.on=false;ZM.s=1;ZM.drag=null;
+  ZEL.forEach(id=>{const el=$(id);if(el){el.style.transform='';el.style.transformOrigin='';el._zm=null}});
+  const ps=$('#pstage');if(ps)ps.classList.remove('zoomed','zsel');
+  const a=$('#zmSel'),b=$('#zmBar');if(a)a.hidden=true;if(b)b.hidden=true;
+  const pz=$('#pZoom');if(pz)pz.setAttribute('aria-pressed','false');
+}
+function zmStart(){
+  if(!$('#present').classList.contains('on')||P.i>=P.order.length)return;
+  if(ZM.on){zmReset();return}
+  if(ZM.sel){zmReset();return}
+  if(AN.open)toggleDraw();
+  ZM.sel=true;$('#pstage').classList.add('zsel');$('#zmSel').hidden=false;$('#zmBand').style.display='none';$('#pZoom').setAttribute('aria-pressed','true');
+}
+function zmRegion(x0,y0,x1,y1){
+  const ps=$('#pstage'),W=ps.clientWidth,H=ps.clientHeight;
+  let rx=Math.min(x0,x1),ry=Math.min(y0,y1),rw=Math.abs(x1-x0),rh=Math.abs(y1-y0);
+  if(rw<24||rh<24){const s=2;rx=Math.max(0,x1-W/s/2);ry=Math.max(0,y1-H/s/2);rw=W/s;rh=H/s}
+  const s=Math.max(1.3,Math.min(5,Math.min(W/rw,H/rh)));
+  ZM.s=s;ZM.rx=rx-(W/s-rw)/2;ZM.ry=ry-(H/s-rh)/2;ZM.sel=false;ZM.on=true;
+  const pst=$('#pstage');pst.classList.remove('zsel');pst.classList.add('zoomed');$('#zmSel').hidden=true;$('#zmBar').hidden=false;
+  ZEL.forEach(id=>{const el=$(id);if(el)el._zm=null});zmApply();
+}
+(function(){
+  const ps=$('#pstage'),sel=$('#zmSel'),band=$('#zmBand');
+  const pt=e=>{const r=ps.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]};
+  sel.addEventListener('pointerdown',e=>{e.preventDefault();sel.setPointerCapture(e.pointerId);ZM.drag=pt(e);band.style.display='block';band.style.left=ZM.drag[0]+'px';band.style.top=ZM.drag[1]+'px';band.style.width='0';band.style.height='0'});
+  sel.addEventListener('pointermove',e=>{if(!ZM.drag)return;const[x,y]=pt(e),[a,b]=ZM.drag;band.style.left=Math.min(a,x)+'px';band.style.top=Math.min(b,y)+'px';band.style.width=Math.abs(x-a)+'px';band.style.height=Math.abs(y-b)+'px'});
+  sel.addEventListener('pointerup',e=>{if(!ZM.drag)return;const[x,y]=pt(e),[a,b]=ZM.drag;ZM.drag=null;zmRegion(a,b,x,y)});
+  ps.addEventListener('pointerdown',e=>{if(!ZM.on||e.target.closest('button,.opt,input,textarea,select,a,[data-zm],.sin'))return;ZM.pan={x:e.clientX,y:e.clientY};ps.setPointerCapture(e.pointerId);ps.classList.add('panning')});
+  ps.addEventListener('pointermove',e=>{if(!ZM.pan)return;ZM.rx-=(e.clientX-ZM.pan.x)/ZM.s;ZM.ry-=(e.clientY-ZM.pan.y)/ZM.s;ZM.pan={x:e.clientX,y:e.clientY};zmApply()});
+  const end=()=>{ZM.pan=null;ps.classList.remove('panning')};ps.addEventListener('pointerup',end);ps.addEventListener('pointercancel',end);
+  $('#zmBar').addEventListener('click',e=>{const b=e.target.closest('[data-zm]');if(!b)return;const a=b.dataset.zm,W=ps.clientWidth,H=ps.clientHeight;
+    if(a==='reset'){zmReset();return}
+    const cx=ZM.rx+W/ZM.s/2,cy=ZM.ry+H/ZM.s/2,ns=Math.max(1.2,Math.min(6,ZM.s*(a==='in'?1.35:1/1.35)));
+    ZM.s=ns;ZM.rx=cx-W/ns/2;ZM.ry=cy-H/ns/2;if(ns<=1.21){zmReset();return}zmApply()});
+  window.addEventListener('resize',()=>{if(ZM.on||ZM.sel)zmReset()});
+})();
 
 /* ---------- cài đặt trình chiếu tự động ---------- */
 function openAuto(){
