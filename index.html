@@ -13,6 +13,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 var(--font-bo
 .nav{position:relative;background:linear-gradient(135deg,#0f2a4d 0%,#14407a 55%,#1b5aa3 100%);color:#fff;box-shadow:0 2px 14px rgb(8 25 52/.35);z-index:5}
 .nav:after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,#f59e0b,#fb923c 40%,#fde68a)}
 .head{display:flex;align-items:center;gap:14px;padding:12px 20px 6px;max-width:1500px;margin:0 auto}
+.hlink{order:3;margin-left:auto;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.5);color:inherit;font:600 13px var(--font-body);text-decoration:none;white-space:nowrap}.hlink:hover{background:rgba(255,255,255,.3)}
 .logo{flex:none;width:46px;height:46px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(145deg,#fbbf24,#f97316);box-shadow:0 4px 12px rgb(0 0 0/.3),inset 0 1px 0 rgb(255 255 255/.5);color:#0f2a4d}
 .logo svg{width:28px;height:28px}
 .ttl{min-width:0}
@@ -44,6 +45,7 @@ body.presenting .nav{display:none}
 <header class="nav">
   <div class="head">
     <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14M9 5c0 6-1 11-4 14M15 5c0 6 1 11 4 14"/></svg></div>
+    <a class="hlink" href="https://lophocdaonguoc.vercel.app/" target="_blank" rel="noopener" title="Mở trang Lớp học đảo ngược trong tab mới">🔄 Lớp học đảo ngược ↗</a>
     <div class="ttl"><h1>Dạy học Toán</h1><p><b>Thầy Vũ Tiến Lực</b> · Trường THPT Nguyễn Hữu Cảnh</p></div>
   </div>
   <nav class="tabs" role="tablist" aria-label="Công cụ dạy học">
@@ -213,6 +215,28 @@ dialog .stack{gap:var(--space-3)}
 .katex{font-size:1.12em}
 
 /* ===== trình chiếu ===== */
+#ggb{position:absolute;inset:0;z-index:40;display:none;background:#fff;color:#1c1917;border-top:1px solid var(--border)}
+#ggb.on{display:block}
+#ggb.half{left:42%;box-shadow:-6px 0 18px rgb(0 0 0/.18);border-left:3px solid var(--primary)}
+#ggb .gghost{position:absolute;inset:0;overflow:hidden}
+#ggb .ggmsg{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;font:600 18px/1.6 var(--font-body);background:#fff;z-index:3}
+#ggb .ggmsg small{font-weight:400;color:var(--muted)}
+#present.ggbon #dtool,#present.ggbon .dpp,#present.ggbon #board,#present.ggbon #ann,#present.ggbon #sdock{display:none!important}
+.ggact{position:absolute;top:8px;right:8px;z-index:6;display:flex;gap:2px;padding:3px;background:rgba(255,255,255,.95);border:1px solid var(--border);border-radius:18px;box-shadow:0 3px 12px rgb(0 0 0/.2)}
+.ggact button,.ggact a{min-width:34px;height:34px;border:0;border-radius:12px;background:transparent;font-size:17px;cursor:pointer;color:var(--text);display:grid;place-items:center;text-decoration:none;padding:0 6px}
+.ggact button:hover,.ggact a:hover{background:var(--surface-2)}
+.ggact [aria-pressed=true]{background:var(--primary-soft);color:var(--primary)}
+.ggact .warn{background:var(--primary);color:#fff;font-size:12px;font-weight:700}
+.gtool{position:absolute;right:8px;top:54px;z-index:5;display:flex;flex-direction:column;gap:2px;padding:5px;background:rgba(255,255,255,.95);border:1px solid var(--border);border-radius:20px;box-shadow:0 3px 14px rgb(0 0 0/.22);overflow-y:auto;max-height:calc(100% - 62px)}
+.gg-g{width:52px;min-height:46px;border:1px solid transparent;border-radius:12px;background:transparent;color:var(--text);cursor:pointer;display:grid;place-items:center;padding:2px;font:600 9.5px/1.1 var(--font-body)}
+.gg-g .ic{font-size:20px;line-height:1.1}
+.gg-g:hover{background:var(--surface-2)}.gg-g.on{background:var(--primary-soft);border-color:var(--primary);color:var(--primary)}
+.gfly{position:absolute;right:72px;z-index:7;display:flex;flex-direction:column;padding:5px;background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 6px 22px rgb(0 0 0/.3);min-width:190px}
+.gfly[hidden]{display:none}
+.gfly button{display:flex;gap:10px;align-items:center;padding:8px 10px;border:0;border-radius:9px;background:transparent;font:600 14px var(--font-body);color:var(--text);cursor:pointer;text-align:left}
+.gfly button .ic{width:24px;text-align:center;font-size:19px}
+.gfly button:hover{background:var(--surface-2)}.gfly button.on{background:var(--primary-soft);color:var(--primary)}
+@media(max-width:700px){#ggb.half{left:0;border-left:0}.gg-g{width:46px}}
 #present{position:fixed;inset:0;z-index:100;background:var(--bg);color:var(--text);display:none;grid-template-rows:auto minmax(0,1fr) auto}
 #present.on{display:grid}
 .ptop{display:flex;align-items:center;gap:var(--space-3);padding:10px var(--space-3);border-bottom:1px solid var(--border);background:var(--surface)}
@@ -488,6 +512,7 @@ table.mx{border-collapse:collapse;margin:8px 0;font-size:13px}table.mx th,table.
 <body>
 <header class="top"><div class="wrap bar">
   <div class="brand">Trình chiếu trắc nghiệm</div>
+  <a class="btn" href="https://lophocdaonguoc.vercel.app/" target="_blank" rel="noopener" style="text-decoration:none" title="Mở trang Lớp học đảo ngược trong tab mới">🔄 Lớp học đảo ngược ↗</a>
   <button class="btn" id="btnImport">Tải file Excel</button>
   <button class="btn" id="btnSampleTop" title="Tải file Excel mẫu gồm 3 loại câu hỏi">⬇ Tải file mẫu</button>
   <button class="btn" id="btnClearAll" title="Xóa toàn bộ câu hỏi cũ để bắt đầu bộ mới">🗑 Xóa tất cả câu</button>
@@ -535,7 +560,8 @@ table.mx{border-collapse:collapse;margin:8px 0;font-size:13px}table.mx th,table.
     <button class="btn" data-p="cfg" id="pCfg" title="Cài đặt tự động / thời gian">⚙</button>
     <button class="btn" data-p="snd" id="pSnd" aria-pressed="true" title="Bật/tắt âm thanh đúng sai (M)">🔊 Âm thanh</button>
     <button class="btn" data-p="review" id="pReview" title="Chọn câu để chiếu lại (R)">🔁 Ôn lại</button>
-    <button class="btn" data-p="think" id="pThink" aria-pressed="false" title="Chỉ hiện câu hỏi — bấm vào câu hỏi mới hiện phương án (H)">🧠 Chỉ hiện câu hỏi</button>
+    <button class="btn" data-p="ggb" id="pGgb" aria-pressed="false" title="Vẽ hình GeoGebra: lưới ô vuông, menu vẽ bên phải (G)">📐 GeoGebra</button>
+    <button class="btn" data-p="think" id="pThink" aria-pressed="false" title="Chỉ hiện câu hỏi — bấm vào câu hỏi mới hiện phương án (Q)">🧠 Chỉ hiện câu hỏi</button>
     <button class="btn" data-p="laser" id="pLaser" aria-pressed="false" title="Con trỏ laser (L)">🔴 Laser</button>
     <button class="btn" data-p="zoom" id="pZoom" aria-pressed="false" title="Kéo chọn vùng để phóng to (Z)">🔍 Phóng to</button>
     <button class="btn" data-p="draw" id="pDraw" aria-pressed="false" title="Bút vẽ (P)">✏️ Bút vẽ</button>
@@ -1096,7 +1122,98 @@ function fsAsk(cmd){
   try{if(cmd==='off'||(cmd==='toggle'&&document.fullscreenElement)){if(document.fullscreenElement)document.exitFullscreen()}else if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen()}catch(e){}
 }
 function tellParent(on){try{if(window.parent!==window)window.parent.postMessage({ttn:'present',on:on},'*')}catch(e){}}
-function exitPlay(){tellParent(false);closeReview();zmReset();setLaser(false);annOff();stopTimer();$('#present').classList.remove('on','focus');document.body.style.overflow='';fsAsk('off')}
+/* ===== GeoGebra: vẽ hình trên lưới ô vuông, menu công cụ bên phải ===== */
+const GG={open:false,half:false,api:null,state:'idle',cur:{},grid:true,armed:0,
+ groups:[
+  ['Di chuyển',[[0,'Di chuyển','↖'],[40,'Kéo khung nhìn','✥'],[77,'Chọn nhiều đối tượng','▭']]],
+  ['Điểm',[[1,'Điểm','•'],[5,'Giao điểm','✕'],[19,'Trung điểm','⊹'],[501,'Điểm trên đối tượng','◉']]],
+  ['Đường',[[15,'Đoạn thẳng','╱'],[2,'Đường thẳng','⟷'],[18,'Tia','↗'],[7,'Vectơ','→']]],
+  ['Quan hệ',[[4,'Vuông góc','⟂'],[3,'Song song','∥'],[8,'Trung trực','⊢'],[9,'Phân giác','∠'],[13,'Tiếp tuyến','⌒']]],
+  ['Đa giác',[[16,'Đa giác','⬠'],[51,'Đa giác đều','⬡']]],
+  ['Đường tròn',[[10,'Tâm – điểm','○'],[34,'Tâm – bán kính','◎'],[11,'Qua 3 điểm','◌'],[24,'Nửa đường tròn','◠']]],
+  ['Đo đạc',[[36,'Góc','⦟'],[38,'Độ dài','↔'],[49,'Diện tích','▦'],[50,'Hệ số góc','∕']]],
+  ['Biến hình',[[30,'Đối xứng trục','⇋'],[29,'Đối xứng tâm','⊛'],[31,'Tịnh tiến','⇒'],[32,'Quay','↻'],[33,'Vị tự','⤢']]],
+  ['Khác',[[17,'Chữ','Aa'],[27,'Ẩn / hiện đối tượng','👁'],[62,'Bút vẽ tay','✎'],[6,'Xóa đối tượng','⌫']]]
+ ]};
+function ggEl(){
+  let e=$('#ggb');if(e)return e;
+  e=document.createElement('div');e.id='ggb';e.setAttribute('role','dialog');e.setAttribute('aria-label','GeoGebra vẽ hình');
+  e.innerHTML='<div class="gghost" id="ggbHost"></div><div class="ggmsg" id="ggMsg"></div>'
+   +'<div class="ggact" id="ggAct"><button type="button" data-gg="undo" title="Hoàn tác" aria-label="Hoàn tác">↶</button><button type="button" data-gg="redo" title="Làm lại" aria-label="Làm lại">↷</button><button type="button" data-gg="grid" id="ggGrid" aria-pressed="true" title="Bật / tắt lưới ô vuông" aria-label="Lưới ô vuông">▦</button><button type="button" data-gg="clear" id="ggClear" title="Xóa toàn bộ hình" aria-label="Xóa toàn bộ hình">🗑</button><button type="button" data-gg="half" id="ggHalf" aria-pressed="false" title="Chia đôi màn hình: đề bên trái, hình bên phải" aria-label="Chia đôi màn hình">◧</button><a href="https://www.geogebra.org/calculator" target="_blank" rel="noopener" title="Mở GeoGebra Calculator trong tab mới" aria-label="Mở GeoGebra trong tab mới">↗</a><button type="button" data-gg="close" title="Đóng (Esc)" aria-label="Đóng">✕</button></div>'
+   +'<div class="gtool" id="ggTool" role="toolbar" aria-label="Công cụ vẽ hình"></div><div class="gfly" id="ggFly" hidden></div>';
+  $('#pstage').appendChild(e);
+  e.addEventListener('click',ggClick);
+  if(window.ResizeObserver)new ResizeObserver(()=>ggResize()).observe(e);
+  ggTools();return e;
+}
+function ggTools(){
+  $('#ggTool').innerHTML=GG.groups.map((g,i)=>{const c=GG.cur[i]!=null?GG.cur[i]:0,t=g[1][c];
+    return`<button type="button" class="gg-g" data-gg="grp" data-i="${i}" aria-haspopup="true" title="${g[0]}: ${t[1]}" aria-label="${g[0]}"><span class="ic">${t[2]}</span><span class="lb">${g[0]}</span></button>`}).join('');
+}
+function ggFlyOpen(i,btn){
+  const fly=$('#ggFly'),g=GG.groups[i];
+  if(!fly.hidden&&fly.dataset.i===String(i)){fly.hidden=true;return}
+  fly.dataset.i=i;fly.innerHTML=g[1].map((t,j)=>`<button type="button" data-gg="tool" data-i="${i}" data-j="${j}" class="${GG.cur[i]===j&&GG.act===i?'on':''}"><span class="ic">${t[2]}</span><span>${t[1]}</span></button>`).join('');
+  fly.hidden=false;
+  const host=$('#ggb').getBoundingClientRect(),b=btn.getBoundingClientRect();
+  fly.style.top=Math.max(8,Math.min(b.top-host.top-4,host.height-fly.offsetHeight-8))+'px';
+}
+function ggMode(i,j){
+  GG.cur[i]=j;GG.act=i;const t=GG.groups[i][1][j];
+  try{if(GG.api)GG.api.setMode(t[0])}catch(e){}
+  ggTools();$$('#ggTool .gg-g').forEach(b=>b.classList.toggle('on',b.dataset.i===String(i)));
+  $('#ggFly').hidden=true;
+}
+function ggClick(e){
+  const b=e.target.closest('[data-gg]');if(!b){if(!e.target.closest('#ggFly'))$('#ggFly').hidden=true;return}
+  const a=b.dataset.gg,api=GG.api;
+  if(a==='grp')ggFlyOpen(+b.dataset.i,b);
+  else if(a==='tool')ggMode(+b.dataset.i,+b.dataset.j);
+  else if(a==='undo'){try{api&&api.undo()}catch(_){}}
+  else if(a==='redo'){try{api&&api.redo()}catch(_){}}
+  else if(a==='grid'){GG.grid=!GG.grid;ggGridApply();}
+  else if(a==='clear'){
+    if(!GG.armed){GG.armed=1;b.textContent='Xóa?';b.classList.add('warn');setTimeout(()=>{GG.armed=0;b.textContent='🗑';b.classList.remove('warn')},2500)}
+    else{GG.armed=0;b.textContent='🗑';b.classList.remove('warn');try{api&&api.newConstruction();ggSetup()}catch(_){}}}
+  else if(a==='half'){GG.half=!GG.half;ggLayout()}
+  else if(a==='close')ggToggle(false);
+  else if(a==='retry')ggStart();
+}
+function ggGridApply(){const api=GG.api;try{if(api){try{api.setGridVisible(GG.grid)}catch(_){api.setGridVisible(1,GG.grid)}}}catch(_){}const g=$('#ggGrid');if(g)g.setAttribute('aria-pressed',String(GG.grid))}
+function ggSetup(){
+  const api=GG.api;if(!api)return;
+  try{api.setPerspective('G')}catch(_){}
+  ggGridApply();try{api.setAxesVisible(false,false)}catch(_){}
+  try{const h=$('#ggbHost'),r=(h.clientWidth||800)/(h.clientHeight||500),y=7;api.setCoordSystem(-y*r,y*r,-y,y)}catch(_){}
+  try{api.setMode(0)}catch(_){}
+}
+function ggResize(){const api=GG.api,h=$('#ggbHost');if(!api||!h||!GG.open)return;try{api.setSize(h.clientWidth,h.clientHeight)}catch(_){}}
+function ggLayout(){const e=$('#ggb');e.classList.toggle('half',GG.half);$('#ggHalf').setAttribute('aria-pressed',String(GG.half));setTimeout(ggResize,60)}
+function ggMsg(html){const m=$('#ggMsg');m.innerHTML=html||'';m.style.display=html?'grid':'none'}
+function ggStart(){
+  if(GG.state==='ready'||GG.state==='loading')return;
+  GG.state='loading';ggMsg('<div>📐 Đang mở GeoGebra…<br><small>Cần có Internet</small></div>');
+  const run=()=>{
+    try{
+      const h=$('#ggbHost'),p={appName:'geometry',width:Math.max(300,h.clientWidth),height:Math.max(260,h.clientHeight),showToolBar:false,showMenuBar:false,showAlgebraInput:false,showToolBarHelp:false,showResetIcon:false,showZoomButtons:false,showFullscreenButton:false,enableRightClick:true,enableShiftDragZoom:true,enableLabelDrags:true,perspective:'G',language:'vi',appletOnLoad:api=>{GG.api=api;GG.state='ready';ggMsg('');ggSetup()}};
+      new window.GGBApplet(p,true).inject('ggbHost');
+    }catch(err){ggFail()}
+  };
+  if(window.GGBApplet)return run();
+  const s=document.createElement('script');s.src='https://www.geogebra.org/apps/deployggb.js';s.onload=run;s.onerror=ggFail;document.head.appendChild(s);
+  clearTimeout(GG.to);GG.to=setTimeout(()=>{if(GG.state==='loading')ggFail()},20000);
+}
+function ggFail(){GG.state='idle';ggMsg('<div>Không mở được GeoGebra.<br><small>Hãy kiểm tra Internet rồi thử lại.</small><br><button class="btn primary" type="button" data-gg="retry">Thử lại</button> <a class="btn" href="https://www.geogebra.org/calculator" target="_blank" rel="noopener" style="text-decoration:none">Mở trong tab mới</a></div>')}
+function ggToggle(on){
+  const e=ggEl();GG.open=on==null?!GG.open:!!on;
+  e.classList.toggle('on',GG.open);$('#present').classList.toggle('ggbon',GG.open);
+  const b=$('#pGgb');if(b)b.setAttribute('aria-pressed',String(GG.open));
+  $('#ggFly').hidden=true;
+  if(GG.open){ggLayout();ggStart();setTimeout(ggResize,80)}
+}
+function ggClose(){if(GG.open)ggToggle(false)}
+
+function exitPlay(){ggClose();tellParent(false);closeReview();zmReset();setLaser(false);annOff();stopTimer();$('#present').classList.remove('on','focus');document.body.style.overflow='';fsAsk('off')}
 function show(){
   stopTimer();clearTimeUp();zmReset();AN.pend=null;AN.poly=null;AN.sel=null;P.reveal=false;P.sol=false;closeNoteInput(false);annRender();
   const n=P.order.length;
@@ -1110,7 +1227,7 @@ function show(){
 function playStar(){const q=P.order[P.i];if(!q)return;const on=!(q.m&&q.m.star);flagQ(q,{star:on?1:0});updBtns();toast(on?'★ Đã gắn sao câu này (vào bộ ôn tập)':'Đã bỏ sao câu này',1800)}
 function playWrong(){const q=P.order[P.i];if(!q)return;if(P.wr)P.wr.add(q);flagQ(q,{wrong:1});updBtns();toast('⚠ Đã ghi: đa số học sinh sai câu này (lần '+q.m.wrong+'). Cuối giờ bấm "Ôn lại" để chiếu lại.',3200)}
 /* ===== Thanh dưới: icon gọn, chú thích khi rê chuột ===== */
-const PB_IC={prev:'◀',next:'▶',reveal:'👁',sol:'💡',cfg:'⚙',full:'⛶','fs-':'A−','fs+':'A+',auto:'⏸',star:'☆',wrong:'⚠',snd:'🔊',review:'🔁',laser:'🔴',think:'🧠',zoom:'🔍',draw:'✏️'};
+const PB_IC={prev:'◀',next:'▶',reveal:'👁',sol:'💡',cfg:'⚙',full:'⛶','fs-':'A−','fs+':'A+',auto:'⏸',star:'☆',wrong:'⚠',snd:'🔊',review:'🔁',laser:'🔴',think:'🧠',ggb:'📐',zoom:'🔍',draw:'✏️'};
 function pbSync(){$$('.pbot .btn[data-p]').forEach(b=>{
   const k=b.dataset.p;let t=(b.textContent||'').trim(),ic=PB_IC[k]||'•',lab=t;
   if(t){const m=t.match(/^([^\p{L}\p{N}]+)\s*(.*)$/u);if(m&&m[2]){ic=m[1].trim();lab=m[2]}else if(m&&!m[2]){ic=m[1].trim();lab=''}}
@@ -1254,7 +1371,7 @@ $('#present').addEventListener('click',e=>{
   else if(a==='star'){playStar()}else if(a==='wrong'){playWrong()}
   else if(a==='draw'){toggleDraw()}
   else if(a==='restart'){P.i=0;show()}
-  else if(a==='review'){openReview()}else if(a==='laser'){setLaser(!RV.laser)}else if(a==='think'){thinkToggle()}else if(a==='opts'){thinkOpen()}else if(a==='zoom'){zmStart()}
+  else if(a==='review'){openReview()}else if(a==='laser'){setLaser(!RV.laser)}else if(a==='think'){thinkToggle()}else if(a==='ggb'){ggToggle()}else if(a==='opts'){thinkOpen()}else if(a==='zoom'){zmStart()}
 });
 $('#stage').addEventListener('click',e=>{if(!P.hid||AN.open||ZM.sel||ZM.on)return;if(e.target.closest('.stem'))thinkOpen()});
 $('#stage').addEventListener('keydown',e=>{if(P.hid&&(e.key==='Enter'||e.key===' ')&&e.target.closest&&e.target.closest('.thinkhint')){e.preventDefault();e.stopPropagation();thinkOpen()}},true);
@@ -1266,10 +1383,12 @@ function renderPvIfEdit(){if($('#pv'))updatePreview()}
 document.addEventListener('keydown',e=>{
   if(!$('#present').classList.contains('on')||e.target.matches('select,input,textarea'))return;
   const k=e.key;
+  if(GG.open){if(k==='g'||k==='G'||k==='Escape'){e.preventDefault();ggToggle(false)}return}
+  if(k==='g'||k==='G'){ggToggle(true);return}
   if($('#rvBox').classList.contains('on')){if(k==='Escape'){e.preventDefault();closeReview()}return}
   if(ZM.sel||ZM.on){if(k==='Escape'){e.preventDefault();zmReset();return}}
   if(k==='l'||k==='L'){setLaser(!RV.laser);return}
-  if(k==='h'||k==='H'){thinkToggle();return}
+  if(k==='q'||k==='Q'){thinkToggle();return}
   if(k==='z'||k==='Z'){zmStart();return}
   if(k==='r'||k==='R'){openReview();return}
   if(AN.open&&AN.pend&&k==='Escape'){e.preventDefault();AN.pend=null;annRender();return}
